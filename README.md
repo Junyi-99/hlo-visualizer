@@ -28,6 +28,19 @@ Interactive viewer for XLA HLO text, such as the HLO that JAX produces on TPU.
 - Where each value lives on TPU (HBM, VMEM, SMEM, …)
 - Data and control dependencies between instructions
 
+<table>
+  <tr>
+    <td width="33%"><img src="doc/decomposition.png" alt="Inspector explaining each part of a while instruction"></td>
+    <td width="33%"><img src="doc/detailed-explanation.png" alt="Inspector expanding a scalar's type, tiling and memory space"></td>
+    <td width="33%"><img src="doc/array-layout.png" alt="Inspector drawing the T(8,128)(2,1) tiling of a bf16 array in VMEM"></td>
+  </tr>
+  <tr>
+    <td>Every part of an instruction, explained</td>
+    <td>Types and layouts, layer by layer</td>
+    <td>TPU array tiling, drawn out</td>
+  </tr>
+</table>
+
 ## Get HLO from JAX
 
 ```python
