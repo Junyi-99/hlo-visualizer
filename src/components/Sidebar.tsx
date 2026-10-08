@@ -18,7 +18,7 @@ export function Sidebar({ module, current, onOverview, onComputation }: SidebarP
   const count = module?.computations.reduce((total, c) => total + c.nodes.length, 0) || 0;
 
   return <aside className="sidebar">
-    <div className="brand"><div className="brand-mark"><Icon name="graph" size={18} /></div><div><strong>HLO Atlas</strong><span>DEPENDENCY EXPLORER</span></div></div>
+    <div className="brand"><div className="brand-mark"><Icon name="graph" size={18} /></div><div><strong>HLO Visualizer</strong><span>Explore and understand XLA HLO</span></div></div>
     <div className="sidebar-section module-section">
       <div className="eyebrow">MODULE</div>
       <h1>{module?.name || 'Loading…'}</h1>

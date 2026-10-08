@@ -12,7 +12,7 @@
       try { var t = localStorage.getItem('theme'); } catch (e) {}
       document.documentElement.dataset.theme = t === 'light' || t === 'dark' ? t : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     </script>
-    <title>HLO Atlas — dependency explorer</title>
+    <title>HLO Visualizer - explore and understand XLA HLO</title>
   </head>
   <body>
     <div id="root"></div>
