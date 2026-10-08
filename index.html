@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%233e6fcb'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-size='43' fill='white'%3E%E2%8C%98%3C/text%3E%3C/svg%3E">
+  <title>HLO Atlas — dependency explorer</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">⌘</div><div><strong>HLO Atlas</strong><span>DEPENDENCY EXPLORER</span></div></div>
+      <div class="sidebar-section module-section"><div class="eyebrow">MODULE</div><h1 id="module-name">Loading…</h1><div id="module-stats" class="muted"></div></div>
+      <div class="sidebar-section"><div class="section-title"><span>Computations</span><span id="computation-count" class="counter"></span></div><nav id="computation-list" aria-label="Computations"></nav></div>
+      <div class="sidebar-footer"><div class="legend-title">NODE TYPES</div><div class="legend"><span><i class="dot input"></i>Input</span><span><i class="dot compute"></i>Compute</span><span><i class="dot transfer"></i>Transfer</span><span><i class="dot control"></i>Control</span><span><i class="dot fusion"></i>Fusion</span><span><i class="dot tuple"></i>Tuple</span></div><p>Click a node to trace its dependencies. Double-click empty space to clear.</p></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="crumb"><span>Workspace</span><span class="slash">/</span><strong id="crumb-current">Entry</strong></div><div class="top-actions"><button id="search-button" class="search-button" title="Search nodes (/)" type="button"><span>⌕</span> Search nodes <kbd>/</kbd></button><button id="open-button" class="primary-button" type="button">＋ Open HLO</button></div></header>
+      <section class="heading"><div><div class="eyebrow" id="view-kicker">ENTRY COMPUTATION</div><h2 id="view-title">main</h2><p id="view-description">Follow data from left to right. Select any node to see its upstream and downstream paths.</p><select id="mobile-computations" aria-label="Choose computation"></select></div><div class="view-actions"><button id="back-button" class="subtle-button" type="button" hidden>← Back</button><button id="fit-button" class="subtle-button" type="button">Fit view</button><button id="zoom-out" class="icon-button" type="button" aria-label="Zoom out">−</button><span id="zoom-value" class="zoom-value">100%</span><button id="zoom-in" class="icon-button" type="button" aria-label="Zoom in">＋</button></div></section>
+      <section class="graph-shell" aria-label="HLO graph"><div id="graph-scroller" class="graph-scroller"><div id="graph-content" class="graph-content"><div id="graph-stage" class="graph-stage"><svg id="graph-edges" class="graph-edges" aria-hidden="true"></svg><div id="graph-nodes" class="graph-nodes"></div></div></div></div><div class="graph-hint"><span class="flow-icon">→</span> <span id="graph-hint-kind">Data flows left to right</span> <span class="hint-divider">·</span> Drag to pan <span class="hint-divider">·</span> <span id="graph-summary"></span></div></section>
+      <div class="bottom-bar"><div id="selection-summary">Select a node to inspect its dependencies</div><div id="warning-count"></div></div>
+    </main>
+    <aside class="inspector" id="inspector"><div class="inspector-header"><div><div class="eyebrow">INSPECTOR</div><h2>Node details</h2></div><button id="close-inspector" class="icon-button" type="button" aria-label="Clear selection">×</button></div><div id="inspector-content" class="inspector-content"><div class="empty-inspector"><div class="empty-icon">◇</div><strong>Explore the graph</strong><p>Select any node to see its inputs, consumers, raw HLO, and linked computations.</p></div></div></aside>
+  </div>
+  <dialog id="open-dialog"><div class="dialog-head"><div><div class="eyebrow">IMPORT MODULE</div><h2>Open HLO text</h2></div><button id="dialog-close" class="icon-button" type="button" aria-label="Close">×</button></div><p>Paste an HLO module or choose a local <code>.hlo</code> / <code>.txt</code> file. Processing stays in your browser.</p><textarea id="hlo-input" spellcheck="false" placeholder="HloModule …&#10;&#10;ENTRY %main (...) -> ... {"></textarea><div class="dialog-actions"><label class="subtle-button file-label">Choose file<input id="file-input" type="file" accept=".hlo,.txt,.log,text/plain"></label><span id="import-error" role="alert"></span><button id="load-button" class="primary-button" type="button">Visualize module →</button></div></dialog>
+  <div id="search-overlay" class="search-overlay" hidden><div class="search-panel"><div class="search-field"><span>⌕</span><input id="search-input" type="search" placeholder="Search nodes or operations…" autocomplete="off"><kbd>esc</kbd></div><div id="search-results" class="search-results"></div></div></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
