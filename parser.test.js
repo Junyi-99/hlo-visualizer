@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseHlo, reachable, computationLinks, nodeSummary } from './parser.js';
+import { parseHlo, reachable, computationLinks, nodeSummary, dependencyNeighborhood, shortestDependencyPath } from './src/lib/parser.ts';
 
 test('sample loop dependencies and computation links', () => {
   const module = parseHlo(readFileSync(new URL('./sample.hlo', import.meta.url), 'utf8'));
@@ -40,4 +40,37 @@ ENTRY %main (a: s32[]) -> s32[] {
   const module = parseHlo(source);
   assert.deepEqual(module.warnings, []);
   assert.deepEqual(module.computations[0].byName.get('copy').operands, ['a']);
+});
+
+test('control dependencies are distinct from data inputs and participate in graph traversal', () => {
+  const source = `HloModule controls
+ENTRY %main (a: s32[]) -> s32[] {
+  %a = s32[] parameter(0)
+  %gate = s32[] constant(1)
+  %middle = s32[] copy(%a), control-predecessors={%gate}
+  ROOT %out = s32[] add(%middle, %gate)
+}`;
+  const module = parseHlo(source);
+  const computation = module.byName.get('main');
+  assert.deepEqual(module.warnings, []);
+  assert.deepEqual(computation.byName.get('middle').operands, ['a']);
+  assert.deepEqual(computation.byName.get('middle').controlPredecessors, ['gate']);
+  assert.deepEqual(computation.byName.get('gate').controlSuccessors, ['middle']);
+  assert.deepEqual([...dependencyNeighborhood(computation, 'a', 1)], ['a', 'middle']);
+  assert.deepEqual(shortestDependencyPath(computation, 'a', 'gate'), ['a', 'middle', 'gate']);
+  assert.equal(reachable(computation, 'gate', 'down').has('middle'), true);
+});
+
+test('multiline attributes retain source and missing control references produce diagnostics', () => {
+  const source = `HloModule multiline
+ENTRY %main (a: s32[]) -> s32[] {
+  %a = s32[] parameter(0)
+  ROOT %out = s32[] copy(%a),
+    metadata={op_name="jit(main)/copy"},
+    control-predecessors={%missing}
+}`;
+  const module = parseHlo(source);
+  assert.equal(module.byName.get('main').byName.get('out').raw.split('\n').length, 3);
+  assert.deepEqual(module.byName.get('main').byName.get('out').controlPredecessors, ['missing']);
+  assert.match(module.warnings[0], /missing control predecessor %missing/);
 });
