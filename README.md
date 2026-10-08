@@ -4,7 +4,18 @@ Interactive viewer for XLA HLO text, such as the HLO that JAX produces on TPU.
 
 **Open it here: https://www.junyi.dev/hlo-visualizer/**
 
-![HLO Visualizer showing the entry computation of a JAX attention program compiled for TPU](doc/screenshot.png)
+<table>
+  <tr>
+    <th>XLA's built-in HLO graph</th>
+    <th>HLO Visualizer</th>
+  </tr>
+  <tr>
+    <td width="50%"><img src="doc/xla-lowered-hlo.png" alt="XLA's HLO graph rendering of a small lowered computation"></td>
+    <td width="50%"><img src="doc/screenshot.png" alt="HLO Visualizer showing the entry computation of a JAX attention program compiled for TPU"></td>
+  </tr>
+</table>
+
+<sub>Left image: from the <a href="https://openxla.org/xla/gpu_architecture">XLA GPU architecture overview</a>, OpenXLA, licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</sub>
 
 ## Use it
 
