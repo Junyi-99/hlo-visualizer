@@ -74,7 +74,7 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
   const hasLoopLinks = computation && links.some(link => link.from === computation.name && (link.role === 'body' || link.role === 'condition'));
   return <>
     <header className="topbar"><div className="crumb"><span>Workspace</span><span className="slash">/</span><strong>{!computation ? 'Overview' : computation.entry ? 'Entry' : computation.name}</strong></div>
-      <div className="top-actions"><ThemeButton />
+      <div className="top-actions"><a className="icon-button repo-link" href="https://github.com/Junyi-99/hlo-visualizer" target="_blank" rel="noreferrer" aria-label="Source code on GitHub" title="Source code on GitHub"><Icon name="github" /></a><ThemeButton />
         <select className="example-select" aria-label="Load an HLO example" title="Load an HLO example" value={exampleId ?? ''} onChange={event => event.target.value && onExample(event.target.value)}>
           <option value="" disabled>Examples</option>
           {(['after', 'before'] as const).map(stage => <optgroup key={stage} label={stage === 'after' ? 'TPU v6e · compiled (after optimizations)' : 'TPU v6e · before optimizations'}>
@@ -99,7 +99,7 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
           <strong>Node labels</strong>
           <label className="display-option"><input type="checkbox" checked={useOpName} onChange={event => onUseOpName(event.target.checked)} />Use op_name in metadata</label>
           <label className="display-option"><input type="checkbox" checked={showLastNameOnly} disabled={!useOpName} onChange={event => onShowLastNameOnly(event.target.checked)} />Show last name only</label>
-          <label className="display-option" title={module.scheduled ? undefined : 'XLA 在编译时才决定每个值放在 HBM 还是 VMEM。这是编译前的 HLO（模块头没有 is_scheduled=true），还没有这些信息；请载入编译后的 HLO。'}><input type="checkbox" checked={showMemoryLocation && module.scheduled} disabled={!module.scheduled} onChange={event => onShowMemoryLocation(event.target.checked)} />展示内存位置{!module.scheduled && <small className="display-note">这是编译前的 HLO，XLA 编译时才决定放在 HBM 还是 VMEM</small>}</label>
+          <label className="display-option" title={module.scheduled ? undefined : 'XLA decides whether each value lives in HBM or VMEM while compiling. This is lowered HLO (no is_scheduled=true in the module header), so that information does not exist yet; load compiled HLO instead.'}><input type="checkbox" checked={showMemoryLocation && module.scheduled} disabled={!module.scheduled} onChange={event => onShowMemoryLocation(event.target.checked)} />Show memory location{!module.scheduled && <small className="display-note">Lowered HLO: XLA picks HBM or VMEM only when compiling</small>}</label>
         </div>}
       </div>
       <button className="subtle-button" type="button" onClick={onFit}>Fit view</button>

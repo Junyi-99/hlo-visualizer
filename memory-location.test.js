@@ -75,7 +75,7 @@ for (const file of readdirSync(dir).filter(name => name.endsWith('.after.hlo')).
         const space = truth[node.name]?.[leaf];
         const where = `%${computation.name}/%${node.name} {${leaf}}`;
         if (typeof space === 'number') assert.match(text, new RegExp(spaceLabel(space).replace(/[()]/g, '\\$&')), `${where} says ${spaceLabel(space)}`);
-        else assert.doesNotMatch(text, /^(HBM|VMEM|SFLAG|HOST|SMEM|S\(\d+\))（/, `${where} has no buffer and must not claim one: ${text}`);
+        else assert.doesNotMatch(text, /^(HBM|VMEM|SFLAG|HOST|SMEM|S\(\d+\)) \(/, `${where} has no buffer and must not claim one: ${text}`);
       }
     }
   });

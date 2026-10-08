@@ -26,7 +26,7 @@ test('layout diagram reflects VMEM to HBM and physical offsets', () => {
   const diagram = layoutDiagram(entry.byName.get('copy-start'));
   assert.match(diagram, /VMEM S\(1\) → HBM S\(0\)/);
   assert.match(diagram, />256<\/text>/);
-  assert.match(diagram, /16 个外层 tile/);
+  assert.match(diagram, /16 outer tiles/);
   assert.match(layoutDiagram(entry.byName.get('copy-start.1')), /HBM S\(0\) → VMEM S\(1\)/);
 });
 
@@ -38,13 +38,13 @@ test('while condition tuple parameter is broken into four explained slots', () =
   assert.deepEqual(guide.parts.filter(part => part.key.startsWith('slot-')).map(part => part.key),
     ['slot-0','slot-1','slot-2','slot-3']);
   assert.match(guide.parts.find(part => part.key === 'slot-0').text, /%copy\.10.*%add\.2.*%get-tuple-element\.15/);
-  assert.match(guide.parts.find(part => part.key === 'slot-1').text, /bf16\[128,128\].*VMEM.*没有直接取出/);
-  assert.match(guide.parts.find(part => part.key === 'tile').text, /T\(128\).*不会把标量变成 128 个逻辑元素/);
-  assert.match(guide.parts.find(part => part.key === 'parameter-index').text, /整个 tuple 是一个参数/);
+  assert.match(guide.parts.find(part => part.key === 'slot-1').text, /bf16\[128,128\].*VMEM.*does not read this element directly/);
+  assert.match(guide.parts.find(part => part.key === 'tile').text, /T\(128\).*does not turn a scalar into 128 logical elements/);
+  assert.match(guide.parts.find(part => part.key === 'parameter-index').text, /the whole tuple is one parameter/);
   assert.equal(guide.resultGroup.kind, 'tuple');
   assert.equal(guide.resultGroup.slots.length, 4);
-  assert.deepEqual(guide.resultGroup.slots[0].details.map(detail => detail.label), ['元素类型与逻辑形状','物理分块','内存空间','循环状态来源','本计算中的使用']);
-  assert.match(layoutDiagram(node), /第 1、2 项 · VMEM S\(1\)/);
+  assert.deepEqual(guide.resultGroup.slots[0].details.map(detail => detail.label), ['Element type and logical shape','Physical tiling','Memory space','Loop state source','Use in this computation']);
+  assert.match(layoutDiagram(node), /Elements 1, 2 · VMEM S\(1\)/);
 });
 
 test('every result type exposes a hierarchy, including copy tuples and single arrays', () => {
@@ -58,14 +58,14 @@ test('every result type exposes a hierarchy, including copy tuples and single ar
   const arrayGuide = instructionGuide(array);
   assert.equal(visibleText(arrayGuide.html), array.raw);
   assert.equal(arrayGuide.resultGroup.kind, 'array');
-  assert.deepEqual(arrayGuide.resultGroup.details.map(detail => detail.label), ['元素类型与逻辑形状','维度顺序','物理分块','内存空间']);
+  assert.deepEqual(arrayGuide.resultGroup.details.map(detail => detail.label), ['Element type and logical shape','Dimension order','Physical tiling','Memory space']);
 });
 
 test('highlighted layout fragments map to result type detail rows', () => {
   const guide = instructionGuide(entry.byName.get('constant.5'));
   assert.match(guide.html, /data-part="tile"[^>]*>T\(128\)/);
   assert.deepEqual(guide.resultGroup.details.map(detail => detail.key), ['shape','tile','space']);
-  assert.equal(guide.resultGroup.details.find(detail => detail.key === 'tile').label, '物理分块');
+  assert.equal(guide.resultGroup.details.find(detail => detail.key === 'tile').label, 'Physical tiling');
 });
 
 test('constant literal has a matching instruction fragment and explanation', () => {
@@ -73,7 +73,7 @@ test('constant literal has a matching instruction fragment and explanation', () 
   const guide = instructionGuide(node);
   assert.equal(visibleText(guide.html), node.raw);
   assert.match(guide.html, /data-part="literal"[^>]*>\(0\)<\/span>/);
-  assert.match(guide.parts.find(part => part.key === 'literal').text, /0.*直接给出的值/);
+  assert.match(guide.parts.find(part => part.key === 'literal').text, /0.*the value given directly/);
 });
 
 test('fusion kind and called computation are explained and linked to instruction fragments', () => {
@@ -83,9 +83,9 @@ test('fusion kind and called computation are explained and linked to instruction
   assert.equal(visibleText(guide.html), node.raw);
   assert.match(guide.html, /data-part="fusion-kind"[^>]*>kind=kOutput<\/span>/);
   assert.match(guide.html, /data-part="called-computation"[^>]*>calls=%fused_computation\.clone\.1<\/span>/);
-  assert.match(guide.parts.find(part => part.key === 'fusion-kind').text, /输出融合/);
+  assert.match(guide.parts.find(part => part.key === 'fusion-kind').text, /Output fusion/);
   assert.match(guide.parts.find(part => part.key === 'called-computation').text,
-    /参数 0 ← %copy\.11；参数 1 ← %get-tuple-element\.41。它的 ROOT %convolution\.3 定义 fusion 的结果/);
+    /parameter 0 ← %copy\.11; parameter 1 ← %get-tuple-element\.41\. Its ROOT %convolution\.3 defines the fusion's result/);
 });
 
 test('array result type is highlighted through its closing layout brace', () => {
@@ -128,10 +128,10 @@ ENTRY %main.28 (q: bf16[8,2048,128]) -> bf16[8,2048,128] {
   assert.equal(computation.byName.get('get-tuple-element.0').index, 3);
   const outputGuide = instructionGuide(computation.byName.get('get-tuple-element.0'));
   assert.match(outputGuide.html, /data-part="tuple-index"[^>]*>index=3/);
-  assert.match(outputGuide.parts.find(part => part.key === 'tuple-index').text, /%custom-call\.0.*第 3 项/);
+  assert.match(outputGuide.parts.find(part => part.key === 'tuple-index').text, /element 3 .*%custom-call\.0/);
   const broadcastGuide = instructionGuide(computation.byName.get('broadcast.0'));
   assert.match(broadcastGuide.html, /data-part="dimensions"[^>]*>dimensions=\{0\}/);
-  assert.match(broadcastGuide.parts.find(part => part.key === 'dimensions').text, /输入维度.*输出/);
+  assert.match(broadcastGuide.parts.find(part => part.key === 'dimensions').text, /input dimensions.*output/);
   assert.match(nodeSummary(node), /tpu_custom_call · 4 outputs/);
   assert.equal(visibleText(guide.html), node.raw);
   assert.ok(!guide.compactHtml.includes(body));

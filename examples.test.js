@@ -47,7 +47,7 @@ for (const file of files) {
         const explained = new Set(guide.parts.map(part => part.key));
         for (const key of segments) assert.ok(explained.has(key), `${where} explains segment ${key}`);
         for (const key of explained) assert.ok(segments.has(key), `${where} explanation ${key} points at a segment`);
-        for (const part of guide.parts) assert.doesNotMatch(part.text, /见 XLA operation semantics/, `${where} ${part.key} has a specific explanation`);
+        for (const part of guide.parts) assert.doesNotMatch(part.text, /see the XLA operation semantics doc/, `${where} ${part.key} has a specific explanation`);
       }
     }
   });

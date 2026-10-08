@@ -8,7 +8,7 @@ import type { HloModule } from '../lib/types';
 import { ComputationExplorer } from './ComputationExplorer';
 
 function memoryTooltip(location: MemoryLocation) {
-  return `${location.path === null ? '结果' : `结果第 ${location.path} 项`}：${memorySpaceText(location.space, location.explicit)}`;
+  return `${location.path === null ? 'Result' : `Result element ${location.path}`}: ${memorySpaceText(location.space, location.explicit)}`;
 }
 
 export interface GraphHandle {

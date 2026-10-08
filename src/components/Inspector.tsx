@@ -95,9 +95,9 @@ function InstructionDetails({ module, computation, node, upstreamCount, downstre
     <div className="metric-row"><div><strong>{upstreamCount}</strong><span>Upstream</span></div><div><strong>{downstreamCount}</strong><span>Downstream</span></div><div><strong>{node.line}</strong><span>Source line</span></div></div>
     <div className="inspector-section instruction-section"><h4>HLO instruction</h4>
       <pre ref={codeRef} className="hlo-code" onClick={activateFromCode} onMouseOver={event => { const { key, slot } = codeTarget(event.target); activate(key, slot); }} onMouseLeave={() => activate(null)} dangerouslySetInnerHTML={{ __html: displayedHtml }} />
-      {guide.compactHtml && <button className="instruction-toggle" type="button" onClick={() => setShowFullInstruction(value => !value)}>{showFullInstruction ? '收起编码配置' : '展开完整 HLO 指令'}</button>}
+      {guide.compactHtml && <button className="instruction-toggle" type="button" onClick={() => setShowFullInstruction(value => !value)}>{showFullInstruction ? 'Hide encoded config' : 'Show full HLO instruction'}</button>}
       {node.op === 'copy-start' && diagram && <div dangerouslySetInnerHTML={{ __html: diagram }} />}
-      <div className="guide-heading">逐段解读 <span>悬停双向高亮 · 点按指令定位说明</span></div>
+      <div className="guide-heading">Explanation</div>
       <div className="guide-list">
         {group && <TypeTree group={group} parts={guide.parts} activePart={activePart} activeSlot={activeSlot} onActivate={activate} />}
         {explanations.map(part => <div key={part.key} className={`guide-row part-${part.key}${activePart === part.key ? ' active-part' : ''}`} data-part={part.key} tabIndex={0} style={partColor(part.key) ? { '--part': partColor(part.key) } as React.CSSProperties : undefined} onMouseEnter={() => activate(part.key)} onMouseLeave={() => activate(null)} onFocus={() => activate(part.key)} onBlur={() => activate(null)}>
@@ -105,19 +105,19 @@ function InstructionDetails({ module, computation, node, upstreamCount, downstre
         </div>)}
       </div>
       {node.op !== 'copy-start' && diagram && <div dangerouslySetInnerHTML={{ __html: diagram }} />}
-      <div className="guide-sources">参考：<a href="https://jax-ml.github.io/scaling-book/profiling/#how-to-read-an-xla-op" target="_blank" rel="noreferrer">How to read an XLA op</a> · <a href="https://openxla.org/xla/shapes" target="_blank" rel="noreferrer">Shapes and layout</a> · <a href={semanticsUrl} target="_blank" rel="noreferrer">{semanticsLabel}</a></div>
+      <div className="guide-sources">References: <a href="https://jax-ml.github.io/scaling-book/profiling/#how-to-read-an-xla-op" target="_blank" rel="noreferrer">How to read an XLA op</a> · <a href="https://openxla.org/xla/shapes" target="_blank" rel="noreferrer">Shapes and layout</a> · <a href={semanticsUrl} target="_blank" rel="noreferrer">{semanticsLabel}</a></div>
     </div>
     {metadata && <div className={`inspector-section metadata-section part-metadata${activePart === 'metadata' ? ' active-part' : ''}`} data-part="metadata" tabIndex={0}
       onMouseEnter={() => activate('metadata')} onMouseLeave={() => activate(null)} onFocus={() => activate('metadata')} onBlur={() => activate(null)}>
       <h4>HLO metadata</h4>
-      <p className="metadata-intro">记录源操作和源码位置。</p>
+      <p className="metadata-intro">Where this instruction came from in the source program.</p>
       <div className="metadata-fields">{metadata.fields.map(field => <div className="metadata-field" key={field.name}>
         <span>{field.name}</span><code>{field.value}</code>
       </div>)}
       {stack.length > 0 && <div className="metadata-field"><span>source (stack_frame_id={frameId}, innermost first)</span>
         <ol className="source-stack">{stack.map((frame, index) => <li key={index}><code>{frame.func}</code> <small>{frame.file}:{frame.line}:{frame.column}</small></li>)}</ol>
       </div>}</div>
-      <details className="metadata-original"><summary>查看原始 metadata</summary><pre>{metadata.raw}</pre></details>
+      <details className="metadata-original"><summary>Show raw metadata</summary><pre>{metadata.raw}</pre></details>
     </div>}
     <div className="inspector-section"><h4>Direct inputs <span>{node.operands.length}</span></h4><ReferenceList names={node.operands} onNode={onNode} /></div>
     <div className="inspector-section"><h4>Direct consumers <span>{node.users.length}</span></h4><ReferenceList names={node.users} onNode={onNode} /></div>

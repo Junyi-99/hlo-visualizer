@@ -18,9 +18,9 @@ function DetailRows({ details, activePart, highlighted, slot, onActivate }: { de
 export function TypeTree({ group, parts, activePart, activeSlot, onActivate }: TypeTreeProps) {
   const tuple = group.kind === 'tuple';
   const key = tuple ? 'tuple' : 'shape';
-  const kind = tuple ? `${group.slots.length} 项 tuple` : /\[\]/.test(group.rawType) ? '标量' : '数组';
+  const kind = tuple ? `${group.slots.length}-element tuple` : /\[\]/.test(group.rawType) ? 'scalar' : 'array';
   return <details className={`type-tree part-${key}${activePart === key ? ' active-part' : ''}`} data-part={key} open>
-    <summary onMouseEnter={() => onActivate(key, null)} onMouseLeave={() => onActivate(null, null)}><span className="type-tree-title">结果类型 <b>{kind}</b></span><code>{group.rawType}</code></summary>
+    <summary onMouseEnter={() => onActivate(key, null)} onMouseLeave={() => onActivate(null, null)}><span className="type-tree-title">Result type <b>{kind}</b></span><code>{group.rawType}</code></summary>
     <div className="type-tree-children">
       {group.kind === 'tuple' ? group.slots.map(slot => {
         const explanation = parts.find(part => part.key === slot.key);
