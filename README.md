@@ -4,19 +4,18 @@ Interactive viewer for XLA HLO text, such as the HLO that JAX produces on TPU.
 
 **Open it here: https://www.junyi.dev/hlo-visualizer/**
 
+![HLO Visualizer showing the entry computation of a JAX attention program compiled for TPU](doc/screenshot.png)
+
 ## Use it
 
-1. Pick a module from **Examples**, or click **Open HLO** to paste text or choose a `.hlo` / `.txt` file. Your HLO stays in your browser.
-2. The overview shows how computations call each other. Open one to see its instructions as a dependency graph.
-3. Click a node. The inspector explains the instruction piece by piece and lists its inputs, consumers and source location.
+1. Pick a module from **Examples**, or click **Open HLO** to paste text or choose a `.hlo` / `.txt` file.
+2. Click a node. The inspector explains the instruction piece by piece.
 
 ## What you can see
 
-- Data and control dependencies, with upstream and downstream paths highlighted
-- A plain-language explanation of every part of an instruction: types, layouts, operands and attributes
-- Where each value lives on TPU (HBM, VMEM, SMEM, …) in compiled HLO, verified against XLA's buffer assignment on TPU v6e
-- Source call stacks from HLO metadata
-- Search (`/`), N-hop neighborhood view, shortest path between two nodes, and nested computations expanded in place
+- A plain-language explanation of every part of an instruction
+- Where each value lives on TPU (HBM, VMEM, SMEM, …)
+- Data and control dependencies between instructions
 
 ## Get HLO from JAX
 
