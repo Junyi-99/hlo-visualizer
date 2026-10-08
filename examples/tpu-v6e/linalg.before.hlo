@@ -1,0 +1,97 @@
+HloModule jit_linalg, entry_computation_layout={(f32[64,64]{1,0}, f32[64,8]{1,0})->(f32[64,64]{1,0}, f32[64,8]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0})}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "linalg"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=20 end_column=36}
+3 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=14 end_column=17}
+4 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=10 end_column=17}
+5 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=25 end_column=36}
+6 {file_name_id=1 function_name_id=2 line=147 end_line=147 column=8 end_column=32}
+7 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=8 end_column=59}
+8 {file_name_id=1 function_name_id=2 line=149 end_line=149 column=11 end_column=27}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+8 {file_location_id=8 parent_frame_id=2}
+
+
+cholesky.1 {
+  iota.8 = s32[64]{0} iota(), iota_dimension=0, metadata={op_name="iota"}
+  iota.9 = s32[64,64]{1,0} broadcast(iota.8), dimensions={0}, metadata={op_name="iota"}
+  iota.10 = s32[64]{0} iota(), iota_dimension=0, metadata={op_name="iota"}
+  iota.11 = s32[64,64]{1,0} broadcast(iota.10), dimensions={1}, metadata={op_name="iota"}
+  ge.1 = pred[64,64]{1,0} compare(iota.9, iota.11), direction=GE, metadata={op_name="ge"}
+  Arg_0.1 = f32[64,64]{1,0} parameter(0)
+  transpose.2 = f32[64,64]{0,1} transpose(Arg_0.1), dimensions={1,0}, metadata={op_name="transpose"}
+  add.2 = f32[64,64]{1,0} add(Arg_0.1, transpose.2), metadata={op_name="add"}
+  constant.4 = f32[] constant(2)
+  div.2 = f32[64,64]{1,0} broadcast(constant.4), dimensions={}, metadata={op_name="div"}
+  div.3 = f32[64,64]{1,0} divide(add.2, div.2), metadata={op_name="div"}
+  cholesky.1 = f32[64,64]{1,0} cholesky(div.3), lower=true, metadata={op_name="cholesky"}
+  constant.3 = f32[] constant(0)
+  broadcast_in_dim.1 = f32[64,64]{1,0} broadcast(constant.3), dimensions={}, metadata={op_name="broadcast_in_dim"}
+  ROOT select_n.1 = f32[64,64]{1,0} select(ge.1, cholesky.1, broadcast_in_dim.1), metadata={op_name="select_n"}
+}
+
+_solve_triangular.2 {
+  Arg_0.3 = f32[64,64]{1,0} parameter(0)
+  Arg_1.1 = f32[64,8]{1,0} parameter(1)
+  ROOT triangular_solve.1 = f32[64,8]{1,0} triangular-solve(Arg_0.3, Arg_1.1), left_side=true, lower=true, transpose_a=NO_TRANSPOSE, metadata={op_name="triangular_solve"}
+}
+
+qr.3 {
+  Arg_0.5 = f32[64,64]{1,0} parameter(0)
+  geqrf.3 = (f32[64,64]{1,0}, f32[64]{0}) custom-call(Arg_0.5), custom_call_target="Qr", metadata={op_name="geqrf"}
+  geqrf.4 = f32[64,64]{1,0} get-tuple-element(geqrf.3), index=0, metadata={op_name="geqrf"}
+  geqrf.5 = f32[64]{0} get-tuple-element(geqrf.3), index=1, metadata={op_name="geqrf"}
+  householder_product.1 = f32[64,64]{1,0} custom-call(geqrf.4, geqrf.5), custom_call_target="ProductOfElementaryHouseholderReflectors", metadata={op_name="householder_product"}
+  iota.16 = s32[64]{0} iota(), iota_dimension=0, metadata={op_name="iota"}
+  iota.17 = s32[64,64]{1,0} broadcast(iota.16), dimensions={0}, metadata={op_name="iota"}
+  constant.8 = s32[] constant(-1)
+  add.5 = s32[64,64]{1,0} broadcast(constant.8), dimensions={}, metadata={op_name="add"}
+  add.6 = s32[64,64]{1,0} add(iota.17, add.5), metadata={op_name="add"}
+  iota.18 = s32[64]{0} iota(), iota_dimension=0, metadata={op_name="iota"}
+  iota.19 = s32[64,64]{1,0} broadcast(iota.18), dimensions={1}, metadata={op_name="iota"}
+  ge.3 = pred[64,64]{1,0} compare(add.6, iota.19), direction=GE, metadata={op_name="ge"}
+  constant.7 = f32[] constant(0)
+  broadcast_in_dim.3 = f32[64,64]{1,0} broadcast(constant.7), dimensions={}, metadata={op_name="broadcast_in_dim"}
+  select_n.3 = f32[64,64]{1,0} select(ge.3, broadcast_in_dim.3, geqrf.4), metadata={op_name="select_n"}
+  ROOT tuple.1 = (f32[64,64]{1,0}, f32[64,64]{1,0}) tuple(householder_product.1, select_n.3)
+}
+
+ENTRY main.4 {
+  a.1 = f32[64,64]{1,0} parameter(0), metadata={op_name="a"}
+  transpose.3 = f32[64,64]{0,1} transpose(a.1), dimensions={1,0}, metadata={op_name="jit(linalg)/transpose" stack_frame_id=3}
+  dot_general.1 = f32[64,64]{1,0} dot(a.1, transpose.3), lhs_contracting_dims={1}, rhs_contracting_dims={0}, metadata={op_name="jit(linalg)/dot_general" stack_frame_id=4}
+  iota.20 = s32[64]{0} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/iota" stack_frame_id=5}
+  iota.21 = s32[64,64]{1,0} broadcast(iota.20), dimensions={0}, metadata={op_name="jit(linalg)/iota" stack_frame_id=5}
+  iota.22 = s32[64]{0} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/iota" stack_frame_id=5}
+  iota.23 = s32[64,64]{1,0} broadcast(iota.22), dimensions={1}, metadata={op_name="jit(linalg)/iota" stack_frame_id=5}
+  eq.1 = pred[64,64]{1,0} compare(iota.21, iota.23), direction=EQ, metadata={op_name="jit(linalg)/eq" stack_frame_id=5}
+  convert_element_type.1 = f32[64,64]{1,0} convert(eq.1), metadata={op_name="jit(linalg)/convert_element_type" stack_frame_id=5}
+  constant.9 = f32[] constant(64)
+  mul.2 = f32[64,64]{1,0} broadcast(constant.9), dimensions={}, metadata={op_name="jit(linalg)/mul" stack_frame_id=2}
+  mul.3 = f32[64,64]{1,0} multiply(convert_element_type.1, mul.2), metadata={op_name="jit(linalg)/mul" stack_frame_id=2}
+  add.7 = f32[64,64]{1,0} add(dot_general.1, mul.3), metadata={op_name="jit(linalg)/add" stack_frame_id=4}
+  jit_cholesky_.1 = f32[64,64]{1,0} call(add.7), to_apply=cholesky.1, metadata={op_name="jit(linalg)/jit(cholesky)" stack_frame_id=6}
+  b.1 = f32[64,8]{1,0} parameter(1), metadata={op_name="b"}
+  jit__solve_triangular_.1 = f32[64,8]{1,0} call(jit_cholesky_.1, b.1), to_apply=_solve_triangular.2, metadata={op_name="jit(linalg)/jit(_solve_triangular)" stack_frame_id=7}
+  jit_qr_.3 = (f32[64,64]{1,0}, f32[64,64]{1,0}) call(a.1), to_apply=qr.3, metadata={op_name="jit(linalg)/jit(qr)" stack_frame_id=8}
+  jit_qr_.4 = f32[64,64]{1,0} get-tuple-element(jit_qr_.3), index=0, metadata={op_name="jit(linalg)/jit(qr)" stack_frame_id=8}
+  jit_qr_.5 = f32[64,64]{1,0} get-tuple-element(jit_qr_.3), index=1, metadata={op_name="jit(linalg)/jit(qr)" stack_frame_id=8}
+  ROOT tuple.3 = (f32[64,64]{1,0}, f32[64,8]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}) tuple(jit_cholesky_.1, jit__solve_triangular_.1, jit_qr_.4, jit_qr_.5)
+}
+

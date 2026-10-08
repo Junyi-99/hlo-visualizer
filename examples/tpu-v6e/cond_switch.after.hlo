@@ -1,0 +1,111 @@
+HloModule jit_cond_switch, is_scheduled=true, entry_computation_layout={(f32[64]{0:T(128)}, s32[]{:T(128)})->f32[64]{0:T(128)}}, allow_spmd_sharding_propagation_to_parameters={true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={arg_layout_modes="default;default",arg_memory_spaces="0;0",out_layout_modes="default",out_memory_spaces="0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "cond_switch"
+3 "cond_switch.<locals>.<lambda>"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=89 end_line=89 column=17 end_column=24}
+3 {file_name_id=1 function_name_id=2 line=89 end_line=89 column=8 end_column=80}
+4 {file_name_id=1 function_name_id=3 line=89 end_line=89 column=40 end_column=50}
+5 {file_name_id=1 function_name_id=2 line=90 end_line=90 column=11 end_column=85}
+6 {file_name_id=1 function_name_id=3 line=90 end_line=90 column=53 end_column=58}
+7 {file_name_id=1 function_name_id=3 line=90 end_line=90 column=70 end_column=80}
+8 {file_name_id=1 function_name_id=3 line=89 end_line=89 column=62 end_column=72}
+9 {file_name_id=1 function_name_id=3 line=90 end_line=90 column=36 end_column=41}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=4}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=6}
+7 {file_location_id=7 parent_frame_id=6}
+8 {file_location_id=8 parent_frame_id=4}
+9 {file_location_id=9 parent_frame_id=6}
+
+
+%region_0.1 (reduce_sum.3: f32[], reduce_sum.4: f32[]) -> f32[] {
+  %reduce_sum.4 = f32[]{:T(128)} parameter(1), metadata={op_name="reduce_sum"}
+  %reduce_sum.3 = f32[]{:T(128)} parameter(0), metadata={op_name="reduce_sum"}
+  ROOT %reduce_sum.5 = f32[]{:T(128)} add(%reduce_sum.3, %reduce_sum.4), metadata={op_name="jit(cond_switch)/reduce_sum" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%fused_computation (param_0.2: f32[64]) -> f32[64] {
+  %param_0.2 = f32[64]{0:T(128)S(1)} parameter(0)
+  %cos.0 = f32[64]{0:T(128)} cosine(%param_0.2), metadata={op_name="jit(cond_switch)/cond/branch_0_fun/cos" stack_frame_id=8}
+  %constant.0 = f32[]{:T(128)} constant(2)
+  %broadcast.0 = f32[64]{0:T(128)} broadcast(%constant.0), dimensions={}
+  ROOT %mul.0 = f32[64]{0:T(128)S(1)} multiply(%cos.0, %broadcast.0), metadata={op_name="jit(cond_switch)/cond/branch_0_fun/mul" stack_frame_id=8}
+}
+
+%region_1.2 (x.0: (f32[64])) -> (f32[64]) {
+  %x.0 = (f32[64]{0:T(128)S(1)}) parameter(0)
+  %get-tuple-element = f32[64]{0:T(128)S(1)} get-tuple-element(%x.0), index=0
+  %cosine_multiply_fusion = f32[64]{0:T(128)S(1)} fusion(%get-tuple-element), kind=kLoop, calls=%fused_computation, metadata={op_name="jit(cond_switch)/cond/branch_0_fun/mul" stack_frame_id=8}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2155","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple.10 = (f32[64]{0:T(128)S(1)}) tuple(%cosine_multiply_fusion)
+}
+
+%region_2.3 (x.1: (f32[64])) -> (f32[64]) {
+  %x.1 = (f32[64]{0:T(128)S(1)}) parameter(0)
+  %get-tuple-element.1 = f32[64]{0:T(128)S(1)} get-tuple-element(%x.1), index=0
+  %sin.1 = f32[64]{0:T(128)S(1)} sine(%get-tuple-element.1), metadata={op_name="jit(cond_switch)/cond/branch_1_fun/sin" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple.11 = (f32[64]{0:T(128)S(1)}) tuple(%sin.1)
+}
+
+%fused_computation.1 (param_0.3: f32[64]) -> f32[64] {
+  %param_0.3 = f32[64]{0:T(128)S(1)} parameter(0)
+  %constant.1 = f32[]{:T(128)} constant(1)
+  %broadcast.2 = f32[64]{0:T(128)} broadcast(%constant.1), dimensions={}
+  ROOT %add.0 = f32[64]{0:T(128)S(1)} add(%param_0.3, %broadcast.2), metadata={op_name="jit(cond_switch)/cond/branch_0_fun/add" stack_frame_id=9}
+}
+
+%region_3.4 (cond.0: (f32[64])) -> (f32[64]) {
+  %cond.0 = (f32[64]{0:T(128)S(1)}) parameter(0)
+  %get-tuple-element.3 = f32[64]{0:T(128)S(1)} get-tuple-element(%cond.0), index=0
+  %broadcast_add_fusion = f32[64]{0:T(128)S(1)} fusion(%get-tuple-element.3), kind=kLoop, calls=%fused_computation.1, metadata={op_name="jit(cond_switch)/cond/branch_0_fun/add" stack_frame_id=9}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple.12 = (f32[64]{0:T(128)S(1)}) tuple(%broadcast_add_fusion)
+}
+
+%region_4.5 (cond.1: (f32[64])) -> (f32[64]) {
+  %cond.1 = (f32[64]{0:T(128)S(1)}) parameter(0)
+  %get-tuple-element.4 = f32[64]{0:T(128)S(1)} get-tuple-element(%cond.1), index=0
+  %mul.3 = f32[64]{0:T(128)S(1)} multiply(%get-tuple-element.4, %get-tuple-element.4), metadata={op_name="jit(cond_switch)/cond/branch_1_fun/mul" stack_frame_id=6}, backend_config={"aliasing_operands":{"lists":[{"indices":["0","1"]}]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple.13 = (f32[64]{0:T(128)S(1)}) tuple(%mul.3)
+}
+
+%region_5.6 (cond.3: (f32[64])) -> (f32[64]) {
+  %cond.3 = (f32[64]{0:T(128)S(1)}) parameter(0)
+  %get-tuple-element.5 = f32[64]{0:T(128)S(1)} get-tuple-element(%cond.3), index=0
+  %exp.1 = f32[64]{0:T(128)S(1)} exponential(%get-tuple-element.5), metadata={op_name="jit(cond_switch)/cond/branch_2_fun/exp" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple.14 = (f32[64]{0:T(128)S(1)}) tuple(%exp.1)
+}
+
+ENTRY %main.7 (x.5: f32[64], i.1: s32[]) -> f32[64] {
+  %constant.8 = s32[]{:T(128)} constant(0)
+  %constant.7 = s32[]{:T(128)} constant(2)
+  %constant.9 = f32[]{:T(128)} constant(0)
+  %i.1 = s32[]{:T(128)} parameter(1), metadata={op_name="i"}
+  %x.5 = f32[64]{0:T(128)} parameter(0), metadata={op_name="x"}
+  %copy.5 = s32[]{:T(128)S(6)} copy(%i.1), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy-start = (f32[64]{0:T(128)S(1)}, f32[64]{0:T(128)}, u32[]{:S(2)}) copy-start(%x.5), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %clamp.1 = s32[]{:T(128)} clamp(%constant.8, %copy.5, %constant.7), metadata={op_name="jit(cond_switch)/clamp" stack_frame_id=5}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy-done = f32[64]{0:T(128)S(1)} copy-done(%copy-start), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %reduce_sum.7 = f32[]{:T(128)} reduce(%copy-done, %constant.9), dimensions={0}, to_apply=%region_0.1, metadata={op_name="jit(cond_switch)/reduce_sum" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"4096"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %gt.1 = pred[]{:T(512)S(6)} compare(%reduce_sum.7, %constant.9), direction=GT, metadata={op_name="jit(cond_switch)/gt" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %convert_element_type.1 = s32[]{:T(128)} convert(%gt.1), metadata={op_name="jit(cond_switch)/convert_element_type" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %tuple.15 = (f32[64]{0:T(128)S(1)}) tuple(%copy-done)
+  %tuple.16 = (f32[64]{0:T(128)S(1)}) tuple(%copy-done)
+  %cond.8.clone = (f32[64]{0:T(128)S(1)}) conditional(%convert_element_type.1, %tuple.15, %tuple.16), branch_computations={%region_1.2, %region_2.3}, metadata={op_name="jit(cond_switch)/cond" stack_frame_id=3}
+  %cond.9.clone = (f32[64]{0:T(128)S(1)}) conditional(%clamp.1, %cond.8.clone, %cond.8.clone, %cond.8.clone), branch_computations={%region_3.4, %region_4.5, %region_5.6}, metadata={op_name="jit(cond_switch)/cond" stack_frame_id=5}
+  %get-tuple-element.13 = f32[64]{0:T(128)S(1)} get-tuple-element(%cond.9.clone), index=0
+  %copy-start.1 = (f32[64]{0:T(128)}, f32[64]{0:T(128)S(1)}, u32[]{:S(2)}) copy-start(%get-tuple-element.13), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  ROOT %copy-done.1 = f32[64]{0:T(128)} copy-done(%copy-start.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+

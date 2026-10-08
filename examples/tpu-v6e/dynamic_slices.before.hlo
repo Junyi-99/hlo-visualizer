@@ -1,0 +1,75 @@
+HloModule jit_dynamic_slices, entry_computation_layout={(f32[256,256]{1,0}, s32[])->(f32[16,32]{1,0}, f32[66,40]{1,0}, f32[259,259]{1,0}, f32[512,256]{1,0}, f32[128,512]{1,0})}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "dynamic_slices"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=105 end_line=105 column=36 end_column=41}
+3 {file_name_id=1 function_name_id=2 line=104 end_line=104 column=33 end_column=38}
+4 {file_name_id=1 function_name_id=2 line=104 end_line=104 column=8 end_column=50}
+5 {file_name_id=1 function_name_id=2 line=105 end_line=105 column=44 end_column=49}
+6 {file_name_id=1 function_name_id=2 line=105 end_line=105 column=8 end_column=54}
+7 {file_name_id=1 function_name_id=2 line=106 end_line=106 column=8 end_column=25}
+8 {file_name_id=1 function_name_id=2 line=107 end_line=107 column=8 end_column=57}
+9 {file_name_id=1 function_name_id=2 line=108 end_line=108 column=28 end_column=35}
+10 {file_name_id=1 function_name_id=2 line=108 end_line=108 column=8 end_column=45}
+11 {file_name_id=1 function_name_id=2 line=109 end_line=109 column=23 end_column=26}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+8 {file_location_id=8 parent_frame_id=2}
+9 {file_location_id=9 parent_frame_id=2}
+10 {file_location_id=10 parent_frame_id=2}
+11 {file_location_id=11 parent_frame_id=2}
+
+
+_pad.1 {
+  Arg_0.1 = f32[256,256]{1,0} parameter(0)
+  Arg_1.1 = f32[] parameter(1)
+  ROOT pad.1 = f32[259,259]{1,0} pad(Arg_0.1, Arg_1.1), padding=1_2x0_3, metadata={op_name="pad"}
+}
+
+ENTRY main.2 {
+  x.1 = f32[256,256]{1,0} parameter(0), metadata={op_name="x"}
+  i.1 = s32[] parameter(1), metadata={op_name="i"}
+  constant.10 = s32[] constant(0)
+  lt.3 = pred[] compare(i.1, constant.10), direction=LT, metadata={op_name="jit(dynamic_slices)/lt" stack_frame_id=4}
+  constant.9 = s32[] constant(256)
+  add.4 = s32[] add(i.1, constant.9), metadata={op_name="jit(dynamic_slices)/add" stack_frame_id=4}
+  select_n.3 = s32[] select(lt.3, add.4, i.1), metadata={op_name="jit(dynamic_slices)/select_n" stack_frame_id=4}
+  constant.11 = s32[] constant(2)
+  mul.4 = s32[] multiply(i.1, constant.11), metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=3}
+  lt.4 = pred[] compare(mul.4, constant.10), direction=LT, metadata={op_name="jit(dynamic_slices)/lt" stack_frame_id=4}
+  add.5 = s32[] add(mul.4, constant.9), metadata={op_name="jit(dynamic_slices)/add" stack_frame_id=4}
+  select_n.4 = s32[] select(lt.4, add.5, mul.4), metadata={op_name="jit(dynamic_slices)/select_n" stack_frame_id=4}
+  dynamic_slice.1 = f32[16,32]{1,0} dynamic-slice(x.1, select_n.3, select_n.4), dynamic_slice_sizes={16,32}, metadata={op_name="jit(dynamic_slices)/dynamic_slice" stack_frame_id=4}
+  constant.6 = f32[] constant(2)
+  mul.3 = f32[16,32]{1,0} broadcast(constant.6), dimensions={}, metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=2}
+  mul.5 = f32[16,32]{1,0} multiply(dynamic_slice.1, mul.3), metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=2}
+  constant.8 = s32[] constant(1)
+  add.6 = s32[] add(i.1, constant.8), metadata={op_name="jit(dynamic_slices)/add" stack_frame_id=5}
+  lt.5 = pred[] compare(add.6, constant.10), direction=LT, metadata={op_name="jit(dynamic_slices)/lt" stack_frame_id=6}
+  add.7 = s32[] add(add.6, constant.9), metadata={op_name="jit(dynamic_slices)/add" stack_frame_id=6}
+  select_n.5 = s32[] select(lt.5, add.7, add.6), metadata={op_name="jit(dynamic_slices)/select_n" stack_frame_id=6}
+  dynamic_update_slice.1 = f32[256,256]{1,0} dynamic-update-slice(x.1, mul.5, select_n.5, constant.10), metadata={op_name="jit(dynamic_slices)/dynamic_update_slice" stack_frame_id=6}
+  slice.1 = f32[66,40]{1,0} slice(dynamic_update_slice.1), slice={[3:200:3], [10:50:1]}, metadata={op_name="jit(dynamic_slices)/slice" stack_frame_id=7}
+  constant.7 = f32[] constant(0.5)
+  jit__pad_.1 = f32[259,259]{1,0} call(dynamic_update_slice.1, constant.7), to_apply=_pad.1, metadata={op_name="jit(dynamic_slices)/jit(_pad)" stack_frame_id=8}
+  rev.1 = f32[256,256]{1,0} reverse(dynamic_update_slice.1), dimensions={0}, metadata={op_name="jit(dynamic_slices)/rev" stack_frame_id=9}
+  concatenate.1 = f32[512,256]{1,0} concatenate(dynamic_update_slice.1, rev.1), dimensions={0}, metadata={op_name="jit(dynamic_slices)/concatenate" stack_frame_id=10}
+  transpose.1 = f32[256,256]{0,1} transpose(dynamic_update_slice.1), dimensions={1,0}, metadata={op_name="jit(dynamic_slices)/transpose" stack_frame_id=11}
+  reshape.1 = f32[128,512]{1,0} reshape(transpose.1), metadata={op_name="jit(dynamic_slices)/reshape" stack_frame_id=11}
+  ROOT tuple.1 = (f32[16,32]{1,0}, f32[66,40]{1,0}, f32[259,259]{1,0}, f32[512,256]{1,0}, f32[128,512]{1,0}) tuple(dynamic_slice.1, slice.1, jit__pad_.1, concatenate.1, reshape.1)
+}
+

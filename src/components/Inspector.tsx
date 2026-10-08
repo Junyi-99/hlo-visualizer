@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { instructionGuide, layoutDiagram } from '../lib/instruction-guide';
+import { instructionGuide, layoutDiagram, partColor } from '../lib/instruction-guide';
 import { extractHloMetadata } from '../lib/metadata.ts';
-import { nodeCategory, nodeSummary } from '../lib/parser';
+import { nodeCategory, nodeSummary, sourceStack } from '../lib/parser';
 import type { Computation, HloModule, HloNode } from '../lib/types';
 import { TypeTree } from './TypeTree';
 import { Icon } from './Icon';
@@ -18,7 +18,7 @@ interface InspectorProps {
 }
 
 function ReferenceList({ names, onNode }: { names: string[]; onNode: (name: string) => void }) {
-  return names.length ? <>{names.map(name => <button type="button" className="reference" key={name} onClick={() => onNode(name)}><span>%{name}</span><span>↗</span></button>)}</> : <p className="none">None in this computation</p>;
+  return names.length ? <>{names.map((name, index) => <button type="button" className="reference" key={`${index}-${name}`} onClick={() => onNode(name)}><span>%{name}</span><span>↗</span></button>)}</> : <p className="none">None in this computation</p>;
 }
 
 export function Inspector({ module, computation, node, upstreamCount, downstreamCount, onClose, onNode, onComputation }: InspectorProps) {
@@ -39,6 +39,8 @@ function InstructionDetails({ module, computation, node, upstreamCount, downstre
   const codeRef = useRef<HTMLPreElement>(null);
   const group = guide.resultGroup;
   const metadata = extractHloMetadata(node.raw);
+  const frameId = Number(metadata?.fields.find(field => field.name === 'stack_frame_id')?.value || 0);
+  const stack = frameId ? sourceStack(module, frameId) : [];
   const typeKeys = new Set(['tuple', 'shape', 'order', 'tile', 'space', 'dest', 'source', 'context', ...(group?.kind === 'tuple' ? group.slots.map(slot => slot.key) : [])]);
   const explanations = guide.parts.filter(part => !typeKeys.has(part.key) && !(metadata && part.key === 'metadata'));
   const diagram = layoutDiagram(node);
@@ -98,7 +100,7 @@ function InstructionDetails({ module, computation, node, upstreamCount, downstre
       <div className="guide-heading">逐段解读 <span>悬停双向高亮 · 点按指令定位说明</span></div>
       <div className="guide-list">
         {group && <TypeTree group={group} parts={guide.parts} activePart={activePart} activeSlot={activeSlot} onActivate={activate} />}
-        {explanations.map(part => <div key={part.key} className={`guide-row part-${part.key}${activePart === part.key ? ' active-part' : ''}`} data-part={part.key} tabIndex={0} onMouseEnter={() => activate(part.key)} onMouseLeave={() => activate(null)} onFocus={() => activate(part.key)} onBlur={() => activate(null)}>
+        {explanations.map(part => <div key={part.key} className={`guide-row part-${part.key}${activePart === part.key ? ' active-part' : ''}`} data-part={part.key} tabIndex={0} style={partColor(part.key) ? { '--part': partColor(part.key) } as React.CSSProperties : undefined} onMouseEnter={() => activate(part.key)} onMouseLeave={() => activate(null)} onFocus={() => activate(part.key)} onBlur={() => activate(null)}>
           <span className="guide-swatch" /><div><strong>{part.label}</strong><p>{part.text}</p></div>
         </div>)}
       </div>
@@ -111,7 +113,10 @@ function InstructionDetails({ module, computation, node, upstreamCount, downstre
       <p className="metadata-intro">记录源操作和源码位置。</p>
       <div className="metadata-fields">{metadata.fields.map(field => <div className="metadata-field" key={field.name}>
         <span>{field.name}</span><code>{field.value}</code>
-      </div>)}</div>
+      </div>)}
+      {stack.length > 0 && <div className="metadata-field"><span>source (stack_frame_id={frameId}, innermost first)</span>
+        <ol className="source-stack">{stack.map((frame, index) => <li key={index}><code>{frame.func}</code> <small>{frame.file}:{frame.line}:{frame.column}</small></li>)}</ol>
+      </div>}</div>
       <details className="metadata-original"><summary>查看原始 metadata</summary><pre>{metadata.raw}</pre></details>
     </div>}
     <div className="inspector-section"><h4>Direct inputs <span>{node.operands.length}</span></h4><ReferenceList names={node.operands} onNode={onNode} /></div>

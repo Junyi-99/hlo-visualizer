@@ -1,0 +1,83 @@
+HloModule jit_cond_switch, entry_computation_layout={(f32[64]{0}, s32[])->f32[64]{0}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "cond_switch"
+3 "cond_switch.<locals>.<lambda>"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=89 end_line=89 column=17 end_column=24}
+3 {file_name_id=1 function_name_id=2 line=89 end_line=89 column=8 end_column=80}
+4 {file_name_id=1 function_name_id=3 line=89 end_line=89 column=62 end_column=72}
+5 {file_name_id=1 function_name_id=3 line=89 end_line=89 column=40 end_column=50}
+6 {file_name_id=1 function_name_id=2 line=90 end_line=90 column=11 end_column=85}
+7 {file_name_id=1 function_name_id=3 line=90 end_line=90 column=36 end_column=41}
+8 {file_name_id=1 function_name_id=3 line=90 end_line=90 column=53 end_column=58}
+9 {file_name_id=1 function_name_id=3 line=90 end_line=90 column=70 end_column=80}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=4}
+5 {file_location_id=5 parent_frame_id=4}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=7}
+8 {file_location_id=8 parent_frame_id=7}
+9 {file_location_id=9 parent_frame_id=7}
+
+
+region_0.1 {
+  reduce_sum.3 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.4 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.5 = f32[] add(reduce_sum.3, reduce_sum.4), metadata={op_name="jit(cond_switch)/reduce_sum" stack_frame_id=2}
+}
+
+region_1.2 {
+  x.2 = f32[64]{0} parameter(0), metadata={op_name="x"}
+  cos.1 = f32[64]{0} cosine(x.2), metadata={op_name="jit(cond_switch)/cond/branch_0_fun/cos" stack_frame_id=4}
+  constant.4 = f32[] constant(2)
+  broadcast.1 = f32[64]{0} broadcast(constant.4), dimensions={}
+  ROOT mul.1 = f32[64]{0} multiply(cos.1, broadcast.1), metadata={op_name="jit(cond_switch)/cond/branch_0_fun/mul" stack_frame_id=4}
+}
+
+region_2.3 {
+  x.4 = f32[64]{0} parameter(0), metadata={op_name="x"}
+  ROOT sin.1 = f32[64]{0} sine(x.4), metadata={op_name="jit(cond_switch)/cond/branch_1_fun/sin" stack_frame_id=5}
+}
+
+region_3.4 {
+  cond.2 = f32[64]{0} parameter(0), metadata={op_name="jit(cond_switch)/cond"}
+  constant.6 = f32[] constant(1)
+  broadcast.3 = f32[64]{0} broadcast(constant.6), dimensions={}
+  ROOT add.1 = f32[64]{0} add(cond.2, broadcast.3), metadata={op_name="jit(cond_switch)/cond/branch_0_fun/add" stack_frame_id=7}
+}
+
+region_4.5 {
+  cond.4 = f32[64]{0} parameter(0), metadata={op_name="jit(cond_switch)/cond"}
+  ROOT mul.3 = f32[64]{0} multiply(cond.4, cond.4), metadata={op_name="jit(cond_switch)/cond/branch_1_fun/mul" stack_frame_id=8}
+}
+
+region_5.6 {
+  cond.6 = f32[64]{0} parameter(0), metadata={op_name="jit(cond_switch)/cond"}
+  ROOT exp.1 = f32[64]{0} exponential(cond.6), metadata={op_name="jit(cond_switch)/cond/branch_2_fun/exp" stack_frame_id=9}
+}
+
+ENTRY main.7 {
+  constant.8 = s32[] constant(0)
+  i.1 = s32[] parameter(1), metadata={op_name="i"}
+  constant.7 = s32[] constant(2)
+  clamp.1 = s32[] clamp(constant.8, i.1, constant.7), metadata={op_name="jit(cond_switch)/clamp" stack_frame_id=6}
+  x.5 = f32[64]{0} parameter(0), metadata={op_name="x"}
+  constant.9 = f32[] constant(0)
+  reduce_sum.7 = f32[] reduce(x.5, constant.9), dimensions={0}, to_apply=region_0.1, metadata={op_name="jit(cond_switch)/reduce_sum" stack_frame_id=2}
+  gt.1 = pred[] compare(reduce_sum.7, constant.9), direction=GT, metadata={op_name="jit(cond_switch)/gt" stack_frame_id=2}
+  convert_element_type.1 = s32[] convert(gt.1), metadata={op_name="jit(cond_switch)/convert_element_type" stack_frame_id=3}
+  cond.8 = f32[64]{0} conditional(convert_element_type.1, x.5, x.5), branch_computations={region_1.2, region_2.3}, metadata={op_name="jit(cond_switch)/cond" stack_frame_id=3}
+  ROOT cond.9 = f32[64]{0} conditional(clamp.1, cond.8, cond.8, cond.8), branch_computations={region_3.4, region_4.5, region_5.6}, metadata={op_name="jit(cond_switch)/cond" stack_frame_id=6}
+}
+

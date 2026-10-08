@@ -1,0 +1,218 @@
+HloModule jit_gather_scatter, is_scheduled=true, entry_computation_layout={(f32[1000,64]{0,1:T(8,128)}, s32[32]{0:T(128)}, f32[32,64]{1,0:T(8,128)})->(f32[32,64]{1,0:T(8,128)}, f32[1000,64]{0,1:T(8,128)}, f32[32,1]{0,1:T(1,128)}, f32[1000,64]{0,1:T(8,128)})}, allow_spmd_sharding_propagation_to_parameters={true,true,true}, allow_spmd_sharding_propagation_to_output={true,true,true,true}, frontend_attributes={arg_layout_modes="default;default;default",arg_memory_spaces="0;0;0",out_layout_modes="default;default;default;default",out_memory_spaces="0;0;0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "gather_scatter"
+3 "conv_grad"
+4 "conv_grad.<locals>.loss"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=96 end_line=96 column=8 end_column=30}
+3 {file_name_id=1 function_name_id=3 line=62 end_line=62 column=11 end_column=47}
+4 {file_name_id=1 function_name_id=4 line=60 end_line=60 column=12 end_column=88}
+5 {file_name_id=1 function_name_id=2 line=98 end_line=98 column=8 end_column=30}
+6 {file_name_id=1 function_name_id=2 line=95 end_line=95 column=8 end_column=18}
+7 {file_name_id=1 function_name_id=2 line=97 end_line=97 column=8 end_column=86}
+8 {file_name_id=1 function_name_id=2 line=97 end_line=97 column=41 end_column=53}
+9 {file_name_id=1 function_name_id=2 line=97 end_line=97 column=28 end_column=38}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=3}
+4 {file_location_id=4 parent_frame_id=4}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+8 {file_location_id=8 parent_frame_id=2}
+9 {file_location_id=9 parent_frame_id=2}
+
+
+%fused_computation.8 (param_0.47: s32[32]) -> (s32[32], s32[32]) {
+  %param_0.47 = s32[32]{0:T(128)} parameter(0)
+  %constant.58 = s32[]{:T(128)} constant(0)
+  %broadcast.50 = s32[32]{0:T(128)} broadcast(%constant.58), dimensions={}
+  %lt.21 = pred[32]{0:T(512)(128)(4,1)} compare(%param_0.47, %broadcast.50), direction=LT, metadata={op_name="jit(gather_scatter)/lt" stack_frame_id=6}
+  %negate.11 = s32[32]{0:T(128)} negate(%param_0.47), metadata={op_name="jit(gather_scatter)/jit(remainder)/rem" stack_frame_id=8}
+  %select.11 = s32[32]{0:T(128)} select(%lt.21, %negate.11, %param_0.47), metadata={op_name="jit(gather_scatter)/jit(remainder)/rem" stack_frame_id=8}
+  %constant.56 = s32[]{:T(128)} constant(63), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)" stack_frame_id=7}
+  %broadcast.48 = s32[32]{0:T(128)} broadcast(%constant.56), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(remainder)/rem" stack_frame_id=8}
+  %and.25 = s32[32]{0:T(128)} and(%select.11, %broadcast.48), metadata={op_name="jit(gather_scatter)/jit(remainder)/rem" stack_frame_id=8}
+  %negate.10 = s32[32]{0:T(128)} negate(%and.25), metadata={op_name="jit(gather_scatter)/jit(remainder)/rem" stack_frame_id=8}
+  %select.10 = s32[32]{0:T(128)} select(%lt.21, %negate.10, %and.25), metadata={op_name="jit(gather_scatter)/jit(remainder)/rem" stack_frame_id=8}
+  %ne.13 = pred[32]{0:T(512)(128)(4,1)} compare(%select.10, %broadcast.50), direction=LT, metadata={op_name="jit(gather_scatter)/jit(remainder)/lt" stack_frame_id=8}
+  %ne.12 = pred[32]{0:T(512)(128)(4,1)} compare(%select.10, %broadcast.50), direction=NE, metadata={op_name="jit(gather_scatter)/jit(remainder)/ne" stack_frame_id=8}
+  %and.18 = pred[32]{0:T(512)(128)(4,1)} and(%ne.13, %ne.12), metadata={op_name="jit(gather_scatter)/jit(remainder)/and" stack_frame_id=8}
+  %constant.62 = s32[]{:T(128)} constant(64)
+  %broadcast.49 = s32[32]{0:T(128)} broadcast(%constant.62), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(remainder)/rem" stack_frame_id=8}
+  %add.20 = s32[32]{0:T(128)} add(%select.10, %broadcast.49), metadata={op_name="jit(gather_scatter)/jit(remainder)/add" stack_frame_id=8}
+  %select_n.22 = s32[32]{0:T(128)} select(%and.18, %add.20, %select.10), metadata={op_name="jit(gather_scatter)/jit(remainder)/select_n" stack_frame_id=8}
+  %lt.15 = pred[32]{0:T(512)(128)(4,1)} compare(%select_n.22, %broadcast.50), direction=LT, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/lt" stack_frame_id=7}
+  %add.16 = s32[32]{0:T(128)} add(%select_n.22, %broadcast.49), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/add" stack_frame_id=7}
+  %select_n.18 = s32[32]{0:T(128)S(1)} select(%lt.15, %add.16, %select_n.22), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/select_n" stack_frame_id=7}
+  %constant.63.clone.1 = s32[]{:T(128)} constant(1000)
+  %broadcast.53.clone.1 = s32[32]{0:T(128)} broadcast(%constant.63.clone.1), dimensions={}
+  %add.18.clone.1 = s32[32]{0:T(128)} add(%param_0.47, %broadcast.53.clone.1), metadata={op_name="jit(gather_scatter)/add" stack_frame_id=6}
+  %select_n.17.clone.1 = s32[32]{0:T(128)S(1)} select(%lt.21, %add.18.clone.1, %param_0.47), metadata={op_name="jit(gather_scatter)/select_n" stack_frame_id=6}
+  ROOT %tuple.3 = (s32[32]{0:T(128)S(1)}, s32[32]{0:T(128)S(1)}) tuple(%select_n.18, %select_n.17.clone.1)
+}
+
+%fused_computation.4 (param_0.17: s32[32]) -> s32[1024] {
+  %constant.49 = s32[] constant(0), metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  %broadcast.41 = s32[1024]{0:T(1024)} broadcast(%constant.49), dimensions={}, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  %param_0.17 = s32[32]{0:T(128)S(1)} parameter(0)
+  %constant.50 = s32[] constant(2147483647), metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  %pad.3 = s32[1024]{0:T(1024)} pad(%param_0.17, %constant.50), padding=0_992, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  %constant.48 = s32[] constant(999), metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  %broadcast.40 = s32[1024]{0:T(1024)} broadcast(%constant.48), dimensions={}, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  ROOT %clamp.3 = s32[1024]{0:T(1024)S(1)} clamp(%broadcast.41, %pad.3, %broadcast.40), metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+}
+
+%fused_computation (param_0.2: f32[1000,64], param_1.16: s32[1024]) -> f32[32,64] {
+  %param_0.2 = f32[1000,64]{1,0:T(8,128)S(1)} parameter(0)
+  %param_1.16 = s32[1024]{0:T(1024)S(1)} parameter(1)
+  %custom-call.3 = s32[1024]{0:T(1024)} custom-call(%param_1.16), custom_call_target="AssumeGatherIndicesInBound", operand_layout_constraints={s32[1024]{0:T(1024)}}, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  %slice.4 = s32[32]{0:T(128)} slice(%custom-call.3), slice={[0:32]}, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  %reshape.37 = s32[32]{0:T(128)} reshape(%slice.4), metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=6}
+  %transpose.5 = s32[32]{0:T(128)} transpose(%reshape.37), dimensions={0}, metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=6}
+  %gather.5 = f32[32,64]{1,0:T(8,128)} gather(%param_0.2, %transpose.5), offset_dims={1}, collapsed_slice_dims={0}, start_index_map={0}, index_vector_dim=1, slice_sizes={1,64}, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  %transpose.4 = f32[32,64]{1,0:T(8,128)} transpose(%gather.5), dimensions={0,1}, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+  ROOT %reshape.36 = f32[32,64]{1,0:T(8,128)} reshape(%transpose.4), metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}
+}
+
+%region_0.1 (scatter-add.2: f32[], scatter-add.3: f32[]) -> f32[] {
+  %scatter-add.2 = f32[]{:T(128)} parameter(0), metadata={op_name="scatter-add"}
+  %scatter-add.3 = f32[]{:T(128)} parameter(1), metadata={op_name="scatter-add"}
+  ROOT %add.3 = f32[]{:T(128)} add(%scatter-add.2, %scatter-add.3), metadata={op_name="jit(gather_scatter)/add" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%fused_computation.2 (param_0.6: f32[1000,64], param_1.11: s32[32], param_2.11: f32[32,64]) -> f32[1000,64] {
+  %param_0.6 = f32[1000,64]{1,0:T(8,128)S(1)} parameter(0)
+  %param_1.11 = s32[32]{0:T(128)S(1)} parameter(1)
+  %reshape.52 = s32[32]{0:T(128)} reshape(%param_1.11), metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=6}
+  %transpose.16 = s32[32]{0:T(128)} transpose(%reshape.52), dimensions={0}, metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=6}
+  %param_2.11 = f32[32,64]{1,0:T(8,128)S(1)} parameter(2)
+  %reshape.53 = f32[32,64]{1,0:T(8,128)} reshape(%param_2.11), metadata={op_name="upd"}
+  %transpose.17 = f32[32,64]{1,0:T(8,128)} transpose(%reshape.53), dimensions={0,1}, metadata={op_name="upd"}
+  ROOT %scatter-add.0 = f32[1000,64]{1,0:T(8,128)S(1)} scatter(%param_0.6, %transpose.16, %transpose.17), update_window_dims={1}, inserted_window_dims={0}, scatter_dims_to_operand_dims={0}, index_vector_dim=1, to_apply=%region_0.1, metadata={op_name="jit(gather_scatter)/scatter-add" stack_frame_id=2}
+}
+
+%fused_computation.11 (param_0.24: s32[32,1,1], param_1.66: s32[32,1,1]) -> s32[32,2] {
+  %param_1.66 = s32[32,1,1]{0,2,1:T(1,128)S(1)} parameter(1)
+  %constant.59 = s32[]{:T(128)} constant(0)
+  %pad.5 = s32[32,1,2]{0,2,1:T(2,128)} pad(%param_1.66, %constant.59), padding=0_0x0_0x0_1, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %param_0.24 = s32[32,1,1]{0,2,1:T(1,128)S(1)} parameter(0)
+  %pad.4 = s32[32,1,2]{0,2,1:T(2,128)} pad(%param_0.24, %constant.59), padding=0_0x0_0x1_0, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %add.12 = s32[32,1,2]{0,2,1:T(2,128)} add(%pad.5, %pad.4), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  ROOT %bitcast.4 = s32[32,2]{0,1:T(2,128)S(1)} bitcast(%add.12), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+}
+
+%fused_computation.14 (param_0.46: s32[32,2]) -> s32[32] {
+  %constant.60 = s32[]{:T(128)} constant(0)
+  %broadcast.45 = s32[32,1]{0,1:T(1,128)} broadcast(%constant.60), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %param_0.46 = s32[32,2]{0,1:T(2,128)S(1)} parameter(0)
+  %slice.6 = s32[32,1]{0,1:T(1,128)} slice(%param_0.46), slice={[0:32], [0:1]}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %constant.52 = s32[]{:T(128)} constant(31), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %broadcast.44 = s32[32,1]{0,1:T(1,128)} broadcast(%constant.52), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %clamp.5 = s32[32,1]{0,1:T(1,128)} clamp(%broadcast.45, %slice.6, %broadcast.44), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %shift-left.3 = s32[32,1]{0,1:T(1,128)} shift-left(%clamp.5, %broadcast.45), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %slice.5 = s32[32,1]{0,1:T(1,128)} slice(%param_0.46), slice={[0:32], [1:2]}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %constant.55 = s32[]{:T(128)} constant(63), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)" stack_frame_id=7}
+  %broadcast.42 = s32[32,1]{0,1:T(1,128)} broadcast(%constant.55), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %clamp.4 = s32[32,1]{0,1:T(1,128)} clamp(%broadcast.45, %slice.5, %broadcast.42), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %constant.51 = s32[]{:T(128)} constant(5), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %broadcast.43 = s32[32,1]{0,1:T(1,128)} broadcast(%constant.51), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %shift-left.2 = s32[32,1]{0,1:T(1,128)} shift-left(%clamp.4, %broadcast.43), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %or.1 = s32[32,1]{0,1:T(1,128)} or(%shift-left.3, %shift-left.2), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  ROOT %bitcast.6 = s32[32]{0:T(128)S(1)} bitcast(%or.1), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+}
+
+%fused_computation.1 (param_0.5: f32[32,64], param_1.8: s32[32]) -> f32[32] {
+  %param_0.5 = f32[32,64]{0,1:T(8,128)S(1)} parameter(0)
+  %constant.38 = s32[]{:T(128)} constant(31), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %broadcast.37 = s32[32,1]{1,0:T(8,128)} broadcast(%constant.38), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %param_1.8 = s32[32]{0:T(128)S(1)} parameter(1)
+  %reshape.45 = s32[32,1]{1,0:T(8,128)} reshape(%param_1.8), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %transpose.11 = s32[32,1]{1,0:T(8,128)} transpose(%reshape.45), dimensions={0,1}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %and.14 = s32[32,1]{1,0:T(8,128)} and(%broadcast.37, %transpose.11), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %constant.37 = s32[]{:T(128)} constant(0), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %broadcast.36 = s32[32,1]{1,0:T(8,128)} broadcast(%constant.37), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %shift-right-logical.3 = s32[32,1]{1,0:T(8,128)} shift-right-logical(%and.14, %broadcast.36), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %constant.36 = s32[]{:T(128)} constant(2016), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %broadcast.35 = s32[32,1]{1,0:T(8,128)} broadcast(%constant.36), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %and.13 = s32[32,1]{1,0:T(8,128)} and(%broadcast.35, %transpose.11), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %constant.35 = s32[]{:T(128)} constant(5), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %broadcast.34 = s32[32,1]{1,0:T(8,128)} broadcast(%constant.35), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %shift-right-logical.2 = s32[32,1]{1,0:T(8,128)} shift-right-logical(%and.13, %broadcast.34), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %concatenate.2 = s32[32,2]{1,0:T(8,128)} concatenate(%shift-right-logical.3, %shift-right-logical.2), dimensions={1}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %custom-call.1 = s32[32,2]{1,0:T(8,128)} custom-call(%concatenate.2), custom_call_target="GatherScatterIndicesBitpacked", metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %gather.7 = f32[32]{0:T(128)} gather(%param_0.5, %custom-call.1), offset_dims={}, collapsed_slice_dims={0,1}, start_index_map={0,1}, index_vector_dim=1, slice_sizes={1,1}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  %transpose.10 = f32[32]{0:T(128)} transpose(%gather.7), dimensions={0}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+  ROOT %reshape.44 = f32[32]{0:T(128)S(1)} reshape(%transpose.10), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}
+}
+
+%fused_computation.12 (param_0.35: f32[32], param_1.59: s32[32]) -> f32[32,1] {
+  %param_1.59 = s32[32]{0:T(128)S(1)} parameter(1)
+  %constant.57 = s32[]{:T(128)} constant(0)
+  %broadcast.51 = s32[32]{0:T(128)} broadcast(%constant.57), dimensions={}
+  %ge.11 = pred[32]{0:T(512)(128)(4,1)} compare(%param_1.59, %broadcast.51), direction=GE, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/ge" stack_frame_id=7}
+  %constant.54 = s32[]{:T(128)} constant(63), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)" stack_frame_id=7}
+  %broadcast.47 = s32[32]{0:T(128)} broadcast(%constant.54), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(remainder)/rem" stack_frame_id=8}
+  %le.11 = pred[32]{0:T(512)(128)(4,1)} compare(%param_1.59, %broadcast.47), direction=LE, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/le" stack_frame_id=7}
+  %and.20 = pred[32]{0:T(512)(128)(4,1)} and(%ge.11, %le.11), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/and" stack_frame_id=7}
+  %param_0.35 = f32[32]{0:T(128)S(1)} parameter(0)
+  %constant.53 = f32[]{:T(128)} constant(nan), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)" stack_frame_id=7}
+  %broadcast.46 = f32[32]{0:T(128)} broadcast(%constant.53), dimensions={}, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/broadcast_in_dim" stack_frame_id=7}
+  %select_n.24 = f32[32]{0:T(128)} select(%and.20, %param_0.35, %broadcast.46), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/select_n" stack_frame_id=7}
+  ROOT %bitcast.5 = f32[32,1]{0,1:T(1,128)} bitcast(%select_n.24), metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/select_n" stack_frame_id=7}
+}
+
+%region_2.6 (scatter-max.2: f32[], scatter-max.3: f32[]) -> f32[] {
+  %scatter-max.2 = f32[]{:T(128)} parameter(0), metadata={op_name="scatter-max"}
+  %scatter-max.3 = f32[]{:T(128)} parameter(1), metadata={op_name="scatter-max"}
+  ROOT %max.1 = f32[]{:T(128)} maximum(%scatter-max.2, %scatter-max.3), metadata={op_name="jit(gather_scatter)/max" stack_frame_id=5}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%fused_computation.3 (param_0.7: f32[1000,64], param_1.14: s32[32], param_2.16: f32[32,64]) -> f32[1000,64] {
+  %param_0.7 = f32[1000,64]{1,0:T(8,128)S(1)} parameter(0)
+  %param_1.14 = s32[32]{0:T(128)S(1)} parameter(1)
+  %reshape.60 = s32[32]{0:T(128)} reshape(%param_1.14), metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=6}
+  %transpose.22 = s32[32]{0:T(128)} transpose(%reshape.60), dimensions={0}, metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=6}
+  %param_2.16 = f32[32,64]{1,0:T(8,128)S(1)} parameter(2)
+  %reshape.61 = f32[32,64]{1,0:T(8,128)} reshape(%param_2.16), metadata={op_name="upd"}
+  %transpose.23 = f32[32,64]{1,0:T(8,128)} transpose(%reshape.61), dimensions={0,1}, metadata={op_name="upd"}
+  ROOT %scatter-max.0 = f32[1000,64]{1,0:T(8,128)S(1)} scatter(%param_0.7, %transpose.22, %transpose.23), update_window_dims={1}, inserted_window_dims={0}, scatter_dims_to_operand_dims={0}, index_vector_dim=1, to_apply=%region_2.6, metadata={op_name="jit(gather_scatter)/scatter-max" stack_frame_id=5}
+}
+
+ENTRY %main.7 (table.1: f32[1000,64], idx.1: s32[32], upd.1: f32[32,64]) -> (f32[32,64], f32[1000,64], f32[32,1], f32[1000,64]) {
+  %idx.1 = s32[32]{0:T(128)} parameter(1), metadata={op_name="idx"}
+  %table.1 = f32[1000,64]{0,1:T(8,128)} parameter(0), metadata={op_name="table"}
+  %upd.1 = f32[32,64]{1,0:T(8,128)} parameter(2), metadata={op_name="upd"}
+  %compare_select_fusion.3 = (s32[32]{0:T(128)S(1)}, s32[32]{0:T(128)S(1)}) fusion(%idx.1), kind=kLoop, calls=%fused_computation.8, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/select_n" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"1024"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2123","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.9 = s32[32]{0:T(128)S(1)} get-tuple-element(%compare_select_fusion.3), index=1, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/select_n" stack_frame_id=7}
+  %copy.8 = f32[1000,64]{1,0:T(8,128)S(1)} copy(%table.1), metadata={op_name="table"}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"262144"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2480","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","8"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["125","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy-start = (f32[32,64]{1,0:T(8,128)S(1)}, f32[32,64]{1,0:T(8,128)}, u32[]{:S(2)}) copy-start(%upd.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy.14 = f32[1000,64]{1,0:T(8,128)S(1)} copy(%copy.8), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"47","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["125","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy-done = f32[32,64]{1,0:T(8,128)S(1)} copy-done(%copy-start), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %scatter_fusion.1 = f32[1000,64]{1,0:T(8,128)S(1)} fusion(%copy.14, %get-tuple-element.9, %copy-done), kind=kCustom, calls=%fused_computation.3, metadata={op_name="jit(gather_scatter)/scatter-max" stack_frame_id=5}, backend_config={"aliasing_operands":{"lists":[{"indices":["0","3"]}]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"528384"}]}
+  %copy.12 = f32[1000,64]{0,1:T(8,128)} copy(%scatter_fusion.1), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"262144"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2480","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["125","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","8"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %pad_clamp_fusion = s32[1024]{0:T(1024)S(1)} fusion(%get-tuple-element.9), kind=kLoop, calls=%fused_computation.4, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2116","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %gather_fusion = f32[32,64]{1,0:T(8,128)} fusion(%copy.8, %pad_clamp_fusion), kind=kCustom, calls=%fused_computation, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=6}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"integer_config":{"integer":"0"},"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"16384"}]}
+  %scatter_fusion = f32[1000,64]{1,0:T(8,128)S(1)} fusion(%copy.8, %get-tuple-element.9, %copy-done), kind=kCustom, calls=%fused_computation.2, metadata={op_name="jit(gather_scatter)/scatter-add" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[{"indices":["0","3"]}]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"528384"}]}
+  %copy.11 = f32[1000,64]{0,1:T(8,128)} copy(%scatter_fusion), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"262144"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2480","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["125","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","8"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.8 = s32[32]{0:T(128)S(1)} get-tuple-element(%compare_select_fusion.3), index=0, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/select_n" stack_frame_id=7}
+  %iota = s32[32,1,1]{0,2,1:T(1,128)S(1)} iota(), iota_dimension=0, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1","1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %bitcast.7 = s32[32,1,1]{0,2,1:T(1,128)S(1)} bitcast(%get-tuple-element.8)
+  %add_bitcast_fusion = s32[32,2]{0,1:T(2,128)S(1)} fusion(%bitcast.7, %iota), kind=kLoop, calls=%fused_computation.11, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2121","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %or_bitcast_fusion = s32[32]{0:T(128)S(1)} fusion(%add_bitcast_fusion), kind=kLoop, calls=%fused_computation.14, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2122","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %slice-start = ((f32[1000,64]{0,1:T(8,128)}), f32[32,64]{0,1:T(8,128)S(1)}, s32[]{:S(2)}) slice-start(%table.1), slice={[0:32], [0:64]}, metadata={op_name="jit(gather_scatter)/slice" stack_frame_id=9}, backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %slice-done = f32[32,64]{0,1:T(8,128)S(1)} slice-done(%slice-start), metadata={op_name="jit(gather_scatter)/slice" stack_frame_id=9}, backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %gather_fusion.1 = f32[32]{0:T(128)S(1)} fusion(%slice-done, %or_bitcast_fusion), kind=kCustom, calls=%fused_computation.1, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/gather" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"integer_config":{"integer":"32"},"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"9216"}]}
+  %fusion = f32[32,1]{0,1:T(1,128)} fusion(%gather_fusion.1, %get-tuple-element.8), kind=kLoop, calls=%fused_computation.12, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)/select_n" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"1024"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2122","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple.2 = (f32[32,64]{1,0:T(8,128)}, f32[1000,64]{0,1:T(8,128)}, f32[32,1]{0,1:T(1,128)}, f32[1000,64]{0,1:T(8,128)}) tuple(%gather_fusion, %copy.11, %fusion, %copy.12)
+}
+

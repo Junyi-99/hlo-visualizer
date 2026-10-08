@@ -1,0 +1,133 @@
+HloModule jit_sort_topk, entry_computation_layout={(f32[8,1000]{1,0})->(f32[8,1000]{1,0}, s32[8,1000]{1,0}, f32[8,5]{1,0}, s32[8,5]{1,0}, s32[8]{0}, /*index=5*/f32[8,1000]{1,0})}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "sort_topk"
+2 "<module>"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=114 end_line=114 column=75 end_column=97}
+2 {file_name_id=1 function_name_id=2 line=209 end_line=209 column=18 end_column=56}
+3 {file_name_id=1 function_name_id=1 line=114 end_line=114 column=11 end_column=31}
+4 {file_name_id=1 function_name_id=1 line=114 end_line=114 column=33 end_column=56}
+5 {file_name_id=1 function_name_id=1 line=114 end_line=114 column=58 end_column=73}
+6 {file_name_id=1 function_name_id=1 line=114 end_line=114 column=99 end_column=121}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=1 parent_frame_id=2}
+3 {file_location_id=2 parent_frame_id=1}
+4 {file_location_id=3 parent_frame_id=4}
+5 {file_location_id=4 parent_frame_id=4}
+6 {file_location_id=5 parent_frame_id=4}
+7 {file_location_id=1 parent_frame_id=4}
+8 {file_location_id=6 parent_frame_id=4}
+
+
+region_0.1 {
+  sort.2 = f32[] parameter(0), metadata={op_name="sort"}
+  ne.2 = pred[] compare(sort.2, sort.2), direction=NE, metadata={op_name="ne"}
+  constant.2 = f32[] constant(nan)
+  constant.3 = f32[] constant(0)
+  eq.2 = pred[] compare(sort.2, constant.3), direction=EQ, metadata={op_name="eq"}
+  select_n.4 = f32[] select(eq.2, constant.3, sort.2), metadata={op_name="select_n"}
+  select_n.5 = f32[] select(ne.2, constant.2, select_n.4), metadata={op_name="select_n"}
+  sort.3 = f32[] parameter(1), metadata={op_name="sort"}
+  ne.3 = pred[] compare(sort.3, sort.3), direction=NE, metadata={op_name="ne"}
+  eq.3 = pred[] compare(sort.3, constant.3), direction=EQ, metadata={op_name="eq"}
+  select_n.6 = f32[] select(eq.3, constant.3, sort.3), metadata={op_name="select_n"}
+  select_n.7 = f32[] select(ne.3, constant.2, select_n.6), metadata={op_name="select_n"}
+  ROOT lt_to.1 = pred[] compare(select_n.5, select_n.7), direction=LT, order=TOTAL, metadata={op_name="lt_to"}
+}
+
+sort.2 {
+  Arg_0.1 = f32[8,1000]{1,0} parameter(0)
+  ROOT sort.5 = f32[8,1000]{1,0} sort(Arg_0.1), dimensions={1}, is_stable=true, to_apply=region_0.1, metadata={op_name="sort"}
+}
+
+region_1.3 {
+  sort.12 = s32[] parameter(2), metadata={op_name="sort"}
+  sort.13 = s32[] parameter(3), metadata={op_name="sort"}
+  sort.10 = f32[] parameter(0), metadata={op_name="sort"}
+  ne.6 = pred[] compare(sort.10, sort.10), direction=NE, metadata={op_name="ne"}
+  constant.6 = f32[] constant(nan)
+  constant.7 = f32[] constant(0)
+  eq.6 = pred[] compare(sort.10, constant.7), direction=EQ, metadata={op_name="eq"}
+  select_n.12 = f32[] select(eq.6, constant.7, sort.10), metadata={op_name="select_n"}
+  select_n.13 = f32[] select(ne.6, constant.6, select_n.12), metadata={op_name="select_n"}
+  sort.11 = f32[] parameter(1), metadata={op_name="sort"}
+  ne.7 = pred[] compare(sort.11, sort.11), direction=NE, metadata={op_name="ne"}
+  eq.7 = pred[] compare(sort.11, constant.7), direction=EQ, metadata={op_name="eq"}
+  select_n.14 = f32[] select(eq.7, constant.7, sort.11), metadata={op_name="select_n"}
+  select_n.15 = f32[] select(ne.7, constant.6, select_n.14), metadata={op_name="select_n"}
+  ROOT lt_to.3 = pred[] compare(select_n.13, select_n.15), direction=LT, order=TOTAL, metadata={op_name="lt_to"}
+}
+
+argsort.4 {
+  Arg_0.3 = f32[8,1000]{1,0} parameter(0)
+  iota.2 = s32[1000]{0} iota(), iota_dimension=0, metadata={op_name="iota"}
+  iota.3 = s32[8,1000]{1,0} broadcast(iota.2), dimensions={1}, metadata={op_name="iota"}
+  sort.17 = (f32[8,1000]{1,0}, s32[8,1000]{1,0}) sort(Arg_0.3, iota.3), dimensions={1}, is_stable=true, to_apply=region_1.3, metadata={op_name="sort"}
+  sort.18 = f32[8,1000]{1,0} get-tuple-element(sort.17), index=0, metadata={op_name="sort"}
+  ROOT sort.19 = s32[8,1000]{1,0} get-tuple-element(sort.17), index=1, metadata={op_name="sort"}
+}
+
+region_2.5 {
+  reduce.4 = f32[] parameter(0), metadata={op_name="reduce"}
+  reduce.6 = f32[] parameter(2), metadata={op_name="reduce"}
+  gt.1 = pred[] compare(reduce.4, reduce.6), direction=GT, metadata={op_name="gt" stack_frame_id=2}
+  ne.9 = pred[] compare(reduce.4, reduce.4), direction=NE, metadata={op_name="ne" stack_frame_id=2}
+  or.2 = pred[] or(gt.1, ne.9), metadata={op_name="or" stack_frame_id=2}
+  select_n.18 = f32[] select(or.2, reduce.4, reduce.6), metadata={op_name="select_n" stack_frame_id=2}
+  eq.9 = pred[] compare(reduce.4, reduce.6), direction=EQ, metadata={op_name="eq" stack_frame_id=2}
+  reduce.5 = s32[] parameter(1), metadata={op_name="reduce"}
+  reduce.7 = s32[] parameter(3), metadata={op_name="reduce"}
+  lt.1 = pred[] compare(reduce.5, reduce.7), direction=LT, metadata={op_name="lt" stack_frame_id=2}
+  and.1 = pred[] and(eq.9, lt.1), metadata={op_name="and" stack_frame_id=2}
+  or.3 = pred[] or(or.2, and.1), metadata={op_name="or" stack_frame_id=2}
+  select_n.19 = s32[] select(or.3, reduce.5, reduce.7), metadata={op_name="select_n" stack_frame_id=2}
+  ROOT tuple.1 = (f32[], s32[]) tuple(select_n.18, select_n.19)
+}
+
+argmax.6 {
+  jit_sort_topk_.1 = f32[8,1000]{1,0} parameter(0), metadata={op_name="jit(sort_topk)"}
+  iota.6 = s32[1000]{0} iota(), iota_dimension=0, metadata={op_name="iota" stack_frame_id=1}
+  iota.7 = s32[8,1000]{1,0} broadcast(iota.6), dimensions={1}, metadata={op_name="iota" stack_frame_id=1}
+  constant.11 = f32[] constant(-inf)
+  constant.10 = s32[] constant(0)
+  reduce.11 = (f32[8]{0}, s32[8]{0}) reduce(jit_sort_topk_.1, iota.7, constant.11, constant.10), dimensions={1}, to_apply=region_2.5, metadata={op_name="reduce" stack_frame_id=1}
+  reduce.12 = f32[8]{0} get-tuple-element(reduce.11), index=0, metadata={op_name="reduce" stack_frame_id=1}
+  ROOT reduce.13 = s32[8]{0} get-tuple-element(reduce.11), index=1, metadata={op_name="reduce" stack_frame_id=1}
+}
+
+region_3.7 {
+  reduce_window_sum.3 = f32[] parameter(0), metadata={op_name="reduce_window_sum"}
+  reduce_window_sum.4 = f32[] parameter(1), metadata={op_name="reduce_window_sum"}
+  ROOT reduce_window_sum.5 = f32[] add(reduce_window_sum.3, reduce_window_sum.4), metadata={op_name="reduce_window_sum"}
+}
+
+cumsum_0.8 {
+  Arg_0.6 = f32[8,1000]{1,0} parameter(0)
+  constant.13 = f32[] constant(0)
+  ROOT reduce_window_sum.7 = f32[8,1000]{1,0} reduce-window(Arg_0.6, constant.13), window={size=1x1000 pad=0_0x999_0}, to_apply=region_3.7, metadata={op_name="reduce_window_sum"}
+}
+
+cumsum.9 {
+  Arg_0.7 = f32[8,1000]{1,0} parameter(0)
+  ROOT call.1 = f32[8,1000]{1,0} call(Arg_0.7), to_apply=cumsum_0.8
+}
+
+ENTRY main.10 {
+  x.1 = f32[8,1000]{1,0} parameter(0), metadata={op_name="x"}
+  jit_sort_.1 = f32[8,1000]{1,0} call(x.1), to_apply=sort.2, metadata={op_name="jit(sort_topk)/jit(sort)" stack_frame_id=4}
+  jit_argsort_.1 = s32[8,1000]{1,0} call(x.1), to_apply=argsort.4, metadata={op_name="jit(sort_topk)/jit(argsort)" stack_frame_id=5}
+  top_k.3 = (f32[8,5]{1,0}, s32[8,5]{1,0}) topk(x.1), k=5, largest=true, is_stable=true, metadata={op_name="jit(sort_topk)/top_k" stack_frame_id=6}
+  top_k.4 = f32[8,5]{1,0} get-tuple-element(top_k.3), index=0, metadata={op_name="jit(sort_topk)/top_k" stack_frame_id=6}
+  top_k.5 = s32[8,5]{1,0} get-tuple-element(top_k.3), index=1, metadata={op_name="jit(sort_topk)/top_k" stack_frame_id=6}
+  jit_sort_topk_.3 = s32[8]{0} call(x.1), to_apply=argmax.6, metadata={op_name="jit(sort_topk)" stack_frame_id=7}
+  jit_cumsum_.1 = f32[8,1000]{1,0} call(x.1), to_apply=cumsum.9, metadata={op_name="jit(sort_topk)/jit(cumsum)" stack_frame_id=8}
+  ROOT tuple.3 = (f32[8,1000]{1,0}, s32[8,1000]{1,0}, f32[8,5]{1,0}, s32[8,5]{1,0}, s32[8]{0}, /*index=5*/f32[8,1000]{1,0}) tuple(jit_sort_.1, jit_argsort_.1, top_k.4, top_k.5, jit_sort_topk_.3, jit_cumsum_.1)
+}
+

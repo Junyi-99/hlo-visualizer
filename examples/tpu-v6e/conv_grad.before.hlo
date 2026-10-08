@@ -1,0 +1,64 @@
+HloModule jit_conv_grad, entry_computation_layout={(f32[8,32,32,16]{3,2,1,0}, f32[3,3,16,32]{3,2,1,0})->(f32[8,32,32,16]{3,2,1,0}, f32[3,3,16,32]{3,2,1,0})}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "conv_grad"
+3 "conv_grad.<locals>.loss"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=62 end_line=62 column=11 end_column=47}
+3 {file_name_id=1 function_name_id=3 line=60 end_line=60 column=12 end_column=88}
+4 {file_name_id=1 function_name_id=3 line=61 end_line=61 column=16 end_column=22}
+5 {file_name_id=1 function_name_id=3 line=58 end_line=59 column=12 end_column=80}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=3}
+4 {file_location_id=2 parent_frame_id=4}
+5 {file_location_id=3 parent_frame_id=5}
+6 {file_location_id=2 parent_frame_id=6}
+7 {file_location_id=3 parent_frame_id=7}
+8 {file_location_id=4 parent_frame_id=3}
+9 {file_location_id=5 parent_frame_id=3}
+
+
+region_0.1 {
+  reduce_window_max.3 = f32[] parameter(0), metadata={op_name="reduce_window_max"}
+  reduce_window_max.4 = f32[] parameter(1), metadata={op_name="reduce_window_max"}
+  ROOT reduce_window_max.5 = f32[] maximum(reduce_window_max.3, reduce_window_max.4), metadata={op_name="jit(conv_grad)/jvp()/reduce_window_max" stack_frame_id=3}
+}
+
+region_1.2 {
+  select_and_scatter.2 = f32[] parameter(0), metadata={op_name="select_and_scatter"}
+  select_and_scatter.3 = f32[] parameter(1), metadata={op_name="select_and_scatter"}
+  ROOT ge.1 = pred[] compare(select_and_scatter.2, select_and_scatter.3), direction=GE, metadata={op_name="jit(conv_grad)/transpose(jvp())/ge" stack_frame_id=7}
+}
+
+region_2.3 {
+  select_and_scatter.6 = f32[] parameter(0), metadata={op_name="select_and_scatter"}
+  select_and_scatter.7 = f32[] parameter(1), metadata={op_name="select_and_scatter"}
+  ROOT add.1 = f32[] add(select_and_scatter.6, select_and_scatter.7), metadata={op_name="jit(conv_grad)/transpose(jvp())/add" stack_frame_id=7}
+}
+
+ENTRY main.4 {
+  x.1 = f32[8,32,32,16]{3,2,1,0} parameter(0), metadata={op_name="x"}
+  k.1 = f32[3,3,16,32]{3,2,1,0} parameter(1), metadata={op_name="k"}
+  conv_general_dilated.3 = f32[8,16,16,32]{3,2,1,0} convolution(x.1, k.1), window={size=3x3 stride=2x2 pad=1_1x1_1}, dim_labels=b01f_01io->b01f, metadata={op_name="jit(conv_grad)/jvp()/conv_general_dilated" stack_frame_id=9}
+  constant.4 = f32[] constant(-inf)
+  reduce_window_max.7 = f32[8,8,8,32]{3,2,1,0} reduce-window(conv_general_dilated.3, constant.4), window={size=1x2x2x1 stride=1x2x2x1}, to_apply=region_0.1, metadata={op_name="jit(conv_grad)/jvp()/reduce_window_max" stack_frame_id=3}
+  constant.3 = f32[] constant(2)
+  mul.2 = f32[8,8,8,32]{3,2,1,0} broadcast(constant.3), dimensions={}, metadata={op_name="jit(conv_grad)/jvp()/mul" stack_frame_id=8}
+  mul.3 = f32[8,8,8,32]{3,2,1,0} multiply(reduce_window_max.7, mul.2), metadata={op_name="jit(conv_grad)/jvp()/mul" stack_frame_id=8}
+  constant.5 = f32[] constant(0)
+  select_and_scatter.9 = f32[8,16,16,32]{3,2,1,0} select-and-scatter(conv_general_dilated.3, mul.3, constant.5), window={size=1x2x2x1 stride=1x2x2x1}, select=region_1.2, scatter=region_2.3, metadata={op_name="jit(conv_grad)/transpose(jvp())/select_and_scatter" stack_frame_id=5}
+  rev.1 = f32[3,3,16,32]{3,2,1,0} reverse(k.1), dimensions={0,1}, metadata={op_name="jit(conv_grad)/transpose(jvp())/rev" stack_frame_id=9}
+  conv_general_dilated.5 = f32[8,32,32,16]{3,2,1,0} convolution(select_and_scatter.9, rev.1), window={size=3x3 pad=1_2x1_2 lhs_dilate=2x2}, dim_labels=b01f_01oi->b01f, metadata={op_name="jit(conv_grad)/transpose(jvp())/conv_general_dilated" stack_frame_id=9}
+  conv_general_dilated.4 = f32[3,3,16,32]{3,2,1,0} convolution(x.1, select_and_scatter.9), window={size=16x16 pad=1_0x1_0 rhs_dilate=2x2}, dim_labels=f01b_i01o->01bf, metadata={op_name="jit(conv_grad)/transpose(jvp())/conv_general_dilated" stack_frame_id=9}
+  ROOT tuple.1 = (f32[8,32,32,16]{3,2,1,0}, f32[3,3,16,32]{3,2,1,0}) tuple(conv_general_dilated.5, conv_general_dilated.4)
+}
+

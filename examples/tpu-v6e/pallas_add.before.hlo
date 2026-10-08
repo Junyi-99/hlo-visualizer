@@ -1,0 +1,24 @@
+HloModule jit_pallas_add, entry_computation_layout={(f32[8,128]{1,0}, f32[8,128]{1,0})->f32[8,128]{1,0}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "pallas_add"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=166 end_line=166 column=11 end_column=89}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+
+
+ENTRY main.1 {
+  x.1 = f32[8,128]{1,0} parameter(0), metadata={op_name="x"}
+  y.1 = f32[8,128]{1,0} parameter(1), metadata={op_name="y"}
+  ROOT pallas_call.1 = f32[8,128]{1,0} custom-call(x.1, y.1), custom_call_target="tpu_custom_call", operand_layout_constraints={f32[8,128]{1,0}, f32[8,128]{1,0}}, frontend_attributes={kernel_metadata={}}, metadata={op_name="jit(pallas_add)/pallas_call" stack_frame_id=2}, backend_config={"custom_call_config": {"body": "TUzvUgFNTElSMjQuMC4wZ2l0AAElCQEDBQcBAwkDEQsNDxETFRcZA7eTEQGNBxMLCw8PDw8PDwsLCxMPDxMLDzsLCwsLCwsLCwsLDwsPCw8LDw8PHw8PDx8THwsPCw8fCw8LDwsPHwsPCw8fIwsPC1MLEwUFYU0HA1kBEQcjGwcPDxsLAkIFHwMDFUkFGwUdHXV3HRdLHQVPHRdRHV1fEQkBBR8FIQUjAwNnkR0Fcx0FfQMDIyUFJREJRQMNKSstLzMTNRM3OTuPBScBAQUpDQ0vEQUrBS0FLwUxBTMdPwEFNR1DAQU3HUcBBTkRAQEdGU0VDQ0tBweWAis/HRlTFQ1VHQVXLQcHlgJFWQMDFVsTBxAAAAAQBTsdYWMFPR0FZS0HB5YCRWEFPx1rbQVBHW9xBUMVHR0tBweWAithBUUdeXsFRxUfHy0HB5YCESUDB4GDhYeJiwVJEQ8ABUsjCwkhAQAAAAEAAAACAAAAAAAAAAVNIwsBASN0cHUubWVtb3J5X3NwYWNlPHZtZW0+ACN0cHUuY29yZV90eXBlPHRjPgAjYXJpdGguZmFzdG1hdGg8bm9uZT4AAxeNBSECBAcxJwUhAgQHCwECBAECAgUHAwMDAQEJBAoCBQERASEHAwEFBxEBJwcDIT8HAz0DQQNFAwMLAwMBAwMLAwMBBQYLAwUHAQcJAwMPAwMBAwMPAwMBBQYPAwUHAw0PAwMRWQMHCQYRAwUDEwsHERsDBQURFQ0HaRsDBQULFwMDCQMDAQMDCQMDAQUGCQMFBwUbHQ8FCX8JGQUbHREAAQYDAQUBAJ4HTxEpCRUNEQsTCQsNDQ0dDxMjIR0pLRELDVM3GSMXFyMVGR8PDQkdEWJ1aWx0aW4Ac3RhYmxlX21vc2FpYwB0cHUAYXJpdGgAbW9kdWxlAGFyaXRoLmNvbnN0YW50AHZlY3Rvci5sb2FkAGZ1bmMuZnVuYwB2ZWN0b3IuYnJvYWRjYXN0AGFyaXRoLm11bGYAYXJpdGguYWRkZgB0cHUudmVjdG9yX3N0b3JlAGZ1bmMucmV0dXJuAHBhbGxhc19hZGQuPGxvY2Fscz4ua2VybmVsAC9ob21lL2p1bnlpL2hsb19kdW1wL3NjcmlwdHMvZHVtcF9obG8ucHkAdmFsdWUAZ2V0OgBnZXQvZ2V0AHN0YWJsZV9tb3NhaWMudmVyc2lvbgBkaW1lbnNpb25fc2VtYW50aWNzAGZ1bmN0aW9uX3R5cGUAc2NhbGFyX3ByZWZldGNoAHNjcmF0Y2hfb3BlcmFuZHMAc3ltX25hbWUAa2VybmVsAHRwdS5jb3JlX3R5cGUAeF9yZWYAeV9yZWYAb19yZWYAbXVsOgBtdWwAZmFzdG1hdGgAYWRkOgBhZGQvYWRkAHN3YXA6AHN3YXAvc3dhcABhZGQAb3BlcmFuZFNlZ21lbnRTaXplcwBzdHJpZGVzAA==", "serialization_format": 1, "needs_layout_passes": true}}
+}
+

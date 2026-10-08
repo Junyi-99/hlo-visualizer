@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { computationLinks } from '../lib/parser';
 import { computationRole } from '../lib/graph-layout';
+import { examples } from '../lib/examples';
 import type { HloModule } from '../lib/types';
 import { Icon } from './Icon';
 
@@ -21,6 +22,8 @@ interface ToolbarProps {
   onZoom: (delta: number) => void;
   onSearch: () => void;
   onImport: () => void;
+  exampleId: string | null;
+  onExample: (id: string) => void;
 }
 
 type Theme = 'system' | 'light' | 'dark';
@@ -47,7 +50,7 @@ function ThemeButton() {
   </button>;
 }
 
-export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastNameOnly, showMemoryLocation, onUseOpName, onShowLastNameOnly, onShowMemoryLocation, onBack, onComputation, onFit, onZoom, onSearch, onImport }: ToolbarProps) {
+export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastNameOnly, showMemoryLocation, onUseOpName, onShowLastNameOnly, onShowMemoryLocation, onBack, onComputation, onFit, onZoom, onSearch, onImport, exampleId, onExample }: ToolbarProps) {
   const [displayOpen, setDisplayOpen] = useState(false);
   const displayRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -71,7 +74,13 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
   const hasLoopLinks = computation && links.some(link => link.from === computation.name && (link.role === 'body' || link.role === 'condition'));
   return <>
     <header className="topbar"><div className="crumb"><span>Workspace</span><span className="slash">/</span><strong>{!computation ? 'Overview' : computation.entry ? 'Entry' : computation.name}</strong></div>
-      <div className="top-actions"><ThemeButton /><button className="search-button" type="button" title="Search nodes (/)" onClick={onSearch}><Icon name="search" /><span className="search-label">Search nodes</span><kbd>/</kbd></button><button className="primary-button" type="button" onClick={onImport}><Icon name="plus" /><span>Open HLO</span></button></div>
+      <div className="top-actions"><ThemeButton />
+        <select className="example-select" aria-label="Load an HLO example" title="Load an HLO example" value={exampleId ?? ''} onChange={event => event.target.value && onExample(event.target.value)}>
+          <option value="" disabled>Examples</option>
+          {(['after', 'before'] as const).map(stage => <optgroup key={stage} label={stage === 'after' ? 'TPU v6e · compiled (after optimizations)' : 'TPU v6e · before optimizations'}>
+            {examples.filter(example => example.stage === stage).map(example => <option key={example.id} value={example.id}>{example.program}</option>)}
+          </optgroup>)}
+        </select><button className="search-button" type="button" title="Search nodes (/)" onClick={onSearch}><Icon name="search" /><span className="search-label">Search nodes</span><kbd>/</kbd></button><button className="primary-button" type="button" aria-label="Open HLO" onClick={onImport}><Icon name="plus" /><span>Open HLO</span></button></div>
     </header>
     <section className="heading"><div>
       <div className="eyebrow">{!computation ? 'MODULE MAP' : computation.entry ? 'ENTRY COMPUTATION' : role}</div>

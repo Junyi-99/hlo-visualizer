@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseHlo, reachable, computationLinks, nodeSummary, dependencyNeighborhood, shortestDependencyPath } from './src/lib/parser.ts';
+import { parseHlo, reachable, computationLinks, nodeSummary, dependencyNeighborhood, shortestDependencyPath, sourceStack } from './src/lib/parser.ts';
 
 test('sample loop dependencies and computation links', () => {
   const module = parseHlo(readFileSync(new URL('./sample.hlo', import.meta.url), 'utf8'));
@@ -73,4 +73,14 @@ ENTRY %main (a: s32[]) -> s32[] {
   assert.equal(module.byName.get('main').byName.get('out').raw.split('\n').length, 3);
   assert.deepEqual(module.byName.get('main').byName.get('out').controlPredecessors, ['missing']);
   assert.match(module.warnings[0], /missing control predecessor %missing/);
+});
+
+test('metadata stack_frame_id resolves through the module source table, innermost first', () => {
+  for (const stage of ['before', 'after']) {
+    const module = parseHlo(readFileSync(new URL(`./examples/tpu-v6e/nested_calls.${stage}.hlo`, import.meta.url), 'utf8'));
+    const sine = module.computations.flatMap(c => c.nodes).find(node => node.op === 'sine');
+    const frame = Number(/stack_frame_id=(\d+)/.exec(sine.raw)[1]);
+    assert.deepEqual(sourceStack(module, frame).map(f => `${f.func}:${f.line}`), ['_inner:194', '_middle:198', 'nested_calls:203', '<module>:209']);
+    assert.equal(sourceStack(module, frame)[0].file, 'scripts/dump_hlo.py');
+  }
 });

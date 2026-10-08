@@ -1,0 +1,31 @@
+HloModule jit_collectives, is_scheduled=true, entry_computation_layout={(f32[1,64]{1,0:T(1,128)})->(f32[1,64]{1,0:T(1,128)}, f32[1,64]{1,0:T(1,128)}, f32[1,1,64]{2,1,0:T(1,128)}, s32[1]{0:T(128)})}, allow_spmd_sharding_propagation_to_parameters={true}, allow_spmd_sharding_propagation_to_output={true,true,true,true}, frontend_attributes={arg_layout_modes="default",arg_memory_spaces="0",out_layout_modes="default;default;default;default",out_memory_spaces="0;0;0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "collectives"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=172 end_line=172 column=11 end_column=15}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+
+
+ENTRY %main.4 (x.1: f32[1,64]) -> (f32[1,64], f32[1,64], f32[1,1,64], s32[1]) {
+  %constant.4 = s32[1]{0:T(128)} constant({0}), metadata={op_name="jit(collectives)/jit(_fun)/broadcast_in_dim" stack_frame_id=2}
+  %x.1 = f32[1,64]{1,0:T(1,128)} parameter(0), metadata={op_name="x"}
+  %copy-start = (f32[1,64]{1,0:T(1,128)S(1)}, f32[1,64]{1,0:T(1,128)}, u32[]{:S(2)}) copy-start(%x.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy-done = f32[1,64]{1,0:T(1,128)S(1)} copy-done(%copy-start), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy.4 = f32[1,64]{1,0:T(1,128)} copy(%copy-done), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}]}
+  %copy.5 = f32[1,64]{1,0:T(1,128)} copy(%copy-done), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}]}
+  %bitcast.1 = f32[1,1,64]{2,1,0:T(1,128)S(1)} bitcast(%copy-done)
+  %copy.6 = f32[1,1,64]{2,1,0:T(1,128)} copy(%bitcast.1), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}]}
+  %copy.7 = s32[1]{0:T(128)} copy(%constant.4), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  ROOT %tuple.4 = (f32[1,64]{1,0:T(1,128)}, f32[1,64]{1,0:T(1,128)}, f32[1,1,64]{2,1,0:T(1,128)}, s32[1]{0:T(128)}) tuple(%copy.4, %copy.5, %copy.6, %copy.7)
+}
+

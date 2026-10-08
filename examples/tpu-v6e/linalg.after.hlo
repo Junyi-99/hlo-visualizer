@@ -1,0 +1,313 @@
+HloModule jit_linalg, is_scheduled=true, entry_computation_layout={(f32[64,64]{1,0:T(8,128)}, f32[64,8]{0,1:T(8,128)})->(f32[64,64]{1,0:T(8,128)}, f32[64,8]{0,1:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)})}, allow_spmd_sharding_propagation_to_parameters={true,true}, allow_spmd_sharding_propagation_to_output={true,true,true,true}, frontend_attributes={arg_layout_modes="default;default",arg_memory_spaces="0;0",out_layout_modes="default;default;default;default",out_memory_spaces="0;0;0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "linalg"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=149 end_line=149 column=11 end_column=27}
+3 {file_name_id=1 function_name_id=2 line=147 end_line=147 column=8 end_column=32}
+4 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=8 end_column=59}
+5 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=20 end_column=36}
+6 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=10 end_column=17}
+7 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=25 end_column=36}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+
+
+%bitcast_fusion (bitcast_input: f32[64,64]) -> f32[64,64] {
+  %bitcast_input = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.11 = f32[64,64]{1,0:T(8,128)} bitcast(%bitcast_input)
+}
+
+%bitcast_fusion.4 (bitcast_input.4: f32[64,64]) -> f32[64,64] {
+  %bitcast_input.4 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.15 = f32[64,64]{1,0:T(8,128)} bitcast(%bitcast_input.4)
+}
+
+%fused_computation.37 (param_0.103: f32[64,64]) -> f32[64,64] {
+  %param_0.103 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  %fusion.32 = f32[64,64]{1,0:T(8,128)} fusion(%param_0.103), kind=kLoop, calls=%bitcast_fusion
+  %fusion.36 = f32[64,64]{1,0:T(8,128)} fusion(%param_0.103), kind=kLoop, calls=%bitcast_fusion.4
+  ROOT %convolution.14 = f32[64,64]{1,0:T(8,128)S(1)} convolution(%fusion.32, %fusion.36), dim_labels=bf_oi->bf, metadata={op_name="jit(linalg)/dot_general" stack_frame_id=6}
+}
+
+%fused_computation.11 (param_0.82: f32[64,64], param_1.94: f32[64,64]) -> f32[64,64] {
+  %param_1.94 = f32[64,64]{0,1:T(8,128)S(1)} parameter(1)
+  %iota.125 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %iota.124 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %compare.53 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.125, %iota.124), direction=EQ, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %constant.154 = f32[]{:T(128)} constant(64)
+  %mul.0 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.154), dimensions={}, metadata={op_name="jit(linalg)/mul" stack_frame_id=5}
+  %constant.152 = f32[]{:T(128)} constant(0), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.206 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.152), dimensions={}
+  %select.37 = f32[64,64]{0,1:T(8,128)} select(%compare.53, %mul.0, %broadcast.206), metadata={op_name="jit(linalg)/mul" stack_frame_id=5}
+  %add.64 = f32[64,64]{0,1:T(8,128)} add(%param_1.94, %select.37), metadata={op_name="jit(linalg)/add" stack_frame_id=6}
+  %param_0.82 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  %bitcast.9 = f32[64,64]{0,1:T(8,128)} bitcast(%param_0.82), metadata={op_name="jit(linalg)/dot_general" stack_frame_id=6}
+  %iota.182 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %iota.181 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %eq.4 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.182, %iota.181), direction=EQ, metadata={op_name="jit(linalg)/eq" stack_frame_id=7}
+  %select.29 = f32[64,64]{0,1:T(8,128)} select(%eq.4, %mul.0, %broadcast.206), metadata={op_name="jit(linalg)/mul" stack_frame_id=5}
+  %add.61 = f32[64,64]{0,1:T(8,128)} add(%bitcast.9, %select.29), metadata={op_name="jit(linalg)/add" stack_frame_id=6}
+  %add.60 = f32[64,64]{0,1:T(8,128)} add(%add.64, %add.61), metadata={op_name="jit(linalg)/jit(cholesky)/add" stack_frame_id=3}
+  %constant.130 = f32[]{:T(128)} constant(0.5), metadata={op_name="jit(linalg)/jit(cholesky)" stack_frame_id=3}
+  %broadcast.189 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.130), dimensions={}, metadata={op_name="jit(linalg)/jit(cholesky)/div" stack_frame_id=3}
+  ROOT %multiply.8 = f32[64,64]{0,1:T(8,128)S(1)} multiply(%add.60, %broadcast.189), metadata={op_name="jit(linalg)/jit(cholesky)/div" stack_frame_id=3}
+}
+
+%add_F32.2 (lhs.2: f32[], rhs.2: f32[]) -> f32[] {
+  %lhs.2 = f32[]{:T(128)} parameter(0)
+  %rhs.2 = f32[]{:T(128)} parameter(1)
+  ROOT %add.3 = f32[]{:T(128)} add(%lhs.2, %rhs.2), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%fused_computation.20 (param_0.98: f32[64,64]) -> f32[64] {
+  %iota.117 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %iota.116 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %compare.49 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.117, %iota.116), direction=EQ, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %param_0.98 = f32[64,64]{0,1:T(8,128)S(1)} parameter(0)
+  %constant.151 = f32[]{:T(128)} constant(0), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.205 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.151), dimensions={}
+  %select.33 = f32[64,64]{0,1:T(8,128)} select(%compare.49, %param_0.98, %broadcast.205), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  ROOT %reduce.6 = f32[64]{0:T(128)S(1)} reduce(%select.33, %constant.151), dimensions={0}, to_apply=%add_F32.2, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+}
+
+%or.4 (lhs.5: pred[], rhs.5: pred[]) -> pred[] {
+  %lhs.5 = pred[]{:T(512)} parameter(0)
+  %rhs.5 = pred[]{:T(512)} parameter(1)
+  ROOT %or.2 = pred[]{:T(512)} or(%lhs.5, %rhs.5), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%fused_computation.32 (param_0.99: f32[64]) -> pred[] {
+  %param_0.99 = f32[64]{0:T(128)S(1)} parameter(0)
+  %compare.81 = pred[64]{0:T(512)(128)(4,1)} compare(%param_0.99, %param_0.99), direction=NE, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %constant.153 = pred[]{:T(512)} constant(false), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  ROOT %reduce.7 = pred[]{:T(512)} reduce(%compare.81, %constant.153), dimensions={0}, to_apply=%or.4, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+}
+
+%fused_computation.25 (param_0.102: f32[64,64], param_1.104: pred[]) -> (f32[1,64,64], f32[64,64]) {
+  %iota.178 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %iota.177 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %ge.12 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.178, %iota.177), direction=GE, metadata={op_name="jit(linalg)/jit(cholesky)/ge" stack_frame_id=3}
+  %param_1.104 = pred[]{:T(512)} parameter(1)
+  %broadcast.212.clone.1 = pred[64,64]{0,1:T(8,128)(4,1)} broadcast(%param_1.104), dimensions={}, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %constant.155.clone.1 = f32[]{:T(128)} constant(nan), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.211.clone.1 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.155.clone.1), dimensions={}, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %param_0.102 = f32[64,64]{0,1:T(8,128)S(1)} parameter(0)
+  %select.51.clone.1 = f32[64,64]{0,1:T(8,128)} select(%broadcast.212.clone.1, %broadcast.211.clone.1, %param_0.102), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %constant.135 = f32[]{:T(128)} constant(0), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.210.clone.1 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.135), dimensions={}
+  %select_n.6.clone.1 = f32[64,64]{0,1:T(8,128)S(1)} select(%ge.12, %select.51.clone.1, %broadcast.210.clone.1), metadata={op_name="jit(linalg)/jit(cholesky)/select_n" stack_frame_id=3}
+  %select.40 = f32[64,64]{0,1:T(8,128)} select(%ge.12, %select_n.6.clone.1, %broadcast.210.clone.1), metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}
+  %bitcast.10 = f32[1,64,64]{1,2,0:T(8,128)S(1)} bitcast(%select.40), metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}
+  ROOT %tuple.7 = (f32[1,64,64]{1,2,0:T(8,128)S(1)}, f32[64,64]{0,1:T(8,128)S(1)}) tuple(%bitcast.10, %select_n.6.clone.1)
+}
+
+%fused_computation.8 (param_0.20: f32[1,64,64]) -> f32[64,64] {
+  %param_0.20 = f32[1,64,64]{1,2,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.4 = f32[64,64]{0,1:T(8,128)} bitcast(%param_0.20), metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}
+}
+
+%bitcast_fusion.3 (bitcast_input.3: f32[64,8]) -> f32[64,8] {
+  %bitcast_input.3 = f32[64,8]{0,1:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.14 = f32[64,8]{0,1:T(8,128)} bitcast(%bitcast_input.3)
+}
+
+%fused_computation.7 (param_0.19: f32[64,8], param_1.22: f32[1,64,64]) -> f32[64,8] {
+  %param_1.22 = f32[1,64,64]{1,2,0:T(8,128)S(1)} parameter(1)
+  %fusion.5 = f32[64,64]{0,1:T(8,128)} fusion(%param_1.22), kind=kLoop, calls=%fused_computation.8, metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}
+  %param_0.19 = f32[64,8]{0,1:T(8,128)S(1)} parameter(0)
+  %fusion.35 = f32[64,8]{0,1:T(8,128)} fusion(%param_0.19), kind=kLoop, calls=%bitcast_fusion.3
+  ROOT %convolution.13 = f32[64,8]{0,1:T(8,128)} convolution(%fusion.5, %fusion.35), dim_labels=bf_io->bf, operand_precision={highest,highest}, frontend_attributes={grad_x="false",grad_y="false"}, metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}
+}
+
+%fused_computation.33 () -> s32[64] {
+  %iota.192 = s32[64]{0:T(128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %constant.131 = s32[]{:T(128)} constant(-1), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %broadcast.209 = s32[64]{0:T(128)} broadcast(%constant.131), dimensions={}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  ROOT %add.65 = s32[64]{0:T(128)S(1)} add(%iota.192, %broadcast.209), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%fused_computation.6.clone.2 (param_0.74: f32[64,64], param_1.88: s32[64]) -> f32[64,64] {
+  %iota.161 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.160 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %compare.71 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.161, %iota.160), direction=EQ, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %convert.22 = f32[64,64]{0,1:T(8,128)} convert(%compare.71), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_1.88 = s32[64]{0:T(128)S(1)} parameter(1)
+  %broadcast.187 = s32[64,64]{0,1:T(8,128)} broadcast(%param_1.88), dimensions={0}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.191 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %compare.80 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%broadcast.187, %iota.191), direction=GE, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_0.74 = f32[64,64]{0,1:T(8,128)S(1)} parameter(0)
+  %constant.145 = f32[]{:T(128)} constant(0), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.197 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.145), dimensions={}
+  %select.50 = f32[64,64]{0,1:T(8,128)} select(%compare.80, %param_0.74, %broadcast.197), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  ROOT %add.53 = f32[64,64]{0,1:T(8,128)} add(%convert.22, %select.50), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%fused_computation.3 (param_0.85: f32[64,64], param_1.87: s32[64], param_2.68: f32[64]) -> f32[64,64] {
+  %iota.170 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %iota.169 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %ge.8 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.170, %iota.169), direction=GE, metadata={op_name="jit(linalg)/jit(cholesky)/ge" stack_frame_id=3}
+  %constant.62.clone.1 = f32[]{:T(128)} constant(0), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.167.clone.1 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.62.clone.1), dimensions={}
+  %param_0.85 = f32[64,64]{0,1:T(8,128)S(1)} parameter(0)
+  %param_1.87 = s32[64]{0:T(128)S(1)} parameter(1)
+  %convert_add_fusion.3 = f32[64,64]{0,1:T(8,128)} fusion(%param_0.85, %param_1.87), kind=kLoop, calls=%fused_computation.6.clone.2, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %convolution.11 = f32[64,64]{0,1:T(8,128)} convolution(%convert_add_fusion.3, %convert_add_fusion.3), dim_labels=fb_io->bf, operand_precision={highest,highest}, frontend_attributes={grad_x="false",grad_y="false"}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %select.27 = f32[64,64]{0,1:T(8,128)} select(%ge.8, %broadcast.167.clone.1, %convolution.11), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.155 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.154 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %compare.68 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.155, %iota.154), direction=EQ, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %convert.19 = f32[64,64]{0,1:T(8,128)} convert(%compare.68), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %add.49 = f32[64,64]{0,1:T(8,128)} add(%select.27, %convert.19), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_2.68 = f32[64]{0:T(128)S(1)} parameter(2)
+  %broadcast.188 = f32[64,64]{0,1:T(8,128)} broadcast(%param_2.68), dimensions={1}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  ROOT %multiply.7 = f32[64,64]{0,1:T(8,128)S(1)} multiply(%add.49, %broadcast.188), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%fused_computation.6.clone.1 (param_0.66: f32[64,64], param_1.86: s32[64]) -> f32[64,64] {
+  %iota.149 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.148 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %compare.65 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.149, %iota.148), direction=EQ, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %convert.21 = f32[64,64]{0,1:T(8,128)} convert(%compare.65), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_1.86 = s32[64]{0:T(128)S(1)} parameter(1)
+  %broadcast.182 = s32[64,64]{0,1:T(8,128)} broadcast(%param_1.86), dimensions={0}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.185 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %compare.74 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%broadcast.182, %iota.185), direction=GE, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_0.66 = f32[64,64]{0,1:T(8,128)S(1)} parameter(0)
+  %constant.150 = f32[]{:T(128)} constant(0), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.193 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.150), dimensions={}
+  %select.44 = f32[64,64]{0,1:T(8,128)} select(%compare.74, %param_0.66, %broadcast.193), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  ROOT %add.52 = f32[64,64]{0,1:T(8,128)} add(%convert.21, %select.44), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%fused_computation.5 () -> f32[64,64] {
+  %iota.145 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.144 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %compare.63 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.145, %iota.144), direction=EQ, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  ROOT %convert.16 = f32[64,64]{0,1:T(8,128)} convert(%compare.63), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%fused_computation.4 (param_0.63: f32[64,64], param_1.85: s32[64]) -> f32[64,64] {
+  %param_0.63 = f32[64,64]{0,1:T(8,128)S(1)} parameter(0)
+  %param_1.85 = s32[64]{0:T(128)S(1)} parameter(1)
+  %convert_add_fusion.2 = f32[64,64]{0,1:T(8,128)} fusion(%param_0.63, %param_1.85), kind=kLoop, calls=%fused_computation.6.clone.1, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %fusion.3 = f32[64,64]{0,1:T(8,128)} fusion(), kind=kLoop, calls=%fused_computation.5, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  ROOT %convolution.12 = f32[64,64]{1,0:T(8,128)S(1)} convolution(%convert_add_fusion.2, %fusion.3), dim_labels=fb_io->bf, operand_precision={highest,highest}, frontend_attributes={grad_x="false",grad_y="false"}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%bitcast_fusion.1 (bitcast_input.1: f32[64,64]) -> f32[64,64] {
+  %bitcast_input.1 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.12 = f32[64,64]{1,0:T(8,128)} bitcast(%bitcast_input.1)
+}
+
+%bitcast_fusion.5 (bitcast_input.5: f32[64,64]) -> f32[64,64] {
+  %bitcast_input.5 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.16 = f32[64,64]{1,0:T(8,128)} bitcast(%bitcast_input.5)
+}
+
+%fused_computation.38 (param_0.104: f32[64,64], param_1.105: f32[64,64]) -> f32[64,64] {
+  %param_0.104 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  %fusion.33 = f32[64,64]{1,0:T(8,128)} fusion(%param_0.104), kind=kLoop, calls=%bitcast_fusion.1
+  %param_1.105 = f32[64,64]{1,0:T(8,128)S(1)} parameter(1)
+  %fusion.37 = f32[64,64]{1,0:T(8,128)} fusion(%param_1.105), kind=kLoop, calls=%bitcast_fusion.5
+  ROOT %convolution.15 = f32[64,64]{1,0:T(8,128)S(1)} convolution(%fusion.33, %fusion.37), dim_labels=bf_io->bf, operand_precision={highest,highest}, frontend_attributes={grad_x="false",grad_y="false"}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%fused_computation.6.clone (param_0.70: f32[64,64], param_1.89: s32[64]) -> f32[64,64] {
+  %iota.139 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.138 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %compare.60 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.139, %iota.138), direction=EQ, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %convert.20 = f32[64,64]{0,1:T(8,128)} convert(%compare.60), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_1.89 = s32[64]{0:T(128)S(1)} parameter(1)
+  %broadcast.178 = s32[64,64]{0,1:T(8,128)} broadcast(%param_1.89), dimensions={0}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.188 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %compare.77 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%broadcast.178, %iota.188), direction=GE, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_0.70 = f32[64,64]{0,1:T(8,128)S(1)} parameter(0)
+  %constant.140 = f32[]{:T(128)} constant(0), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.201 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.140), dimensions={}
+  %select.47 = f32[64,64]{0,1:T(8,128)} select(%compare.77, %param_0.70, %broadcast.201), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  ROOT %add.51 = f32[64,64]{0,1:T(8,128)} add(%convert.20, %select.47), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%bitcast_fusion.2 (bitcast_input.2: f32[64,64]) -> f32[64,64] {
+  %bitcast_input.2 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.13 = f32[64,64]{1,0:T(8,128)} bitcast(%bitcast_input.2)
+}
+
+%fused_computation (param_0.14: f32[64,64], param_1.75: f32[64,64], param_2.70: s32[64]) -> f32[64,64] {
+  %iota.133 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.132 = u32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %compare.57 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%iota.133, %iota.132), direction=EQ, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %convert.17 = f32[64,64]{0,1:T(8,128)} convert(%compare.57), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_1.75 = f32[64,64]{0,1:T(8,128)S(1)} parameter(1)
+  %param_2.70 = s32[64]{0:T(128)S(1)} parameter(2)
+  %convert_add_fusion.1 = f32[64,64]{0,1:T(8,128)} fusion(%param_1.75, %param_2.70), kind=kLoop, calls=%fused_computation.6.clone, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %param_0.14 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  %fusion.34 = f32[64,64]{1,0:T(8,128)} fusion(%param_0.14), kind=kLoop, calls=%bitcast_fusion.2
+  %convolution.6 = f32[64,64]{0,1:T(8,128)} convolution(%convert_add_fusion.1, %fusion.34), dim_labels=bf_io->bf, operand_precision={highest,highest}, frontend_attributes={grad_x="false",grad_y="false"}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  ROOT %add.46 = f32[64,64]{0,1:T(8,128)S(1)} add(%convert.17, %convolution.6), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+}
+
+%fused_computation.15 (param_0.91: f32[64,64], param_1.92: s32[64]) -> f32[64,64] {
+  %param_1.92 = s32[64]{0:T(128)S(1)} parameter(1)
+  %broadcast.183 = s32[64,64]{0,1:T(8,128)} broadcast(%param_1.92), dimensions={0}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %iota.100 = s32[64,64]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(linalg)/jit(cholesky)/iota" stack_frame_id=3}
+  %compare.40 = pred[64,64]{0,1:T(8,128)(4,1)} compare(%broadcast.183, %iota.100), direction=GE, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}
+  %constant.133 = f32[]{:T(128)} constant(0), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}
+  %broadcast.204 = f32[64,64]{0,1:T(8,128)} broadcast(%constant.133), dimensions={}
+  %param_0.91 = f32[64,64]{0,1:T(8,128)S(1)} parameter(0)
+  ROOT %select_n.4 = f32[64,64]{0,1:T(8,128)S(1)} select(%compare.40, %broadcast.204, %param_0.91), metadata={op_name="jit(linalg)/jit(qr)/select_n" stack_frame_id=2}
+}
+
+ENTRY %main.4 (a.1: f32[64,64], b.1: f32[64,8]) -> (f32[64,64], f32[64,8], f32[64,64], f32[64,64]) {
+  %b.1 = f32[64,8]{0,1:T(8,128)} parameter(1), metadata={op_name="b"}
+  %copy-start = (f32[64,8]{0,1:T(8,128)S(1)}, f32[64,8]{0,1:T(8,128)}, u32[]{:S(2)}) copy-start(%b.1), cross_program_prefetch_index=0, backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %a.1 = f32[64,64]{1,0:T(8,128)} parameter(0), metadata={op_name="a"}
+  %custom-call.12 = (f32[64,64]{1,0:T(8,128)S(1)}, f32[64]{0:T(128)S(1)}) custom-call(%a.1), custom_call_target="QrDecompositionBlock", operand_layout_constraints={f32[64,64]{1,0}}, metadata={op_name="jit(linalg)/jit(qr)/geqrf" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"103424"}]}
+  %get-tuple-element.4 = f32[64,64]{1,0:T(8,128)S(1)} get-tuple-element(%custom-call.12), index=0, metadata={op_name="jit(linalg)/jit(qr)/geqrf" stack_frame_id=2}
+  %copy.5 = f32[64,64]{0,1:T(8,128)S(1)} copy(%get-tuple-element.4), metadata={op_name="jit(linalg)/jit(qr)/geqrf" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"100","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %iota_add_fusion = s32[64]{0:T(128)S(1)} fusion(), kind=kLoop, calls=%fused_computation.33, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.5 = f32[64]{0:T(128)S(1)} get-tuple-element(%custom-call.12), index=1, metadata={op_name="jit(linalg)/jit(qr)/geqrf" stack_frame_id=2}
+  %negate.5 = f32[64]{0:T(128)S(1)} negate(%get-tuple-element.5), metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %fusion.1 = f32[64,64]{0,1:T(8,128)S(1)} fusion(%copy.5, %iota_add_fusion, %negate.5), kind=kOutput, calls=%fused_computation.3, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitOutputBatchInLanesInputBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %custom-call.14 = f32[64,64]{1,0:T(8,128)S(1)} custom-call(%fusion.1), custom_call_target="CompactWyHelper", operand_layout_constraints={f32[64,64]{0,1}}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"65536"}]}
+  %fusion.2 = f32[64,64]{1,0:T(8,128)S(1)} fusion(%copy.5, %iota_add_fusion), kind=kOutput, calls=%fused_computation.4, frontend_attributes={grad_x="false",grad_y="false"}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitOutputBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %fusion.31 = f32[64,64]{1,0:T(8,128)S(1)} fusion(%custom-call.14, %fusion.2), kind=kOutput, calls=%fused_computation.38, frontend_attributes={grad_x="false",grad_y="false"}, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitAllBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %convolution_add_fusion = f32[64,64]{0,1:T(8,128)S(1)} fusion(%fusion.31, %copy.5, %iota_add_fusion), kind=kOutput, calls=%fused_computation, metadata={op_name="jit(linalg)/jit(qr)/householder_product" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitInputBatchInLanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy-start.1 = (f32[64,64]{1,0:T(8,128)S(1)}, f32[64,64]{1,0:T(8,128)}, u32[]{:S(2)}) copy-start(%a.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy.9 = f32[64,64]{1,0:T(8,128)} copy(%convolution_add_fusion), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"32768"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2235","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy-done.1 = f32[64,64]{1,0:T(8,128)S(1)} copy-done(%copy-start.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %fusion.30 = f32[64,64]{1,0:T(8,128)S(1)} fusion(%copy-done.1), kind=kOutput, calls=%fused_computation.37, metadata={op_name="jit(linalg)/dot_general" stack_frame_id=6}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitOutputBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1040","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy = f32[64,64]{0,1:T(8,128)S(1)} copy(%fusion.30), metadata={op_name="jit(linalg)/dot_general" stack_frame_id=6}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"100","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %fusion.7 = f32[64,64]{0,1:T(8,128)S(1)} fusion(%fusion.30, %copy), kind=kLoop, calls=%fused_computation.11, metadata={op_name="jit(linalg)/jit(cholesky)/div" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2146","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy.1 = f32[64,64]{1,0:T(8,128)S(1)} copy(%fusion.7), metadata={op_name="jit(linalg)/jit(cholesky)/div" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"100","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %custom-call.10 = f32[64,64]{1,0:T(8,128)S(1)} custom-call(%copy.1), custom_call_target="Cholesky", operand_layout_constraints={f32[64,64]{1,0}}, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"65536"}]}
+  %copy.2 = f32[64,64]{0,1:T(8,128)S(1)} copy(%custom-call.10), metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"100","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %fusion.12 = f32[64]{0:T(128)S(1)} fusion(%copy.2), kind=kLoop, calls=%fused_computation.20, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"4096"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2165","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %compare_reduce_fusion = pred[]{:T(512)} fusion(%fusion.12), kind=kLoop, calls=%fused_computation.32, metadata={op_name="jit(linalg)/jit(cholesky)/cholesky" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"4096"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %fusion.16 = (f32[1,64,64]{1,2,0:T(8,128)S(1)}, f32[64,64]{0,1:T(8,128)S(1)}) fusion(%copy.2, %compare_reduce_fusion), kind=kLoop, calls=%fused_computation.25, metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2134","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.10 = f32[1,64,64]{1,2,0:T(8,128)S(1)} get-tuple-element(%fusion.16), index=0, metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}
+  %copy.4 = f32[1,64,64]{2,1,0:T(8,128)S(1)} copy(%get-tuple-element.10), metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"100","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["1","8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1","8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %custom-call.11 = f32[1,64,64]{1,2,0:T(8,128)S(1)} custom-call(%copy.4), custom_call_target="InvertDiagBlocksLowerTriangular", operand_layout_constraints={f32[1,64,64]{2,1,0}}, metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"32768"}]}
+  %copy-done = f32[64,8]{0,1:T(8,128)S(1)} copy-done(%copy-start), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %fusion.4 = f32[64,8]{0,1:T(8,128)} fusion(%copy-done, %custom-call.11), kind=kOutput, calls=%fused_computation.7, frontend_attributes={grad_x="false",grad_y="false"}, metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitInputBatchInLanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"4096"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"3224","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["1","1"],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.11 = f32[64,64]{0,1:T(8,128)S(1)} get-tuple-element(%fusion.16), index=1, metadata={op_name="jit(linalg)/jit(_solve_triangular)/triangular_solve" stack_frame_id=4}
+  %copy.8 = f32[64,64]{1,0:T(8,128)} copy(%get-tuple-element.11), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"32768"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2235","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %fusion.8 = f32[64,64]{0,1:T(8,128)S(1)} fusion(%copy.5, %iota_add_fusion), kind=kLoop, calls=%fused_computation.15, metadata={op_name="jit(linalg)/jit(qr)/select_n" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2129","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy.10 = f32[64,64]{1,0:T(8,128)} copy(%fusion.8), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"32768"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2235","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple.6 = (f32[64,64]{1,0:T(8,128)}, f32[64,8]{0,1:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}) tuple(%copy.8, %fusion.4, %copy.9, %copy.10)
+}
+

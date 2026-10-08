@@ -1,10 +1,19 @@
 import type { Computation, GuidePart, HloModule, HloNode, InstructionGuide, ResultGroup, TypeDetail, TypeSlot } from './types';
 import { extractHloMetadata } from './metadata.ts';
+import { splitTopLevel } from './parser.ts';
+import { attributeKey, explainAttribute, opDescription } from './hlo-reference.ts';
 
 interface GuideContext { computation?: Computation; module?: HloModule }
 
 const escapeHtml = (value: unknown) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'} as Record<string, string>)[c]);
-const mark = (key: string, text: string) => `<span class="hlo-part part-${key}" data-part="${key}" tabindex="0">${escapeHtml(text)}</span>`;
+const STYLED_KEYS = /^(name|tuple|dest|source|context|shape|order|tile|space|op|operand|priority|literal|parameter-index|target|constraints|metadata|backend|dimensions|tuple-index|fusion-kind|called-computation|slot-\d+)$/;
+// Keys without a CSS color get a stable hue so neighbouring segments stay distinguishable.
+const hue = (key: string) => [...key].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+export const partColor = (key: string) => STYLED_KEYS.test(key) ? undefined : `hsl(${hue(key)} 45% 40%)`;
+const partStyle = (key: string) => partColor(key) ? ` style="--part:${partColor(key)}"` : '';
+const open = (key: string) => `<span class="hlo-part part-${key}" data-part="${key}" tabindex="0"${partStyle(key)}>`;
+const markHtml = (key: string, html: string) => `${open(key)}${html}</span>`;
+const mark = (key: string, text: string) => markHtml(key, escapeHtml(text));
 
 function splitTuple(text: string) {
   const parts: { body: string; separator: string }[] = [];
@@ -45,27 +54,29 @@ function shapeHtml(shape: string) {
   return escapeHtml(match[1]) + `<span class="hlo-type part-shape" data-part="shape" tabindex="0">${type}</span>` + escapeHtml(match[4]);
 }
 
-function suffixHtml(text: string) {
-  const metadata = extractHloMetadata(text);
-  if (metadata) return suffixFieldsHtml(text.slice(0, metadata.start)) + mark('metadata', metadata.raw) + suffixFieldsHtml(text.slice(metadata.end));
-  return suffixFieldsHtml(text);
-}
-
-function suffixFieldsHtml(text: string) {
-  let result = '', position = 0;
-  const fields = /custom_call_target="[^"]*"|operand_layout_constraints=|backend_config=|\bdimensions=\{[^}]*\}|\bindex=\d+|\bkind=k[\w]+|\bcalls=%[\w.-]+|"?dma_priority"?\s*[:=]\s*"?\d+"?/g;
-  for (const match of text.matchAll(fields)) {
-    const key = match[0].startsWith('custom_call_target') ? 'target' :
-      match[0].startsWith('operand_layout_constraints') ? 'constraints' :
-      match[0].startsWith('backend_config') ? 'backend' :
-      match[0].startsWith('dimensions=') ? 'dimensions' :
-      match[0].startsWith('index=') ? 'tuple-index' :
-      match[0].startsWith('kind=') ? 'fusion-kind' :
-      match[0].startsWith('calls=') ? 'called-computation' : 'priority';
-    result += escapeHtml(text.slice(position, match.index)) + mark(key, match[0]);
-    position = match.index + match[0].length;
-  }
-  return result + escapeHtml(text.slice(position));
+// Attributes after the operand list. Each top-level `name=value` becomes one explained segment.
+function suffixHtml(suffix: string) {
+  const pieces = splitTopLevel(suffix);
+  const attributes: { name: string; value: string }[] = [];
+  const html = pieces.map((piece, index) => {
+    const match = /^(\s*)([\w-]+)=([\s\S]*?)(\s*)$/.exec(piece);
+    const separator = index < pieces.length - 1 ? ',' : '';
+    if (!match) return escapeHtml(piece) + separator;
+    const [, lead, name, value, trail] = match;
+    attributes.push({ name, value });
+    const text = `${name}=${value}`;
+    let inner = escapeHtml(text);
+    if (name === 'backend_config') {
+      // The DMA priority inside backend_config gets its own nested segment.
+      const priority = /"dma_priority"\s*:\s*"?\d+"?/.exec(text);
+      if (priority) {
+        inner = escapeHtml(text.slice(0, priority.index)) + mark('priority', priority[0]) + escapeHtml(text.slice(priority.index + priority[0].length));
+        attributes.push({ name: 'dma_priority', value: /\d+/.exec(priority[0])![0] });
+      }
+    }
+    return escapeHtml(lead) + markHtml(attributeKey(name), inner) + escapeHtml(trail) + separator;
+  }).join('');
+  return { html, attributes };
 }
 
 function compactEncodedBody(html: string) {
@@ -73,13 +84,16 @@ function compactEncodedBody(html: string) {
     (_match, before: string, body: string, after: string) => `${before}[${body.length.toLocaleString('en-US')} encoded characters]${after}`);
 }
 
+// Operand references, with or without the % sigil, plus printer comments such as /*index=5*/.
 function operandHtml(args: string) {
-  let result = '', position = 0;
-  for (const match of args.matchAll(/%[\w.-]+/g)) {
-    result += escapeHtml(args.slice(position, match.index)) + mark('operand', match[0]);
-    position = match.index + match[0].length;
-  }
-  return result + escapeHtml(args.slice(position));
+  return splitTopLevel(args).map((piece, index, all) => {
+    const separator = index < all.length - 1 ? ',' : '';
+    const match = /^([\s\S]*?)(%?[\w.-]+)(\s*)$/.exec(piece);
+    if (!match) return escapeHtml(piece) + separator;
+    const head = match[1].replace(/\/\*[^*]*\*\//g, comment => `\u0000${comment}\u0000`).split('\u0000')
+      .map(chunk => chunk.startsWith('/*') ? mark('operand-index', chunk) : escapeHtml(chunk)).join('');
+    return head + mark('operand', match[2]) + escapeHtml(match[3]) + separator;
+  }).join('');
 }
 
 function memoryLabel(shape: string) {
@@ -87,12 +101,19 @@ function memoryLabel(shape: string) {
   return value === 0 ? 'HBM（省略 S(0)）' : value === 1 ? 'VMEM（S(1)）' : `S(${value})（后端专用空间）`;
 }
 
+const DTYPES: Record<string, string> = {
+  pred: '布尔值', s4: '4 位有符号整数', s8: '8 位有符号整数', s16: '16 位有符号整数', s32: '32 位有符号整数', s64: '64 位有符号整数',
+  u4: '4 位无符号整数', u8: '8 位无符号整数', u16: '16 位无符号整数', u32: '32 位无符号整数', u64: '64 位无符号整数',
+  f16: '16 位半精度浮点数', bf16: '16 位脑浮点数（bfloat16）', f32: '32 位浮点数', f64: '64 位浮点数',
+  f8e4m3fn: '8 位浮点数（e4m3）', f8e5m2: '8 位浮点数（e5m2）', c64: '64 位复数（两个 f32）', c128: '128 位复数（两个 f64）', token: '令牌（只用于排序副作用，不含数据）',
+};
+
 function shapeDescription(shape: string, includeMemory = true) {
   const match = /([a-z][\w]*)\[([^\]]*)\]/.exec(shape);
   if (!match) return '该项的具体类型以原始 HLO 为准';
-  const dtype = ({ s32:'32 位有符号整数', u32:'32 位无符号整数', bf16:'16 位脑浮点数', f32:'32 位浮点数', pred:'布尔值' } as Record<string, string>)[match[1]] || match[1];
-  const logical = match[2] ? `${match[2].replaceAll(',', '×')} 的数组` : '标量（逻辑形状 []）';
-  return `${match[1]}[${match[2]}]：${dtype}，${logical}${includeMemory ? `；${memoryLabel(shape)}` : ''}`;
+  const dtype = DTYPES[match[1]] || match[1];
+  const logical = match[1] === 'token' ? '' : match[2] ? `，${match[2].replaceAll(',', '×')} 的数组` : '，标量（逻辑形状 []）';
+  return `${match[1]}[${match[2]}]：${dtype}${logical}${includeMemory ? `；${memoryLabel(shape)}` : ''}`;
 }
 
 function typeDetails(shape: string): TypeDetail[] {
@@ -120,9 +141,11 @@ function whileState(context: GuideContext) {
   return null;
 }
 
+const operandList = (node: HloNode) => node.operands.map(name => `%${name}`).join('、');
+
 export function instructionGuide(node: HloNode, context: GuideContext = {}): InstructionGuide {
   const raw = node.raw;
-  const prefix = /^(ROOT\s+)?(%[\w.-]+)(\s*=\s*)/.exec(raw);
+  const prefix = /^(ROOT\s+)?(%?[\w.-]+)(\s*=\s*)/.exec(raw);
   const opAt = prefix ? raw.indexOf(` ${node.op}(`, prefix[0].length) : -1;
   if (!prefix || opAt < 0) return { html: escapeHtml(raw), parts: [], resultGroup: null };
   const typeText = raw.slice(prefix[0].length, opAt);
@@ -136,6 +159,7 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
   const suffix = raw.slice(argsEnd + 1);
   const tupleType = typeText.startsWith('(') && typeText.endsWith(')');
   const copyStart = node.op === 'copy-start' && tupleType;
+  const opPart: GuidePart = { key:'op', label:'操作', text:opDescription(node) };
   let resultType: string, parts: GuidePart[], tupleGroup: { rawType: string; slots: (TypeSlot & GuidePart)[] } | null = null;
   if (copyStart) {
     const slots = splitTuple(typeText);
@@ -145,24 +169,22 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
     const order = /\{(\d+(?:,\d+)*):/.exec(slots[0]?.body || '')?.[1];
     const tile = /T(?:\([^)]*\))+/.exec(slots[0]?.body || '')?.[0];
     const tileLevels = tile && [...tile.matchAll(/\(([^)]*)\)/g)].map(match => match[1].replaceAll(',', '×'));
-    const priority = /"?dma_priority"?\s*[:=]\s*"?(\d+)/.exec(raw)?.[1];
     resultType = `<span class="hlo-type part-tuple" data-part="tuple" tabindex="0">` + mark('tuple', '(') + slots.map(({body,separator}, index) =>
       `<span class="hlo-slot part-${['dest','source','context'][index] || 'shape'}" data-part="${['dest','source','context'][index] || 'shape'}">${shapeHtml(body)}</span>${escapeHtml(separator)}`).join('') + mark('tuple', ')') + '</span>';
     parts = [
-      { key:'name', label:'结果名', text:`%${node.name} 是这条指令的结果标识，后续节点可引用它。` },
+      { key:'name', label:'结果名', text:`${prefix[2]} 是这条指令的结果标识，后续节点可引用它。` },
       { key:'tuple', label:'三项结果', text:'括号表示返回一个 tuple；依次包含复制目标、复制源和上下文，供 copy-done 使用。' },
       { key:'dest', label:'第 0 项 · 目标', text:`复制完成后数据所在的目标缓冲区；这里位于 ${memoryLabel(memory(slots[0]?.body || ''))}。` },
       { key:'source', label:'第 1 项 · 源', text:`复制前数据所在的源缓冲区；这里位于 ${memoryLabel(memory(slots[1]?.body || ''))}。` },
-      { key:'context', label:'第 2 项 · 上下文', text:'u32[] 是 32 位无符号标量，作为异步复制的上下文标记；这里的 S(2) 是后端专用内存空间编号。' },
+      { key:'context', label:'第 2 项 · 上下文', text:`${(slots[2]?.body || 'u32[]').trim()} 是异步复制的上下文标记，供 copy-done 识别这次复制；S(n) 若出现，是后端专用内存空间编号。` },
       { key:'shape', label:'类型与形状', text:outputShape ? `${outputShape[1]}[${outputShape[2]}] 是结果张量的元素类型和逻辑形状；u32[] 表示标量。` : '这里写的是结果张量的元素类型和逻辑形状；u32[] 表示标量。' },
       { key:'order', label:'维度顺序', text:order ? `${order} 是 minor-to-major 物理顺序；排在最前面的维度变化最快。` : '大括号内的数字表示 minor-to-major 物理顺序。' },
       { key:'tile', label:'分块布局', text:tileLevels?.length === 2 ? `${tile} 是两层 tiling：外层 ${tileLevels[0]}，内层 ${tileLevels[1]}；可能引入填充。` : tile ? `${tile} 描述分块的物理布局与可能的填充。` : 'T(...) 描述分块的物理布局与可能的填充。' },
-      { key:'space', label:'内存空间', text:'S(1) 在 TPU 上表示 VMEM；未写 S(n) 通常等同 S(0)，即 HBM。S(2) 的具体用途由后端定义。' },
-      { key:'op', label:'操作', text:'copy-start 启动异步复制；对应的 copy-done 等待/完成复制并产生目标张量。' },
-      { key:'operand', label:'输入', text:`${node.operands.map(x=>`%${x}`).join('、') || '括号内的节点'} 提供要复制的数据；点击上方 Direct inputs 可跳到该节点。` },
-      { key:'priority', label:'DMA 优先级', text:`dma_priority=${priority ?? '?'} 是后端配置中的 DMA 优先级值；数值如何影响调度由具体后端决定。` }
+      { key:'space', label:'内存空间', text:'S(1) 在 TPU 上表示 VMEM；未写 S(n) 通常等同 S(0)，即 HBM。S(2) 等其他编号的用途由后端定义。' },
+      opPart,
+      { key:'operand', label:'输入', text:`${operandList(node) || '括号内的节点'} 提供要复制的数据；点击上方 Direct inputs 可跳到该节点。` },
     ];
-    parts = parts.filter(part => (part.key !== 'priority' || priority !== undefined) && (part.key !== 'tile' || tile) && (part.key !== 'order' || order));
+    parts = parts.filter(part => (part.key !== 'tile' || tile) && (part.key !== 'order' || order) && (part.key !== 'space' || /S\(/.test(typeText)));
   } else if (tupleType) {
     const slots = splitTuple(typeText);
     const state = node.op === 'parameter' ? whileState(context) : null;
@@ -191,74 +213,42 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
     });
     tupleGroup = { rawType: typeText, slots: slotParts };
     parts = [
-      { key:'name', label:'结果名', text:`%${node.name} 是这条指令的结果标识。` },
+      { key:'name', label:'结果名', text:`${prefix[2]} 是这条指令的结果标识。` },
       { key:'tuple', label:`${slots.length} 项 tuple`, text:`外层括号表示一个有 ${slots.length} 个位置的 tuple。每一项都有自己的类型、形状和布局；序号从 0 开始。` },
       ...slotParts,
       { key:'shape', label:'类型与逻辑形状', text:'tuple 的每一项分别声明元素类型和逻辑形状；展开子项可逐项查看。' },
       { key:'order', label:'物理维度顺序', text:'大括号内的数字是 minor-to-major 顺序；排在前面的维度变化最快。' },
       { key:'tile', label:'T(...) 分块', text:/\bs32\[\]\{[^}]*T\(128\)/.test(typeText) ? 'T(128) 是标量的布局标记，不会把标量变成 128 个逻辑元素；其他 T(...) 描述数组的物理分块。' : 'T(...) 描述物理分块；它不会改变数组的逻辑形状。' },
       { key:'space', label:'S(...) 内存空间', text:'S(n) 指定内存空间；未写 S(n) 通常是默认空间。' },
-      { key:'op', label:'操作', text:node.op === 'parameter' ? 'parameter 声明当前 computation 的一个输入，不在这里创建新的数据。' : node.op === 'custom-call' ? 'custom-call 把这一步交给后端实现；文本 HLO 只显示调用边界和声明的结果。' : `${node.op} 是这条 HLO 指令的操作。` }
+      node.op === 'parameter' ? { ...opPart, text:'parameter 声明当前 computation 的一个输入，不在这里创建新的数据。' } : opPart
     ];
     if (node.op === 'parameter') parts.push({ key:'parameter-index', label:'参数序号', text:`parameter(${args}) 表示当前 computation 的第 ${args} 个输入；这里整个 tuple 是一个参数，而不是 ${slots.length} 个独立参数。` });
-    if (node.op !== 'parameter' && node.operands.length) parts.push({ key:'operand', label:'输入依赖', text:`这条指令直接依赖 ${node.operands.map(name => `%${name}`).join('、')}；图中的输入边对应这些引用。` });
-    if (node.op === 'custom-call') {
-      const target = /\bcustom_call_target="([^"]+)"/.exec(suffix)?.[1];
-      const opName = /\bop_name="([^"]+)"/.exec(suffix)?.[1];
-      const sourceLine = /\bsource_line=(\d+)/.exec(suffix)?.[1];
-      parts.push(
-        { key:'target', label:'后端目标', text:`${target || 'custom_call_target'} 是注册的后端调用目标；它本身不展开内部计算图。` },
-        { key:'constraints', label:'输入布局约束', text:'operand_layout_constraints 依输入顺序列出后端期望的每个操作数布局。' },
-        { key:'metadata', label:'来源信息', text:`${opName ? `JAX 操作路径：${opName}。` : 'metadata 可记录源操作。'}${sourceLine ? ` 源码行号：${sourceLine}。` : ''}` },
-        { key:'backend', label:'后端配置', text:'backend_config 包含后端专用的序列化配置；其中编码的 body 不能仅凭外层 HLO 推导出内部指令依赖。' }
-      );
-      parts = parts.filter(part => part.key !== 'target' || !!target).filter(part => part.key !== 'constraints' || suffix.includes('operand_layout_constraints=')).filter(part => part.key !== 'metadata' || suffix.includes('metadata=')).filter(part => part.key !== 'backend' || suffix.includes('backend_config='));
-    }
-    if (!/\{\d+(?:,\d+)*:/.test(typeText)) parts = parts.filter(part => part.key !== 'order');
+    if (node.op !== 'parameter' && node.operands.length) parts.push({ key:'operand', label:'输入依赖', text:`这条指令直接依赖 ${operandList(node)}；图中的输入边对应这些引用。` });
+    if (!/\{\d+(?:,\d+)*[:}]/.test(typeText)) parts = parts.filter(part => part.key !== 'order');
     if (!/T\(/.test(typeText)) parts = parts.filter(part => part.key !== 'tile');
     if (!/S\(/.test(typeText)) parts = parts.filter(part => part.key !== 'space');
   } else {
     resultType = shapeHtml(typeText);
+    const details = typeDetails(typeText);
+    const detail = (key: string) => details.find(item => item.key === key);
     parts = [
-      { key:'name', label:'结果名', text:`%${node.name} 是这条指令的结果标识。` },
-      { key:'shape', label:'结果类型', text:'等号后面是结果的数据类型、逻辑形状与可选的物理布局。' },
-      { key:'op', label:'操作', text:node.op === 'broadcast' ? 'broadcast 把输入值扩展到结果形状；dimensions 指定输入轴在输出中的对应位置。' : node.op === 'get-tuple-element' ? 'get-tuple-element 从输入 tuple 中选出一个位置作为本节点的结果。' : `${node.op} 是执行的 HLO 操作。` },
-      { key:'operand', label:'输入', text:'括号内的 %名称表示这条指令依赖的上游节点。' }
+      { key:'name', label:'结果名', text:`${prefix[2]} 是这条指令的结果标识。` },
+      { key:'shape', label:'结果类型', text:`${shapeDescription(typeText)}。等号后面是结果的数据类型、逻辑形状与可选的物理布局。` },
+      ...(/\{\d+(?:,\d+)*[:}]/.test(typeText) ? [{ key:'order', label:'维度顺序', text:detail('order')!.text }] : []),
+      ...(/T\(/.test(typeText) ? [{ key:'tile', label:'物理分块', text:detail('tile')!.text }] : []),
+      ...(/S\(/.test(typeText) ? [{ key:'space', label:'内存空间', text:detail('space')!.text }] : []),
+      opPart,
+      { key:'operand', label:'输入', text:`括号内的 ${operandList(node)} 是这条指令依赖的上游节点${node.operands.length > 1 ? '，按操作数顺序排列' : ''}。` }
     ];
     if (node.op === 'parameter') parts.push({ key:'parameter-index', label:'参数序号', text:`parameter(${args}) 表示当前 computation 的第 ${args} 个输入。` });
-    if (node.op === 'constant') parts.push({ key:'literal', label:'常量值', text:`括号中的 ${args} 是这条指令直接给出的值；结果类型决定它的数据类型与形状，不依赖上游节点。` });
-    if (node.op === 'get-tuple-element' && node.index !== null) parts.push({ key:'tuple-index', label:'读取 tuple 的位置', text:`index=${node.index} 从 ${node.operands[0] ? `%${node.operands[0]}` : '输入 tuple'} 取出第 ${node.index} 项（从 0 开始）；此节点的结果类型对应那一项。` });
-    if (node.op === 'broadcast') {
-      const dimensions = /\bdimensions=\{([^}]*)\}/.exec(suffix)?.[1];
-      if (dimensions !== undefined) parts.push({ key:'dimensions', label:'广播维度', text:`dimensions={${dimensions}} 表示输入维度依次映射到输出的这些维度；其余输出维度由广播扩展。` });
-    }
-    if (!node.operands.length) parts = parts.filter(part => part.key !== 'operand');
+    if (node.op === 'constant') parts.push({ key:'literal', label:'常量值', text:`括号中的 ${args.length > 80 ? `${args.slice(0, 77)}…` : args} 是这条指令直接给出的值；结果类型决定它的数据类型与形状，不依赖上游节点。` });
+    if (!node.operands.length || node.op === 'constant' || node.op === 'parameter') parts = parts.filter(part => part.key !== 'operand');
   }
-  if (node.op === 'fusion' && node.kind && suffix.includes(`kind=${node.kind}`)) {
-    const meaning = node.kind === 'kOutput'
-      ? '输出融合：融合计算的主操作后还可以有处理结果的指令，最终由内部 ROOT 给出输出。'
-      : node.kind === 'kLoop'
-        ? '循环融合：后端可把融合计算实现为一个循环。'
-        : '这是该 fusion 的类型，用于指导后端如何实现融合计算。';
-    parts.push({ key:'fusion-kind', label:'Fusion 类型', text:`kind=${node.kind}。${meaning}` });
-  }
-  const calledName = node.calls.calls;
-  if (calledName && suffix.includes(`calls=%${calledName}`)) {
-    const callee = context.module?.byName.get(calledName);
-    const root = callee?.nodes.find(instruction => instruction.root);
-    const parameterMapping = node.operands.map((operand, index) => `参数 ${index} ← %${operand}`).join('；');
-    parts.push({
-      key:'called-computation', label:'被调用的 computation',
-      text:`calls=%${calledName} 指向此 fusion 内部执行的 computation。${parameterMapping ? `${parameterMapping}。` : ''}${root ? `它的 ROOT %${root.name} 定义 fusion 的结果。` : '它的 ROOT 定义 fusion 的结果。'}`
-    });
-  }
-  if (node.op !== 'custom-call' && suffix.includes('metadata=')) {
-    const opName = /\bop_name="([^"]+)"/.exec(suffix)?.[1];
-    const sourceLine = /\bsource_line=(\d+)/.exec(suffix)?.[1];
-    parts.push({ key:'metadata', label:'来源信息', text:`metadata 记录源操作信息。${opName ? `op_name=${opName}。` : ''}${sourceLine ? `源码行号 ${sourceLine}。` : ''}` });
-  }
-  if (node.op !== 'custom-call' && suffix.includes('backend_config=')) {
-    parts.push({ key:'backend', label:'后端配置', text:'backend_config 是后端专用配置；展开完整指令可查看其字段。' });
+  if (/\/\*[^*]*\*\//.test(args)) parts.push({ key:'operand-index', label:'序号注释', text:'/*index=N*/ 是 HLO 打印器每隔几个操作数插入的注释，标出紧随其后的操作数序号（从 0 开始），不是操作数本身。' });
+  const suffixParts = suffixHtml(suffix);
+  for (const { name, value } of suffixParts.attributes) {
+    const explanation = explainAttribute(name, value, { node, module: context.module, computation: context.computation });
+    if (!parts.some(part => part.key === explanation.key)) parts.push(explanation);
   }
   const resultGroup: ResultGroup = tupleType ? {
     kind:'tuple', rawType:typeText,
@@ -272,7 +262,7 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
   const argumentsHtml = node.op === 'constant' ? mark('literal', `(${args})`) :
     '(' + (node.op === 'parameter' ? mark('parameter-index', args) : operandHtml(args)) + ')';
   const html = escapeHtml(prefix[1] || '') + mark('name', prefix[2]) + escapeHtml(prefix[3]) + resultType +
-    ' ' + mark('op', node.op) + argumentsHtml + suffixHtml(suffix);
+    ' ' + mark('op', node.op) + argumentsHtml + suffixParts.html;
   const metadata = extractHloMetadata(suffix);
   const compactHtml = compactEncodedBody(metadata ? html.replace(mark('metadata', metadata.raw), mark('metadata', 'metadata={…}')) : html);
   return { html, compactHtml: compactHtml === html ? undefined : compactHtml, parts, resultGroup };

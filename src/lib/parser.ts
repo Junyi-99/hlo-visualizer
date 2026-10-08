@@ -1,7 +1,7 @@
 // A small, dependency-free parser for the textual HLO shown by XLA.
 // It keeps the original instruction line for inspection and only interprets
 // the parts needed to draw data dependencies and computation links.
-import type { Computation, ComputationLink, HloModule, HloNode } from './types';
+import type { Computation, ComputationLink, HloModule, HloNode, SourceFrame } from './types';
 
 function openBraceCount(text: string): number {
   let depth = 0, quoted = false, escaped = false;
@@ -17,9 +17,55 @@ function openBraceCount(text: string): number {
   return depth;
 }
 
+// Split on commas that are not nested inside (), [], {} or a quoted string.
+export function splitTopLevel(text: string): string[] {
+  const pieces: string[] = [];
+  let depth = 0, quoted = false, escaped = false, start = 0;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (quoted) {
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === '"') quoted = false;
+    } else if (char === '"') quoted = true;
+    else if (char === '(' || char === '[' || char === '{') depth++;
+    else if (char === ')' || char === ']' || char === '}') depth--;
+    else if (char === ',' && depth === 0) { pieces.push(text.slice(start, i)); start = i + 1; }
+  }
+  pieces.push(text.slice(start));
+  return pieces;
+}
+
+// Attributes whose value names other computations. Newer XLA/JAX printers omit the % sigil.
+const CALL_ATTRIBUTES = new Set(['calls', 'to_apply', 'body', 'condition', 'select', 'scatter', 'branch_computations',
+  'true_computation', 'false_computation', 'called_computations', 'comparator']);
+
+export function computationCalls(suffix: string): Record<string, string> {
+  const calls: Record<string, string> = {};
+  for (const piece of splitTopLevel(suffix)) {
+    const match = /^\s*([\w-]+)=(.*)$/s.exec(piece);
+    if (!match || !CALL_ATTRIBUTES.has(match[1])) continue;
+    const names = [...match[2].matchAll(/%?([\w.-]+)/g)].map(m => m[1]);
+    names.forEach((name, index) => { calls[names.length > 1 ? `${match[1]}[${index}]` : match[1]] = name; });
+  }
+  return calls;
+}
+
+// Operand names in an argument list: "%a, %b", "a, b", "/*index=5*/%f", or typed "f32[2]{0} %a".
+export function operandNames(args: string): string[] {
+  if (!args.trim()) return [];
+  return splitTopLevel(args).flatMap(piece => {
+    const name = /%?([\w.-]+)\s*$/.exec(piece.replace(/\/\*.*?\*\//g, ''))?.[1];
+    return name ? [name] : [];
+  });
+}
+
 export function parseHlo(source: string): HloModule {
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
-  const module: HloModule = { name: '', computations: [], byName: new Map(), warnings: [] };
+  const module: HloModule = { name: '', computations: [], byName: new Map(), warnings: [], stackFrames: new Map() };
+  // FileNames / FunctionNames / FileLocations / StackFrames tables printed before the computations.
+  const tables: Record<string, Map<number, string>> = { FileNames: new Map(), FunctionNames: new Map(), FileLocations: new Map(), StackFrames: new Map() };
+  let table: Map<number, string> | null = null;
   let current: Computation | null = null;
   let pending: { text: string; line: number } | null = null;
 
@@ -27,7 +73,7 @@ export function parseHlo(source: string): HloModule {
     if (!pending || !current) return;
     const { text: raw, line: lineNumber } = pending;
     pending = null;
-    const match = raw.match(/^(ROOT\s+)?%([^\s]+)\s*=\s*([\s\S]*)$/);
+    const match = raw.match(/^(ROOT\s+)?%?([^\s=]+)\s*=\s*([\s\S]*)$/);
     if (!match) { module.warnings.push(`Line ${lineNumber}: unrecognized instruction`); return; }
     const rhs = match[3];
     const opMatch = /\s([a-z][a-z0-9-]*)\(/g.exec(rhs);
@@ -41,12 +87,11 @@ export function parseHlo(source: string): HloModule {
     }
     if (end >= rhs.length) { module.warnings.push(`Line ${lineNumber}: unclosed ${op} operands`); return; }
     const args = rhs.slice(opStart + 1, end);
-    const operands = [...args.matchAll(/%([\w.-]+)/g)].map(m => m[1]);
+    const operands = op === 'constant' || op === 'parameter' ? [] : operandNames(args);
     const suffix = rhs.slice(end + 1);
-    const calls: Record<string, string> = {};
-    for (const ref of suffix.matchAll(/\b(calls|body|condition)=%([\w.-]+)/g)) calls[ref[1]] = ref[2];
+    const calls = computationCalls(suffix);
     const controlText = /\bcontrol-predecessors=\{([^}]*)\}/.exec(suffix)?.[1] || '';
-    const controlPredecessors = [...controlText.matchAll(/%([\w.-]+)/g)].map(m => m[1]);
+    const controlPredecessors = [...controlText.matchAll(/%?([\w.-]+)/g)].map(m => m[1]);
     const index = /\bindex=(\d+)/.exec(suffix);
     const kind = /\bkind=([\w]+)/.exec(suffix);
     const direction = /\bdirection=([\w]+)/.exec(suffix);
@@ -74,9 +119,11 @@ export function parseHlo(source: string): HloModule {
       continue;
     }
     if (line === '}') { commit(); current = null; continue; }
-    if (line.endsWith('{') && /^(ENTRY\s+)?%[^\s(]+\s*\(/.test(line)) {
+    const header = line.endsWith('{') && !/\s=\s/.test(line.split('(')[0]) && !(pending && openBraceCount(pending.text) > 0)
+      ? /^(ENTRY\s+)?%?([^\s(={]+)\s*[({]/.exec(line) : null;
+    if (header) {
       commit();
-      const match = line.match(/^(ENTRY\s+)?%([^\s(]+)\s*\(/);
+      const match = header;
       if (match) {
         current = { name: match[2], entry: !!match[1], nodes: [], byName: new Map(), header: line };
         module.computations.push(current);
@@ -84,14 +131,30 @@ export function parseHlo(source: string): HloModule {
       }
       continue;
     }
-    if (!current) continue;
-    if (/^(?:ROOT\s+)?%[^\s]+\s*=/.test(line)) {
+    if (!current) {
+      if (line in tables) table = tables[line];
+      else if (table) { const row = /^(\d+)\s+(.*)$/.exec(line); if (row) table.set(Number(row[1]), row[2]); }
+      continue;
+    }
+    if (/^(?:ROOT\s+)?%?[\w.-]+\s=\s/.test(line) && !(pending && openBraceCount(pending.text) > 0)) {
       commit();
       pending = { text: line, line: i + 1 };
     } else if (pending) pending.text += `\n${line}`;
     else module.warnings.push(`Line ${i + 1}: unrecognized content in %${current.name}`);
   }
   commit();
+  const field = (text: string, name: string) => Number(new RegExp(`\\b${name}=(\\d+)`).exec(text)?.[1] ?? 0);
+  const unquote = (text = '') => text.replace(/^"|"$/g, '');
+  for (const [id, frame] of tables.StackFrames) {
+    const location = tables.FileLocations.get(field(frame, 'file_location_id')) || '';
+    module.stackFrames.set(id, {
+      file: unquote(tables.FileNames.get(field(location, 'file_name_id'))),
+      func: unquote(tables.FunctionNames.get(field(location, 'function_name_id'))),
+      line: field(location, 'line'), column: field(location, 'column'),
+      // XLA prints parent_frame_id as the parent's id + 1, so 1 means "no parent" (checked against a 3-level call chain).
+      parent: Math.max(0, field(frame, 'parent_frame_id') - 1),
+    });
+  }
   for (const computation of module.computations) {
     for (const node of computation.nodes) {
       for (const operand of node.operands) {
@@ -111,6 +174,13 @@ export function parseHlo(source: string): HloModule {
   }
   if (!module.name) module.name = 'Untitled HLO module';
   return module;
+}
+
+// Call stack for a metadata stack_frame_id, innermost frame first.
+export function sourceStack(module: HloModule, frameId: number): SourceFrame[] {
+  const stack: SourceFrame[] = [];
+  for (let id = frameId; id && module.stackFrames.has(id) && stack.length < 64; id = module.stackFrames.get(id)!.parent) stack.push(module.stackFrames.get(id)!);
+  return stack;
 }
 
 export function nodeCategory(node: HloNode): string {

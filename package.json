@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node --test parser.test.js instruction-guide.test.js memory-location.test.js"
+    "test": "node --test parser.test.js instruction-guide.test.js memory-location.test.js examples.test.js"
   },
   "dependencies": {
     "react": "^19.3.0",

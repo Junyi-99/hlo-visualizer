@@ -1,0 +1,347 @@
+HloModule jit_fft_complex, is_scheduled=true, entry_computation_layout={(f32[256]{0:T(256)}, f32[8,64]{1,0:T(8,128)})->(f32[256]{0:T(256)}, f32[256]{0:T(256)}, f32[8,64]{1,0:T(8,128)})}, allow_spmd_sharding_propagation_to_parameters={true,true}, allow_spmd_sharding_propagation_to_output={true,true,true}, frontend_attributes={arg_layout_modes="default;default",arg_memory_spaces="0;0",out_layout_modes="default;default;default",out_memory_spaces="0;0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "fft_complex"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=139 end_line=139 column=8 end_column=22}
+3 {file_name_id=1 function_name_id=2 line=140 end_line=140 column=22 end_column=46}
+4 {file_name_id=1 function_name_id=2 line=140 end_line=140 column=8 end_column=56}
+5 {file_name_id=1 function_name_id=2 line=141 end_line=141 column=23 end_column=34}
+6 {file_name_id=1 function_name_id=2 line=141 end_line=141 column=11 end_column=21}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+
+
+%scalar_add_computation.clone.1 (scalar_lhs.2: f32[], scalar_rhs.2: f32[]) -> f32[] {
+  %scalar_lhs.2 = f32[]{:T(128)} parameter(0)
+  %scalar_rhs.2 = f32[]{:T(128)} parameter(1)
+  ROOT %add.20 = f32[]{:T(128)} add(%scalar_lhs.2, %scalar_rhs.2), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%scalar_add_computation (scalar_lhs: f32[], scalar_rhs: f32[]) -> f32[] {
+  %scalar_lhs = f32[]{:T(128)} parameter(0)
+  %scalar_rhs = f32[]{:T(128)} parameter(1)
+  ROOT %add.15 = f32[]{:T(128)} add(%scalar_lhs, %scalar_rhs), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%fused_computation.10 (param_0.164: f32[256]) -> (f32[256], f32[256]) {
+  %param_0.164 = f32[256]{0:T(256)S(1)} parameter(0)
+  %broadcast.76 = f32[256,256]{1,0:T(8,128)} broadcast(%param_0.164), dimensions={1}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %iota.37 = u32[256,256]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %iota.36 = u32[256,256]{1,0:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %multiply.64 = u32[256,256]{1,0:T(8,128)} multiply(%iota.37, %iota.36), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %constant.120 = u32[]{:T(128)} constant(255), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %broadcast.73 = u32[256,256]{1,0:T(8,128)} broadcast(%constant.120), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %and.19 = u32[256,256]{1,0:T(8,128)} and(%multiply.64, %broadcast.73), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %convert.18 = f32[256,256]{1,0:T(8,128)} convert(%and.19), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %constant.154 = f32[]{:T(128)} constant(-0.0245436933), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %broadcast.70 = f32[256,256]{1,0:T(8,128)} broadcast(%constant.154), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %multiply.63 = f32[256,256]{1,0:T(8,128)} multiply(%convert.18, %broadcast.70), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %sine.7 = f32[256,256]{1,0:T(8,128)} sine(%multiply.63), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %cosine.8 = f32[256,256]{1,0:T(8,128)} cosine(%multiply.63), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %subtract.17 = f32[256,256]{1,0:T(8,128)} subtract(%sine.7, %cosine.8), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %multiply.34 = f32[256,256]{1,0:T(8,128)} multiply(%broadcast.76, %subtract.17)
+  %constant.164 = f32[]{:T(128)} constant(0), metadata={op_name="jit(fft_complex)/jit(fft)/convert_element_type" stack_frame_id=2}
+  %reduce.3 = f32[256]{0:T(256)S(1)} reduce(%multiply.34, %constant.164), dimensions={1}, to_apply=%scalar_add_computation.clone.1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %multiply.72.clone.1 = f32[256,256]{1,0:T(8,128)} multiply(%broadcast.76, %cosine.8)
+  %reduce.5.clone.1 = f32[256]{0:T(256)S(1)} reduce(%multiply.72.clone.1, %constant.164), dimensions={1}, to_apply=%scalar_add_computation, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  ROOT %tuple.20 = (f32[256]{0:T(256)S(1)}, f32[256]{0:T(256)S(1)}) tuple(%reduce.3, %reduce.5.clone.1)
+}
+
+%scalar_add_computation.clone (scalar_lhs.1: f32[], scalar_rhs.1: f32[]) -> f32[] {
+  %scalar_lhs.1 = f32[]{:T(128)} parameter(0)
+  %scalar_rhs.1 = f32[]{:T(128)} parameter(1)
+  ROOT %add.19 = f32[]{:T(128)} add(%scalar_lhs.1, %scalar_rhs.1), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%fused_computation.12 () -> f32[256] {
+  %constant.157 = f32[]{:T(128)} constant(0), metadata={op_name="jit(fft_complex)/jit(fft)/convert_element_type" stack_frame_id=2}
+  %broadcast.69 = f32[256,256]{1,0:T(8,128)} broadcast(%constant.157), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %iota.29 = u32[256,256]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %iota.28 = u32[256,256]{1,0:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %multiply.55 = u32[256,256]{1,0:T(8,128)} multiply(%iota.29, %iota.28), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %constant.119 = u32[]{:T(128)} constant(255), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %broadcast.74 = u32[256,256]{1,0:T(8,128)} broadcast(%constant.119), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %and.15 = u32[256,256]{1,0:T(8,128)} and(%multiply.55, %broadcast.74), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %convert.14 = f32[256,256]{1,0:T(8,128)} convert(%and.15), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %constant.153 = f32[]{:T(128)} constant(-0.0245436933), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %broadcast.71 = f32[256,256]{1,0:T(8,128)} broadcast(%constant.153), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %multiply.54 = f32[256,256]{1,0:T(8,128)} multiply(%convert.14, %broadcast.71), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %cosine.10 = f32[256,256]{1,0:T(8,128)} cosine(%multiply.54), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %sine.9 = f32[256,256]{1,0:T(8,128)} sine(%multiply.54), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %add.30 = f32[256,256]{1,0:T(8,128)} add(%cosine.10, %sine.9), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %multiply.37 = f32[256,256]{1,0:T(8,128)} multiply(%broadcast.69, %add.30)
+  ROOT %reduce.4 = f32[256]{0:T(256)S(1)} reduce(%multiply.37, %constant.157), dimensions={1}, to_apply=%scalar_add_computation.clone, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+}
+
+%fused_computation.47 (param_0.152: f32[256], param_1.179: f32[256], param_2.142: f32[256]) -> (f32[256], f32[256]) {
+  %param_0.152 = f32[256]{0:T(256)S(1)} parameter(0)
+  %param_2.142 = f32[256]{0:T(256)S(1)} parameter(2)
+  %subtract.22 = f32[256]{0:T(256)} subtract(%param_0.152, %param_2.142), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %param_1.179 = f32[256]{0:T(256)S(1)} parameter(1)
+  %add.39 = f32[256]{0:T(256)} add(%param_0.152, %param_1.179), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %add.38 = f32[256]{0:T(256)} add(%subtract.22, %add.39), metadata={op_name="jit(fft_complex)/add" stack_frame_id=5}
+  %abs.10.clone.1 = f32[256]{0:T(256)} abs(%subtract.22), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %abs.9.clone.1 = f32[256]{0:T(256)} abs(%add.39), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %maximum.13.clone.1 = f32[256]{0:T(256)} maximum(%abs.10.clone.1, %abs.9.clone.1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %constant.152.clone.1 = f32[]{:T(128)} constant(1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %broadcast.130.clone.1 = f32[256]{0:T(256)} broadcast(%constant.152.clone.1), dimensions={}, metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %minimum.1.clone.1 = f32[256]{0:T(256)} minimum(%abs.10.clone.1, %abs.9.clone.1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %divide.5.clone.1 = f32[256]{0:T(256)} divide(%minimum.1.clone.1, %maximum.13.clone.1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %multiply.151.clone.1 = f32[256]{0:T(256)} multiply(%divide.5.clone.1, %divide.5.clone.1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %add.37.clone.1 = f32[256]{0:T(256)} add(%broadcast.130.clone.1, %multiply.151.clone.1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %sqrt.1.clone.1 = f32[256]{0:T(256)} sqrt(%add.37.clone.1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %multiply.150.clone.1 = f32[256]{0:T(256)} multiply(%maximum.13.clone.1, %sqrt.1.clone.1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %compare.9.clone.1 = pred[256]{0:T(512)(128)(4,1)} compare(%multiply.150.clone.1, %multiply.150.clone.1), direction=EQ, metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  %select.12.clone.1 = f32[256]{0:T(256)} select(%compare.9.clone.1, %multiply.150.clone.1, %minimum.1.clone.1), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=6}
+  ROOT %tuple.21 = (f32[256]{0:T(256)}, f32[256]{0:T(256)}) tuple(%add.38, %select.12.clone.1)
+}
+
+%fused_computation.26.clone.2 () -> f32[64,64] {
+  %iota.77 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %iota.76 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.103 = u32[64,64]{1,0:T(8,128)} multiply(%iota.77, %iota.76), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.118 = u32[]{:T(128)} constant(63), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.101 = u32[64,64]{1,0:T(8,128)} broadcast(%constant.118), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %and.39 = u32[64,64]{1,0:T(8,128)} and(%multiply.103, %broadcast.101), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %convert.38 = f32[64,64]{1,0:T(8,128)} convert(%and.39), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.151 = f32[]{:T(128)} constant(-0.0981747732), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.125 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.151), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.102 = f32[64,64]{1,0:T(8,128)} multiply(%convert.38, %broadcast.125), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  ROOT %cosine.22 = f32[64,64]{1,0:T(8,128)} cosine(%multiply.102), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+}
+
+%bitcast_fusion.1 (bitcast_input.1: f32[8,64]) -> f32[8,64] {
+  %bitcast_input.1 = f32[8,64]{1,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.7 = f32[8,64]{1,0:T(8,128)} bitcast(%bitcast_input.1)
+}
+
+%fused_computation.8 (param_0.70: f32[8,64]) -> f32[8,64] {
+  %fusion.20 = f32[64,64]{1,0:T(8,128)} fusion(), kind=kLoop, calls=%fused_computation.26.clone.2, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %param_0.70 = f32[8,64]{1,0:T(8,128)S(1)} parameter(0)
+  %fusion.62 = f32[8,64]{1,0:T(8,128)} fusion(%param_0.70), kind=kLoop, calls=%bitcast_fusion.1
+  %convolution.18 = f32[64,8]{0,1:T(8,128)} convolution(%fusion.20, %fusion.62), dim_labels=fb_oi->bf, operand_precision={highest,highest}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  ROOT %bitcast.5 = f32[8,64]{1,0:T(8,128)S(1)} bitcast(%convolution.18), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+}
+
+%fused_computation.22 () -> f32[64,64] {
+  %iota.117 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %iota.116 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.143 = u32[64,64]{1,0:T(8,128)} multiply(%iota.117, %iota.116), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.108 = u32[]{:T(128)} constant(63), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.85 = u32[64,64]{1,0:T(8,128)} broadcast(%constant.108), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %and.59 = u32[64,64]{1,0:T(8,128)} and(%multiply.143, %broadcast.85), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %convert.58 = f32[64,64]{1,0:T(8,128)} convert(%and.59), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.141 = f32[]{:T(128)} constant(-0.0981747732), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.121 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.141), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.142 = f32[64,64]{1,0:T(8,128)} multiply(%convert.58, %broadcast.121), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %sine.20 = f32[64,64]{1,0:T(8,128)} sine(%multiply.142), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %cosine.21 = f32[64,64]{1,0:T(8,128)} cosine(%multiply.142), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  ROOT %subtract.21 = f32[64,64]{1,0:T(8,128)} subtract(%sine.20, %cosine.21), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+}
+
+%bitcast_fusion (bitcast_input: f32[8,64]) -> f32[8,64] {
+  %bitcast_input = f32[8,64]{1,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.6 = f32[8,64]{1,0:T(8,128)} bitcast(%bitcast_input)
+}
+
+%fused_computation.6 (param_0.11: f32[8,64], param_1.66: f32[8,64]) -> f32[8,64] {
+  %param_0.11 = f32[8,64]{1,0:T(8,128)S(1)} parameter(0)
+  %fusion.13 = f32[64,64]{1,0:T(8,128)} fusion(), kind=kLoop, calls=%fused_computation.22, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %param_1.66 = f32[8,64]{1,0:T(8,128)S(1)} parameter(1)
+  %fusion.61 = f32[8,64]{1,0:T(8,128)} fusion(%param_1.66), kind=kLoop, calls=%bitcast_fusion
+  %convolution.16 = f32[64,8]{0,1:T(8,128)} convolution(%fusion.13, %fusion.61), dim_labels=fb_oi->bf, operand_precision={highest,highest}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %bitcast.4 = f32[8,64]{1,0:T(8,128)} bitcast(%convolution.16), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  ROOT %add.27 = f32[8,64]{1,0:T(8,128)S(1)} add(%param_0.11, %bitcast.4), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+}
+
+%fused_computation.46 () -> f32[8,64] {
+  %constant.163 = f32[]{:T(128)} constant(0), metadata={op_name="jit(fft_complex)/jit(fft)/convert_element_type" stack_frame_id=2}
+  ROOT %broadcast.129 = f32[8,64]{1,0:T(8,128)} broadcast(%constant.163), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.21 () -> f32[64,64] {
+  %iota.69 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %iota.68 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.95 = u32[64,64]{1,0:T(8,128)} multiply(%iota.69, %iota.68), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.103 = u32[]{:T(128)} constant(63), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.89 = u32[64,64]{1,0:T(8,128)} broadcast(%constant.103), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %and.35 = u32[64,64]{1,0:T(8,128)} and(%multiply.95, %broadcast.89), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %convert.34 = f32[64,64]{1,0:T(8,128)} convert(%and.35), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.146 = f32[]{:T(128)} constant(-0.0981747732), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.117 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.146), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.94 = f32[64,64]{1,0:T(8,128)} multiply(%convert.34, %broadcast.117), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %cosine.18 = f32[64,64]{1,0:T(8,128)} cosine(%multiply.94), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %sine.23 = f32[64,64]{1,0:T(8,128)} sine(%multiply.94), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  ROOT %add.34 = f32[64,64]{1,0:T(8,128)} add(%cosine.18, %sine.23), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+}
+
+%fused_computation.7 (param_0.13: f32[8,64]) -> f32[8,64] {
+  %param_0.13 = f32[8,64]{1,0:T(8,128)S(1)} parameter(0)
+  %fusion.44 = f32[8,64]{1,0:T(8,128)} fusion(), kind=kLoop, calls=%fused_computation.46, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %fusion.12 = f32[64,64]{1,0:T(8,128)} fusion(), kind=kLoop, calls=%fused_computation.21, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %convolution.17 = f32[8,64]{1,0:T(8,128)} convolution(%fusion.44, %fusion.12), dim_labels=bf_io->bf, operand_precision={highest,highest}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  ROOT %subtract.14 = f32[8,64]{1,0:T(8,128)S(1)} subtract(%param_0.13, %convolution.17), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+}
+
+%fused_computation.44 (param_0.144: f32[8,31], param_1.181: f32[8,33], param_2.144: f32[8,31], param_3.79: f32[8,33]) -> f32[8,64] {
+  %param_3.79 = f32[8,33]{1,0:T(8,128)S(1)} parameter(3)
+  %constant.77 = f32[]{:T(128)} constant(-inf)
+  %pad.21 = f32[8,64]{1,0:T(8,128)} pad(%param_3.79, %constant.77), padding=0_0x0_31, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %param_2.144 = f32[8,31]{1,0:T(8,128)S(1)} parameter(2)
+  %pad.20 = f32[8,64]{1,0:T(8,128)} pad(%param_2.144, %constant.77), padding=0_0x33_0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %maximum.11 = f32[8,64]{1,0:T(8,128)} maximum(%pad.21, %pad.20), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %param_1.181 = f32[8,33]{1,0:T(8,128)S(1)} parameter(1)
+  %pad.13 = f32[8,64]{1,0:T(8,128)} pad(%param_1.181, %constant.77), padding=0_0x0_31, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %param_0.144 = f32[8,31]{1,0:T(8,128)S(1)} parameter(0)
+  %pad.12 = f32[8,64]{1,0:T(8,128)} pad(%param_0.144, %constant.77), padding=0_0x33_0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %maximum.7 = f32[8,64]{1,0:T(8,128)} maximum(%pad.13, %pad.12), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %add.36 = f32[8,64]{1,0:T(8,128)} add(%maximum.11, %maximum.7), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.28.clone.2 () -> f32[64,64] {
+  %iota.99 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %iota.98 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.125 = u32[64,64]{1,0:T(8,128)} multiply(%iota.99, %iota.98), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.93 = u32[]{:T(128)} constant(63), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.97 = u32[64,64]{1,0:T(8,128)} broadcast(%constant.93), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %and.50 = u32[64,64]{1,0:T(8,128)} and(%multiply.125, %broadcast.97), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %convert.49 = f32[64,64]{1,0:T(8,128)} convert(%and.50), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.136 = f32[]{:T(128)} constant(0.0981747732), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %broadcast.113 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.136), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %multiply.124 = f32[64,64]{1,0:T(8,128)} multiply(%convert.49, %broadcast.113), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %cosine.30 = f32[64,64]{1,0:T(8,128)} cosine(%multiply.124), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.29 (param_0.161: f32[8,31], param_1.189: f32[8,33], param_2.154: f32[8,31], param_3.85: f32[8,33]) -> f32[8,64] {
+  %param_0.161 = f32[8,31]{1,0:T(8,128)S(1)} parameter(0)
+  %param_1.189 = f32[8,33]{1,0:T(8,128)S(1)} parameter(1)
+  %param_2.154 = f32[8,31]{1,0:T(8,128)S(1)} parameter(2)
+  %param_3.85 = f32[8,33]{1,0:T(8,128)S(1)} parameter(3)
+  %fusion.43 = f32[8,64]{1,0:T(8,128)} fusion(%param_0.161, %param_1.189, %param_2.154, %param_3.85), kind=kLoop, calls=%fused_computation.44, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %fusion.26 = f32[64,64]{1,0:T(8,128)} fusion(), kind=kLoop, calls=%fused_computation.28.clone.2, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %convolution.19 = f32[8,64]{1,0:T(8,128)S(1)} convolution(%fusion.43, %fusion.26), dim_labels=bf_io->bf, operand_precision={highest,highest}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.42.clone.1 (param_0.145: f32[8,31], param_1.183: f32[8,33]) -> f32[8,64] {
+  %param_1.183 = f32[8,33]{1,0:T(8,128)S(1)} parameter(1)
+  %constant.87 = f32[]{:T(128)} constant(-inf)
+  %pad.23 = f32[8,64]{1,0:T(8,128)} pad(%param_1.183, %constant.87), padding=0_0x0_31, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %param_0.145 = f32[8,31]{1,0:T(8,128)S(1)} parameter(0)
+  %pad.22 = f32[8,64]{1,0:T(8,128)} pad(%param_0.145, %constant.87), padding=0_0x33_0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %maximum.12 = f32[8,64]{1,0:T(8,128)} maximum(%pad.23, %pad.22), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.20 () -> f32[64,64] {
+  %iota.105 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %iota.104 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.131 = u32[64,64]{1,0:T(8,128)} multiply(%iota.105, %iota.104), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.113 = u32[]{:T(128)} constant(63), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.81 = u32[64,64]{1,0:T(8,128)} broadcast(%constant.113), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %and.53 = u32[64,64]{1,0:T(8,128)} and(%multiply.131, %broadcast.81), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %convert.52 = f32[64,64]{1,0:T(8,128)} convert(%and.53), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.126 = f32[]{:T(128)} constant(0.0981747732), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %broadcast.109 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.126), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %multiply.130 = f32[64,64]{1,0:T(8,128)} multiply(%convert.52, %broadcast.109), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %sine.14 = f32[64,64]{1,0:T(8,128)} sine(%multiply.130), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %cosine.29 = f32[64,64]{1,0:T(8,128)} cosine(%multiply.130), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %subtract.19 = f32[64,64]{1,0:T(8,128)} subtract(%sine.14, %cosine.29), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.4 (param_0.137: f32[8,64], param_1.194: f32[8,31], param_2.156: f32[8,33]) -> f32[8,64] {
+  %constant.156 = f32[]{:T(128)} constant(0), metadata={op_name="jit(fft_complex)/jit(fft)/convert_element_type" stack_frame_id=2}
+  %broadcast.127 = f32[8,64]{1,0:T(8,128)} broadcast(%constant.156), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %param_0.137 = f32[8,64]{1,0:T(8,128)S(1)} parameter(0)
+  %param_1.194 = f32[8,31]{1,0:T(8,128)S(1)} parameter(1)
+  %param_2.156 = f32[8,33]{1,0:T(8,128)S(1)} parameter(2)
+  %pad_maximum_fusion.5 = f32[8,64]{1,0:T(8,128)} fusion(%param_1.194, %param_2.156), kind=kLoop, calls=%fused_computation.42.clone.1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %fusion.11 = f32[64,64]{1,0:T(8,128)} fusion(), kind=kLoop, calls=%fused_computation.20, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %convolution.13 = f32[8,64]{1,0:T(8,128)} convolution(%pad_maximum_fusion.5, %fusion.11), dim_labels=bf_io->bf, operand_precision={highest,highest}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %add.26 = f32[8,64]{1,0:T(8,128)} add(%param_0.137, %convolution.13), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %multiply.31 = f32[8,64]{1,0:T(8,128)S(1)} multiply(%broadcast.127, %add.26), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.43.clone.1 (param_0.141: f32[8,31], param_1.182: f32[8,33]) -> f32[8,64] {
+  %param_1.182 = f32[8,33]{1,0:T(8,128)S(1)} parameter(1)
+  %constant.82 = f32[]{:T(128)} constant(-inf)
+  %pad.15 = f32[8,64]{1,0:T(8,128)} pad(%param_1.182, %constant.82), padding=0_0x0_31, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %param_0.141 = f32[8,31]{1,0:T(8,128)S(1)} parameter(0)
+  %pad.14 = f32[8,64]{1,0:T(8,128)} pad(%param_0.141, %constant.82), padding=0_0x33_0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %maximum.8 = f32[8,64]{1,0:T(8,128)} maximum(%pad.15, %pad.14), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.19 () -> f32[64,64] {
+  %iota.91 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %iota.90 = u32[64,64]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %multiply.117 = u32[64,64]{1,0:T(8,128)} multiply(%iota.91, %iota.90), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.98 = u32[]{:T(128)} constant(63), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %broadcast.93 = u32[64,64]{1,0:T(8,128)} broadcast(%constant.98), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %and.46 = u32[64,64]{1,0:T(8,128)} and(%multiply.117, %broadcast.93), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %convert.45 = f32[64,64]{1,0:T(8,128)} convert(%and.46), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  %constant.131 = f32[]{:T(128)} constant(0.0981747732), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %broadcast.105 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.131), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %multiply.116 = f32[64,64]{1,0:T(8,128)} multiply(%convert.45, %broadcast.105), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %cosine.26 = f32[64,64]{1,0:T(8,128)} cosine(%multiply.116), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %sine.17 = f32[64,64]{1,0:T(8,128)} sine(%multiply.116), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %add.32 = f32[64,64]{1,0:T(8,128)} add(%cosine.26, %sine.17), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+%fused_computation.2 (param_0.136: f32[8,64], param_1.158: f32[8,64], param_2.153: f32[8,31], param_3.84: f32[8,33]) -> f32[8,64] {
+  %param_0.136 = f32[8,64]{1,0:T(8,128)S(1)} parameter(0)
+  %param_1.158 = f32[8,64]{1,0:T(8,128)S(1)} parameter(1)
+  %param_2.153 = f32[8,31]{1,0:T(8,128)S(1)} parameter(2)
+  %param_3.84 = f32[8,33]{1,0:T(8,128)S(1)} parameter(3)
+  %pad_maximum_fusion.3 = f32[8,64]{1,0:T(8,128)} fusion(%param_2.153, %param_3.84), kind=kLoop, calls=%fused_computation.43.clone.1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %fusion.10 = f32[64,64]{1,0:T(8,128)} fusion(), kind=kLoop, calls=%fused_computation.19, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %convolution.10 = f32[8,64]{1,0:T(8,128)} convolution(%pad_maximum_fusion.3, %fusion.10), dim_labels=bf_io->bf, operand_precision={highest,highest}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %subtract.13 = f32[8,64]{1,0:T(8,128)} subtract(%param_1.158, %convolution.10), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %add.23 = f32[8,64]{1,0:T(8,128)} add(%param_0.136, %subtract.13), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %constant.88 = f32[]{:T(128)} constant(0.015625), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  %broadcast.126 = f32[8,64]{1,0:T(8,128)} broadcast(%constant.88), dimensions={}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT %multiply.30 = f32[8,64]{1,0:T(8,128)} multiply(%add.23, %broadcast.126), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+}
+
+ENTRY %main.4 (x.1: f32[256], y.1: f32[8,64]) -> (f32[256], f32[256], f32[8,64]) {
+  %y.1 = f32[8,64]{1,0:T(8,128)} parameter(1), metadata={op_name="y"}
+  %copy-start = (f32[8,64]{1,0:T(8,128)S(1)}, f32[8,64]{1,0:T(8,128)}, u32[]{:S(2)}) copy-start(%y.1), cross_program_prefetch_index=0, backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %x.1 = f32[256]{0:T(256)} parameter(0), metadata={op_name="x"}
+  %copy-done = f32[8,64]{1,0:T(8,128)S(1)} copy-done(%copy-start), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %convolution_bitcast_fusion.1 = f32[8,64]{1,0:T(8,128)S(1)} fusion(%copy-done), kind=kOutput, calls=%fused_computation.8, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitInputBatchInLanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["1","1"],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %fusion.3 = f32[8,64]{1,0:T(8,128)S(1)} fusion(%convolution_bitcast_fusion.1, %copy-done), kind=kOutput, calls=%fused_computation.6, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitInputBatchInLanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["8","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["1","1"],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %slice.1 = f32[8,31]{1,0:T(8,128)S(1)} slice(%fusion.3), slice={[0:8], [1:32]}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2116","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %reverse.0 = f32[8,31]{1,0:T(8,128)S(1)} reverse(%slice.1), dimensions={1}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}]}
+  %negate.1 = f32[8,31]{1,0:T(8,128)S(1)} negate(%reverse.0), metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2116","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %convolution_subtract_fusion.1 = f32[8,64]{1,0:T(8,128)S(1)} fusion(%convolution_bitcast_fusion.1), kind=kOutput, calls=%fused_computation.7, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitAllBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["1","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %slice.3 = f32[8,31]{1,0:T(8,128)S(1)} slice(%convolution_subtract_fusion.1), slice={[0:8], [1:32]}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2116","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %reverse.1 = f32[8,31]{1,0:T(8,128)S(1)} reverse(%slice.3), dimensions={1}, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}]}
+  %bitcast.10 = f32[8,33]{1,0:T(8,128)S(1)} bitcast(%fusion.3)
+  %bitcast.12 = f32[8,33]{1,0:T(8,128)S(1)} bitcast(%convolution_subtract_fusion.1)
+  %fusion.25 = f32[8,64]{1,0:T(8,128)S(1)} fusion(%negate.1, %bitcast.10, %reverse.1, %bitcast.12), kind=kOutput, calls=%fused_computation.29, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitAllBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["1","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %bitcast.13 = f32[8,33]{1,0:T(8,128)S(1)} bitcast(%convolution_subtract_fusion.1)
+  %fusion.2 = f32[8,64]{1,0:T(8,128)S(1)} fusion(%fusion.25, %reverse.1, %bitcast.13), kind=kOutput, calls=%fused_computation.4, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitAllBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1120","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["1","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy-start.1 = (f32[256]{0:T(256)S(1)}, f32[256]{0:T(256)}, u32[]{:S(2)}) copy-start(%x.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %bitcast.11 = f32[8,33]{1,0:T(8,128)S(1)} bitcast(%fusion.3)
+  %fusion.1 = f32[8,64]{1,0:T(8,128)} fusion(%fusion.2, %fusion.25, %negate.1, %bitcast.11), kind=kOutput, calls=%fused_computation.2, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitAllBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"4096"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"3224","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["1","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["8","1"],"ml_estimated_microseconds":0,"output_window_bounds":["1","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %copy-done.1 = f32[256]{0:T(256)S(1)} copy-done(%copy-start.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %fusion.4 = (f32[256]{0:T(256)S(1)}, f32[256]{0:T(256)S(1)}) fusion(%copy-done.1), kind=kLoop, calls=%fused_computation.10, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"20480"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"6978","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","2"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["32","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element = f32[256]{0:T(256)S(1)} get-tuple-element(%fusion.4), index=0, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %get-tuple-element.1 = f32[256]{0:T(256)S(1)} get-tuple-element(%fusion.4), index=1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  %fusion.5 = f32[256]{0:T(256)S(1)} fusion(), kind=kLoop, calls=%fused_computation.12, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"5120"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"7184","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["32","2"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %add_add_fusion = (f32[256]{0:T(256)}, f32[256]{0:T(256)}) fusion(%get-tuple-element.1, %get-tuple-element, %fusion.5), kind=kLoop, calls=%fused_computation.47, metadata={op_name="jit(fft_complex)/add" stack_frame_id=5}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"2048"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2125","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.2 = f32[256]{0:T(256)} get-tuple-element(%add_add_fusion), index=0, metadata={op_name="jit(fft_complex)/add" stack_frame_id=5}
+  %get-tuple-element.3 = f32[256]{0:T(256)} get-tuple-element(%add_add_fusion), index=1, metadata={op_name="jit(fft_complex)/add" stack_frame_id=5}
+  ROOT %tuple.19 = (f32[256]{0:T(256)}, f32[256]{0:T(256)}, f32[8,64]{1,0:T(8,128)}) tuple(%get-tuple-element.3, %get-tuple-element.2, %fusion.1)
+}
+

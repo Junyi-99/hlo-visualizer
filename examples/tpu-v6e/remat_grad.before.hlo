@@ -1,0 +1,52 @@
+HloModule jit_remat_grad, entry_computation_layout={(f32[128,256]{1,0}, f32[256,256]{1,0})->(f32[], f32[256,256]{1,0})}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "remat_grad"
+3 "remat_grad.<locals>.<lambda>"
+4 "remat_grad.<locals>.layer"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=159 end_line=159 column=11 end_column=38}
+3 {file_name_id=1 function_name_id=3 line=158 end_line=158 column=21 end_column=36}
+4 {file_name_id=1 function_name_id=3 line=158 end_line=158 column=27 end_column=35}
+5 {file_name_id=1 function_name_id=4 line=157 end_line=157 column=24 end_column=29}
+6 {file_name_id=1 function_name_id=4 line=157 end_line=157 column=15 end_column=30}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=3}
+4 {file_location_id=4 parent_frame_id=3}
+5 {file_location_id=5 parent_frame_id=5}
+6 {file_location_id=6 parent_frame_id=5}
+7 {file_location_id=5 parent_frame_id=4}
+8 {file_location_id=6 parent_frame_id=4}
+
+
+region_0.1 {
+  reduce_sum.3 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.4 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.5 = f32[] add(reduce_sum.3, reduce_sum.4), metadata={op_name="jit(remat_grad)/jvp()/reduce_sum" stack_frame_id=3}
+}
+
+ENTRY main.2 {
+  x.1 = f32[128,256]{1,0} parameter(0), metadata={op_name="x"}
+  w.1 = f32[256,256]{1,0} parameter(1), metadata={op_name="w"}
+  dot_general.2 = f32[128,256]{1,0} dot(x.1, w.1), lhs_contracting_dims={1}, rhs_contracting_dims={0}, metadata={op_name="jit(remat_grad)/jvp()/checkpoint/dot_general" stack_frame_id=5}
+  tanh.2 = f32[128,256]{1,0} tanh(dot_general.2), metadata={op_name="jit(remat_grad)/jvp()/checkpoint/tanh" stack_frame_id=6}
+  dot_general.3 = f32[128,256]{1,0} dot(tanh.2, w.1), lhs_contracting_dims={1}, rhs_contracting_dims={0}, metadata={op_name="jit(remat_grad)/jvp()/checkpoint/dot_general" stack_frame_id=7}
+  tanh.3 = f32[128,256]{1,0} tanh(dot_general.3), metadata={op_name="jit(remat_grad)/jvp()/checkpoint/tanh" stack_frame_id=8}
+  constant.5 = f32[] constant(0)
+  reduce_sum.7 = f32[] reduce(tanh.3, constant.5), dimensions={0,1}, to_apply=region_0.1, metadata={op_name="jit(remat_grad)/jvp()/reduce_sum" stack_frame_id=3}
+  constant.4 = f32[] constant(32768)
+  div.1 = f32[] divide(reduce_sum.7, constant.4), metadata={op_name="jit(remat_grad)/jvp()/div" stack_frame_id=3}
+  constant.3 = f32[] constant(0)
+  broadcast_in_dim.1 = f32[256,256]{1,0} broadcast(constant.3), dimensions={}, metadata={op_name="jit(remat_grad)/broadcast_in_dim" stack_frame_id=2}
+  ROOT tuple.1 = (f32[], f32[256,256]{1,0}) tuple(div.1, broadcast_in_dim.1)
+}
+

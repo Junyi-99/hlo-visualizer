@@ -1,6 +1,6 @@
 import { Fragment, forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { computationLinks, dependencyNeighborhood, nodeCategory, nodeSummary, reachable, shortestDependencyPath } from '../lib/parser';
-import { computationRole, layoutInstructions, layoutOverview, NODE_HEIGHT, NODE_WIDTH, OVERVIEW_HEIGHT, OVERVIEW_WIDTH } from '../lib/graph-layout';
+import { computationRole, linkLabel, layoutInstructions, layoutOverview, NODE_HEIGHT, NODE_WIDTH, OVERVIEW_HEIGHT, OVERVIEW_WIDTH } from '../lib/graph-layout';
 import { hloOpName, lastOpNameSegment } from '../lib/metadata';
 import { memoryLocations, type MemoryLocation } from '../lib/memory-location';
 import type { HloModule } from '../lib/types';
@@ -236,7 +236,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
       <path className="call-edge" d={`M${x1} ${y1} C${x1 + 32} ${y1},${x2 - 32} ${y2},${x2 - 8} ${y2}`} markerEnd="url(#call-arrow)">
         <title>%{link.from} → %{link.to} via %{link.via} ({link.role})</title>
       </path>
-      <text className="call-label" x={(x1 + x2) / 2 - 4} y={(y1 + y2) / 2 - 9} textAnchor="middle">{link.role === 'condition' ? 'COND' : link.role === 'body' ? 'BODY' : 'CALL'}</text>
+      <text className="call-label" x={(x1 + x2) / 2 - 4} y={(y1 + y2) / 2 - 9} textAnchor="middle">{linkLabel(link.role)}</text>
     </g>;
   });
 

@@ -7,6 +7,7 @@ import { SearchOverlay } from './components/SearchOverlay';
 import { Sidebar } from './components/Sidebar';
 import { Icon } from './components/Icon';
 import { Toolbar } from './components/Toolbar';
+import { examples } from './lib/examples';
 import { parseHlo, reachable } from './lib/parser';
 import type { HloModule } from './lib/types';
 
@@ -24,6 +25,7 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [exampleId, setExampleId] = useState<string | null>(null);
   const graphRef = useRef<GraphHandle>(null);
 
   useEffect(() => {
@@ -53,7 +55,17 @@ export default function App() {
     setCurrent(previous.current);
     setSelected(previous.selected);
   };
-  const loadText = (source: string) => {
+  const loadExample = async (id: string) => {
+    const example = examples.find(item => item.id === id);
+    if (!example) return;
+    loadText(await example.load(), id);
+  };
+  // ?example=<id> loads a bundled example, so a reviewed module can be linked directly.
+  useEffect(() => {
+    const id = new URLSearchParams(location.search).get('example');
+    if (id) void loadExample(id);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const loadText = (source: string, example: string | null = null) => {
     const parsed = parseHlo(source);
     if (!parsed.computations.length) throw new Error('No computations found. Paste a textual HLO module with %computation { … } blocks.');
     setModule(parsed);
@@ -63,6 +75,10 @@ export default function App() {
     setImportOpen(false);
     setNotesOpen(false);
     setZoom(1);
+    setExampleId(example);
+    const url = new URL(location.href);
+    if (example) url.searchParams.set('example', example); else url.searchParams.delete('example');
+    window.history.replaceState(null, '', url);
   };
   const openReference = (name: string) => {
     setSelected(name);
@@ -82,7 +98,7 @@ export default function App() {
           onUseOpName={value => { setUseOpName(value); if (!value) setShowLastNameOnly(false); }} onShowLastNameOnly={setShowLastNameOnly}
           onShowMemoryLocation={setShowMemoryLocation}
           onBack={goBack} onComputation={name => openComputation(name)} onFit={() => graphRef.current?.fit()}
-          onZoom={delta => setZoom(value => Math.min(1.5, Math.max(0.45, value + delta)))} onSearch={() => setSearchOpen(true)} onImport={() => setImportOpen(true)} />
+          onZoom={delta => setZoom(value => Math.min(1.5, Math.max(0.45, value + delta)))} onSearch={() => setSearchOpen(true)} onImport={() => setImportOpen(true)} exampleId={exampleId} onExample={id => void loadExample(id)} />
         <GraphCanvas ref={graphRef} module={module} current={current} selected={selected} zoom={zoom} useOpName={useOpName} showLastNameOnly={showLastNameOnly} showMemoryLocation={showMemoryLocation} onZoom={setZoom} onSelect={setSelected} onComputation={name => openComputation(name)} />
         <div className="bottom-bar"><div>{node ? `%${node.name} · ${upstream.size} upstream · ${downstream.size} downstream` : computation ? 'Select a node to inspect its dependencies' : 'Computation links · instruction data edges are inside each computation'}</div>
           <div>{module.warnings.length ? <button type="button" className="parse-notes-button" onClick={() => setNotesOpen(true)}>{module.warnings.length} parse notes ↗</button> : 'Parsed without warnings'}</div></div>
@@ -90,7 +106,7 @@ export default function App() {
       <Inspector module={module} computation={computation} node={node} upstreamCount={upstream.size} downstreamCount={downstream.size} onClose={() => setSelected(null)} onNode={openReference} onComputation={name => openComputation(name)} />
     </div>
     {searchOpen && <SearchOverlay module={module} useOpName={useOpName} showLastNameOnly={showLastNameOnly} onClose={() => setSearchOpen(false)} onSelect={(computationName, nodeName) => { setSearchOpen(false); openComputation(computationName, nodeName); }} />}
-    {importOpen && <ImportDialog onClose={() => setImportOpen(false)} onLoad={loadText} />}
+    {importOpen && <ImportDialog onClose={() => setImportOpen(false)} onLoad={source => loadText(source)} />}
     {notesOpen && <div className="notes-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setNotesOpen(false); }}><div className="notes-panel" role="dialog" aria-modal="true" aria-label="Parse notes"><header><strong>Parse notes</strong><button className="icon-button" type="button" aria-label="Close parse notes" onClick={() => setNotesOpen(false)}><Icon name="close" /></button></header><p>Some input could not be represented exactly. Check these lines before relying on the graph.</p><ul>{module.warnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></div></div>}
   </>;
 }

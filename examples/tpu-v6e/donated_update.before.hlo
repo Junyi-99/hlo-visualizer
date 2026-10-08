@@ -1,0 +1,48 @@
+HloModule jit_donated_update, input_output_alias={ {0}: (0, {}, may-alias) }, entry_computation_layout={(f32[128,128]{1,0}, f32[128]{0})->(f32[128,128]{1,0}, f32[])}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "donated_update"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=184 end_line=184 column=19 end_column=33}
+3 {file_name_id=1 function_name_id=2 line=184 end_line=184 column=11 end_column=33}
+4 {file_name_id=1 function_name_id=2 line=184 end_line=184 column=35 end_column=57}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+
+
+region_0.1 {
+  reduce_sum.3 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.4 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.5 = f32[] add(reduce_sum.3, reduce_sum.4), metadata={op_name="reduce_sum"}
+}
+
+norm.2 {
+  Arg_0.1 = f32[128,128]{1,0} parameter(0)
+  mul.1 = f32[128,128]{1,0} multiply(Arg_0.1, Arg_0.1), metadata={op_name="mul"}
+  constant.1 = f32[] constant(0)
+  reduce_sum.7 = f32[] reduce(mul.1, constant.1), dimensions={0,1}, to_apply=region_0.1, metadata={op_name="reduce_sum"}
+  ROOT sqrt.1 = f32[] sqrt(reduce_sum.7), metadata={op_name="sqrt"}
+}
+
+ENTRY main.3 {
+  state.1 = f32[128,128]{1,0} parameter(0), metadata={op_name="state"}
+  delta.1 = f32[128]{0} parameter(1), metadata={op_name="delta"}
+  broadcast_in_dim.1 = f32[1,128]{1,0} reshape(delta.1), metadata={op_name="jit(donated_update)/broadcast_in_dim" stack_frame_id=2}
+  add.4 = f32[1,128]{1,0} broadcast(broadcast_in_dim.1), dimensions={0,1}, metadata={op_name="jit(donated_update)/add" stack_frame_id=3}
+  add.5 = f32[128]{0} reshape(add.4), metadata={op_name="jit(donated_update)/add" stack_frame_id=3}
+  add.6 = f32[128,128]{1,0} broadcast(add.5), dimensions={1}, metadata={op_name="jit(donated_update)/add" stack_frame_id=3}
+  add.7 = f32[128,128]{1,0} add(state.1, add.6), metadata={op_name="jit(donated_update)/add" stack_frame_id=3}
+  jit_norm_.1 = f32[] call(state.1), to_apply=norm.2, metadata={op_name="jit(donated_update)/jit(norm)" stack_frame_id=4}
+  ROOT tuple.1 = (f32[128,128]{1,0}, f32[]) tuple(add.7, jit_norm_.1)
+}
+

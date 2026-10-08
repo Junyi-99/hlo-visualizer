@@ -15,7 +15,21 @@ export function computationRole(computation: Computation, links: ComputationLink
   if (incoming.some(link => link.role === 'body')) return 'WHILE BODY';
   if (incoming.some(link => link.role === 'condition')) return 'WHILE CONDITION';
   if (incoming.some(link => link.op === 'fusion')) return 'FUSION';
+  if (incoming.some(link => /^(branch_computations|true_computation|false_computation)/.test(link.role))) return 'BRANCH';
+  if (incoming.some(link => link.op === 'sort' || link.role === 'comparator' || (link.op === 'custom-call' && link.role.startsWith('called_computations')))) return 'COMPARATOR';
+  if (incoming.some(link => link.role === 'to_apply' && ['reduce', 'reduce-window', 'all-reduce', 'reduce-scatter', 'scatter'].includes(link.op))) return 'REDUCER';
+  if (incoming.some(link => link.role === 'select')) return 'SELECT';
+  if (incoming.some(link => link.role === 'scatter')) return 'SCATTER';
+  if (incoming.some(link => link.op === 'call')) return 'CALLED';
   return 'COMPUTATION';
+}
+
+// Short label drawn on an overview edge, e.g. BODY, COND, APPLY, BRANCH 1.
+export function linkLabel(role: string): string {
+  const branch = /^branch_computations\[(\d+)\]$/.exec(role);
+  if (branch) return `BRANCH ${branch[1]}`;
+  return ({ body: 'BODY', condition: 'COND', to_apply: 'APPLY', calls: 'CALL', branch_computations: 'BRANCH', true_computation: 'TRUE',
+    false_computation: 'FALSE', select: 'SELECT', scatter: 'SCATTER', called_computations: 'CALLED' } as Record<string, string>)[role] || role.toUpperCase();
 }
 
 export function layoutOverview(module: HloModule): GraphLayout {

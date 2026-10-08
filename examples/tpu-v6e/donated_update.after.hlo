@@ -1,0 +1,47 @@
+HloModule jit_donated_update, is_scheduled=true, input_output_alias={ {0}: (0, {}, may-alias) }, entry_computation_layout={(f32[128,128]{1,0:T(8,128)}, f32[128]{0:T(128)})->(f32[128,128]{1,0:T(8,128)}, f32[]{:T(128)})}, allow_spmd_sharding_propagation_to_parameters={true,true}, allow_spmd_sharding_propagation_to_output={true,true}, frontend_attributes={arg_layout_modes="default;default",arg_memory_spaces="0;0",out_layout_modes="default;default",out_memory_spaces="0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "donated_update"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=184 end_line=184 column=35 end_column=57}
+3 {file_name_id=1 function_name_id=2 line=184 end_line=184 column=11 end_column=33}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+
+
+%region_0.1 (reduce_sum.3: f32[], reduce_sum.4: f32[]) -> f32[] {
+  %reduce_sum.4 = f32[]{:T(128)} parameter(1), metadata={op_name="reduce_sum"}
+  %reduce_sum.3 = f32[]{:T(128)} parameter(0), metadata={op_name="reduce_sum"}
+  ROOT %reduce_sum.5 = f32[]{:T(128)} add(%reduce_sum.3, %reduce_sum.4), metadata={op_name="reduce_sum"}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+%fused_computation (param_0.3: f32[128,128], param_1.5: f32[128]) -> (f32[], f32[128,128]) {
+  %param_0.3 = f32[128,128]{1,0:T(8,128)} parameter(0)
+  %mul.2 = f32[128,128]{1,0:T(8,128)} multiply(%param_0.3, %param_0.3), metadata={op_name="jit(donated_update)/jit(norm)/mul" stack_frame_id=2}
+  %constant.2 = f32[]{:T(128)} constant(0), metadata={op_name="jit(donated_update)/jit(norm)" stack_frame_id=2}
+  %reduce_sum.1 = f32[]{:T(128)} reduce(%mul.2, %constant.2), dimensions={0,1}, to_apply=%region_0.1, metadata={op_name="jit(donated_update)/jit(norm)/reduce_sum" stack_frame_id=2}
+  %param_1.5 = f32[128]{0:T(128)} parameter(1)
+  %add.1.clone.1 = f32[128,128]{1,0:T(8,128)} broadcast(%param_1.5), dimensions={1}, metadata={op_name="jit(donated_update)/add" stack_frame_id=3}
+  %add.0.clone.1 = f32[128,128]{1,0:T(8,128)} add(%param_0.3, %add.1.clone.1), metadata={op_name="jit(donated_update)/add" stack_frame_id=3}
+  ROOT %tuple = (f32[]{:T(128)}, f32[128,128]{1,0:T(8,128)}) tuple(%reduce_sum.1, %add.0.clone.1)
+}
+
+ENTRY %main.3 (state.1: f32[128,128], delta.1: f32[128]) -> (f32[128,128], f32[]) {
+  %delta.1 = f32[128]{0:T(128)} parameter(1), metadata={op_name="delta"}
+  %state.1 = f32[128,128]{1,0:T(8,128)} parameter(0), metadata={op_name="state"}
+  %multiply_reduce_fusion = (f32[]{:T(128)}, f32[128,128]{1,0:T(8,128)}) fusion(%state.1, %delta.1), kind=kLoop, calls=%fused_computation, metadata={op_name="jit(donated_update)/jit(norm)/reduce_sum" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[{"indices":["0","3"]}]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"136192"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2285","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["16","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element = f32[]{:T(128)} get-tuple-element(%multiply_reduce_fusion), index=0, metadata={op_name="jit(donated_update)/jit(norm)/reduce_sum" stack_frame_id=2}
+  %sqrt.0 = f32[]{:T(128)} sqrt(%get-tuple-element), metadata={op_name="jit(donated_update)/jit(norm)/sqrt" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %get-tuple-element.2 = f32[128,128]{1,0:T(8,128)} get-tuple-element(%multiply_reduce_fusion), index=1, metadata={op_name="jit(donated_update)/jit(norm)/reduce_sum" stack_frame_id=2}
+  ROOT %tuple.2 = (f32[128,128]{1,0:T(8,128)}, f32[]{:T(128)}) tuple(%get-tuple-element.2, %sqrt.0)
+}
+

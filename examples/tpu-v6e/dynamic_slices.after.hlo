@@ -1,0 +1,93 @@
+HloModule jit_dynamic_slices, is_scheduled=true, entry_computation_layout={(f32[256,256]{1,0:T(8,128)}, s32[]{:T(128)})->(f32[16,32]{1,0:T(8,128)}, f32[66,40]{0,1:T(8,128)}, f32[259,259]{1,0:T(8,128)}, f32[512,256]{1,0:T(8,128)}, f32[128,512]{1,0:T(8,128)})}, allow_spmd_sharding_propagation_to_parameters={true,true}, allow_spmd_sharding_propagation_to_output={true,true,true,true,true}, frontend_attributes={arg_layout_modes="default;default",arg_memory_spaces="0;0",out_layout_modes="default;default;default;default;default",out_memory_spaces="0;0;0;0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "dynamic_slices"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=108 end_line=108 column=8 end_column=45}
+3 {file_name_id=1 function_name_id=2 line=104 end_line=104 column=8 end_column=50}
+4 {file_name_id=1 function_name_id=2 line=105 end_line=105 column=36 end_column=41}
+5 {file_name_id=1 function_name_id=2 line=104 end_line=104 column=33 end_column=38}
+6 {file_name_id=1 function_name_id=2 line=105 end_line=105 column=44 end_column=49}
+7 {file_name_id=1 function_name_id=2 line=105 end_line=105 column=8 end_column=54}
+8 {file_name_id=1 function_name_id=2 line=106 end_line=106 column=8 end_column=25}
+9 {file_name_id=1 function_name_id=2 line=107 end_line=107 column=8 end_column=57}
+10 {file_name_id=1 function_name_id=2 line=108 end_line=108 column=28 end_column=35}
+11 {file_name_id=1 function_name_id=2 line=109 end_line=109 column=23 end_column=26}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+8 {file_location_id=8 parent_frame_id=2}
+9 {file_location_id=9 parent_frame_id=2}
+10 {file_location_id=10 parent_frame_id=2}
+11 {file_location_id=11 parent_frame_id=2}
+
+
+%fused_computation.1 (param_0.3: f32[256,256], param_1.6: s32[], param_2.2: s32[]) -> (f32[16,32], f32[16,32]) {
+  %param_0.3 = f32[256,256]{1,0:T(8,128)S(1)} parameter(0)
+  %param_1.6 = s32[]{:T(128)S(6)} parameter(1)
+  %param_2.2 = s32[]{:T(128)S(6)} parameter(2)
+  %dynamic_slice.0 = f32[16,32]{1,0:T(8,128)} dynamic-slice(%param_0.3, %param_1.6, %param_2.2), dynamic_slice_sizes={16,32}, metadata={op_name="jit(dynamic_slices)/dynamic_slice" stack_frame_id=3}, backend_config={"flag_configs":[],"indices_config":{"index_known_bits":[{"bitwidth":"32","ones":"0","zeroes":"4294967040"},{"bitwidth":"32","ones":"0","zeroes":"4294967041"}],"is_index_aligned":[]},"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %constant.3 = f32[]{:T(128)} constant(2)
+  %mul.1 = f32[16,32]{1,0:T(8,128)} broadcast(%constant.3), dimensions={}, metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=4}
+  %mul.0 = f32[16,32]{1,0:T(8,128)S(1)} multiply(%dynamic_slice.0, %mul.1), metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=4}
+  ROOT %tuple.2 = (f32[16,32]{1,0:T(8,128)S(1)}, f32[16,32]{1,0:T(8,128)}) tuple(%mul.0, %dynamic_slice.0)
+}
+
+%fused_computation (param_0.1: f32[256,256], param_1.5: f32[256,256]) -> f32[512,256] {
+  %param_1.5 = f32[256,256]{1,0:T(8,128)S(1)} parameter(1)
+  %constant.2 = f32[]{:T(128)} constant(-inf)
+  %pad.5 = f32[512,256]{1,0:T(8,128)} pad(%param_1.5, %constant.2), padding=0_256x0_0, metadata={op_name="jit(dynamic_slices)/concatenate" stack_frame_id=2}
+  %param_0.1 = f32[256,256]{1,0:T(8,128)S(1)} parameter(0)
+  %pad.4 = f32[512,256]{1,0:T(8,128)} pad(%param_0.1, %constant.2), padding=256_0x0_0, metadata={op_name="jit(dynamic_slices)/concatenate" stack_frame_id=2}
+  ROOT %maximum.1 = f32[512,256]{1,0:T(8,128)} maximum(%pad.5, %pad.4), metadata={op_name="jit(dynamic_slices)/concatenate" stack_frame_id=2}
+}
+
+ENTRY %main.2 (x.1: f32[256,256], i.1: s32[]) -> (f32[16,32], f32[66,40], f32[259,259], f32[512,256], f32[128,512]) {
+  %constant = s32[]{:T(128)} constant(257)
+  %constant.8 = s32[]{:T(128)} constant(1)
+  %constant.10 = s32[]{:T(128)} constant(0)
+  %constant.11 = s32[]{:T(128)} constant(2)
+  %constant.9 = s32[]{:T(128)} constant(256)
+  %constant.7 = f32[]{:T(128)} constant(0.5)
+  %i.1 = s32[]{:T(128)} parameter(1), metadata={op_name="i"}
+  %x.1 = f32[256,256]{1,0:T(8,128)} parameter(0), metadata={op_name="x"}
+  %copy.5 = f32[256,256]{1,0:T(8,128)S(1)} copy(%x.1), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}]}
+  %copy.4 = s32[]{:T(128)S(6)} copy(%i.1), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %add.7 = s32[]{:T(128)S(6)} add(%copy.4, %constant), metadata={op_name="jit(dynamic_slices)/add" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %add.6 = s32[]{:T(128)S(6)} add(%copy.4, %constant.8), metadata={op_name="jit(dynamic_slices)/add" stack_frame_id=6}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %lt.5 = pred[]{:T(512)S(6)} compare(%add.6, %constant.10), direction=LT, metadata={op_name="jit(dynamic_slices)/lt" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %select_n.5 = s32[]{:T(128)S(6)} select(%lt.5, %add.7, %add.6), metadata={op_name="jit(dynamic_slices)/select_n" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[{"indices":["1","3"]}]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %mul.4 = s32[]{:T(128)S(6)} multiply(%copy.4, %constant.11), metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=5}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %add.5 = s32[]{:T(128)S(6)} add(%mul.4, %constant.9), metadata={op_name="jit(dynamic_slices)/add" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %lt.4 = pred[]{:T(512)S(6)} compare(%mul.4, %constant.10), direction=LT, metadata={op_name="jit(dynamic_slices)/lt" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %select_n.4 = s32[]{:T(128)S(6)} select(%lt.4, %add.5, %mul.4), metadata={op_name="jit(dynamic_slices)/select_n" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[{"indices":["1","3"]}]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %add.4 = s32[]{:T(128)S(6)} add(%copy.4, %constant.9), metadata={op_name="jit(dynamic_slices)/add" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %lt.3 = pred[]{:T(512)S(6)} compare(%copy.4, %constant.10), direction=LT, metadata={op_name="jit(dynamic_slices)/lt" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %select_n.3 = s32[]{:T(128)S(6)} select(%lt.3, %add.4, %copy.4), metadata={op_name="jit(dynamic_slices)/select_n" stack_frame_id=3}, backend_config={"aliasing_operands":{"lists":[{"indices":["1","3"]}]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %broadcast_multiply_fusion = (f32[16,32]{1,0:T(8,128)S(1)}, f32[16,32]{1,0:T(8,128)}) fusion(%copy.5, %select_n.3, %select_n.4), kind=kLoop, calls=%fused_computation.1, metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"8192"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2128","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["2","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.6 = f32[16,32]{1,0:T(8,128)} get-tuple-element(%broadcast_multiply_fusion), index=1, metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=4}
+  %get-tuple-element.5 = f32[16,32]{1,0:T(8,128)S(1)} get-tuple-element(%broadcast_multiply_fusion), index=0, metadata={op_name="jit(dynamic_slices)/mul" stack_frame_id=4}
+  %dynamic_update_slice.1 = f32[256,256]{1,0:T(8,128)S(1)} dynamic-update-slice(%copy.5, %get-tuple-element.5, %select_n.5, %constant.10), metadata={op_name="jit(dynamic_slices)/dynamic_update_slice" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[{"indices":["0","4"]}]},"flag_configs":[],"indices_config":{"index_known_bits":[{"bitwidth":"32","ones":"0","zeroes":"4294967040"},{"bitwidth":"32","ones":"0","zeroes":"4294967295"}],"is_index_aligned":[]},"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"81920"}]}
+  %slice.1 = f32[66,40]{1,0:T(8,128)S(1)} slice(%dynamic_update_slice.1), slice={[3:200:3], [10:50:1]}, metadata={op_name="jit(dynamic_slices)/slice" stack_frame_id=8}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"143360"}]}
+  %copy.1 = f32[66,40]{0,1:T(8,128)} copy(%slice.1), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"122880"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2221","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["9","1"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["5","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %bitcast.1 = f32[256,256]{0,1:T(8,128)S(1)} bitcast(%dynamic_update_slice.1)
+  %copy = f32[256,256]{1,0:T(8,128)S(1)} copy(%bitcast.1), metadata={op_name="jit(dynamic_slices)/transpose" stack_frame_id=11}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"0","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"100","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["32","2"],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["32","2"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %reshape.1 = f32[128,512]{1,0:T(8,128)} reshape(%copy), metadata={op_name="jit(dynamic_slices)/reshape" stack_frame_id=11}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"integer_config":{"integer":"65536"},"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"262144"}]}
+  %rev.1 = f32[256,256]{1,0:T(8,128)S(1)} reverse(%dynamic_update_slice.1), dimensions={0}, metadata={op_name="jit(dynamic_slices)/rev" stack_frame_id=10}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"131072"}]}
+  %pad_maximum_fusion = f32[512,256]{1,0:T(8,128)} fusion(%rev.1, %dynamic_update_slice.1), kind=kLoop, calls=%fused_computation, metadata={op_name="jit(dynamic_slices)/concatenate" stack_frame_id=2}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"524288"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"3012","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["64","2"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %pad.0 = f32[259,259]{1,0:T(8,128)} pad(%dynamic_update_slice.1, %constant.7), padding=1_2x0_3, metadata={op_name="jit(dynamic_slices)/jit(_pad)/pad" stack_frame_id=9}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"405504"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2622","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["33","3"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple = (f32[16,32]{1,0:T(8,128)}, f32[66,40]{0,1:T(8,128)}, f32[259,259]{1,0:T(8,128)}, f32[512,256]{1,0:T(8,128)}, f32[128,512]{1,0:T(8,128)}) tuple(%get-tuple-element.6, %copy.1, %pad.0, %pad_maximum_fusion, %reshape.1)
+}
+

@@ -29,6 +29,16 @@ export interface HloModule {
   computations: Computation[];
   byName: Map<string, Computation>;
   warnings: string[];
+  // Module-level source table that metadata stack_frame_id refers to.
+  stackFrames: Map<number, SourceFrame>;
+}
+
+export interface SourceFrame {
+  file: string;
+  func: string;
+  line: number;
+  column: number;
+  parent: number; // 0 when this is the outermost frame
 }
 
 export interface ComputationLink {

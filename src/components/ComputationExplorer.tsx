@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { layoutInstructions, NODE_HEIGHT, NODE_WIDTH } from '../lib/graph-layout';
+import { layoutInstructions, linkLabel, NODE_HEIGHT, NODE_WIDTH } from '../lib/graph-layout';
 import { nodeCategory, nodeSummary } from '../lib/parser';
 import type { HloModule, HloNode } from '../lib/types';
 import { Icon } from './Icon';
@@ -36,7 +36,7 @@ export function ComputationExplorer({ module, rootNode, onClose, onOpenFull }: C
     <header className="explorer-header"><div><span className="eyebrow">EXPANDED IN CANVAS</span><strong>%{rootNode.name}</strong></div><button type="button" className="icon-button" aria-label="Close expanded computation" onClick={onClose}><Icon name="close" /></button></header>
     <div className="explorer-breadcrumb"><button type="button" onClick={() => { setSteps([]); setSelected(null); }}>%{rootNode.name}</button>{steps.map((step, index) =>
       <span key={`${index}/${step.name}`}><span>›</span><button type="button" aria-current={index === steps.length - 1 ? 'page' : undefined} onClick={() => { setSteps(prior => prior.slice(0, index + 1)); setSelected(null); }}>%{step.name}</button></span>)}</div>
-    <div className="explorer-tabs">{entries.map(([role, name]) => <button type="button" key={role} className={steps[0]?.role === role ? 'active' : ''} onClick={() => chooseRoot(role, name)}>{role.toUpperCase()}</button>)}</div>
+    <div className="explorer-tabs">{entries.map(([role, name]) => <button type="button" key={role} className={steps[0]?.role === role ? 'active' : ''} onClick={() => chooseRoot(role, name)}>{linkLabel(role)}</button>)}</div>
     {computation && layout ? <>
       <div ref={scrollerRef} className="nested-scroller"><div className="nested-content" style={{ width: layout.width * scale, height: layout.height * scale }}><div className="nested-stage" style={{ width: layout.width, height: layout.height, transform: `scale(${scale})` }}>
         <svg width={layout.width} height={layout.height} aria-hidden="true">{computation.nodes.flatMap(node => node.operands.concat(node.controlPredecessors).map((source, index) => {
@@ -54,6 +54,6 @@ export function ComputationExplorer({ module, rootNode, onClose, onOpenFull }: C
       {selectedNode && <div className="explorer-detail"><strong>%{selectedNode.name}</strong><pre>{selectedNode.raw}</pre>{Object.entries(selectedNode.calls).filter(([, name]) => module.byName.has(name)).map(([role, name]) =>
         <button type="button" key={role} onClick={() => drill(role, name)}>Expand {role} → %{name}</button>)}</div>}
       <button type="button" className="explorer-full" onClick={() => onOpenFull(computation.name)}>Open %{computation.name} as full graph ↗</button>
-    </> : <p className="explorer-empty">Choose BODY or CONDITION to see its dependency graph.</p>}
+    </> : <p className="explorer-empty">Choose a called computation above to see its dependency graph.</p>}
   </aside>;
 }

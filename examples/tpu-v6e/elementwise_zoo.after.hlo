@@ -1,0 +1,226 @@
+HloModule jit_elementwise_zoo, is_scheduled=true, entry_computation_layout={(f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)})->(f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, /*index=5*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, /*index=10*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, pred[64,64]{1,0:T(32,128)(4,1)}, f32[64,64]{1,0:T(8,128)}, /*index=15*/f32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, /*index=20*/s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, /*index=25*/s32[64,64]{1,0:T(8,128)}, s8[64,64]{1,0:T(32,128)(4,1)}, f16[64,64]{1,0:T(8,128)(2,1)}, pred[64,64]{1,0:T(32,128)(4,1)}, f32[64,64]{1,0:T(8,128)}, /*index=30*/s32[64,64]{1,0:T(8,128)})}, allow_spmd_sharding_propagation_to_parameters={true,true}, allow_spmd_sharding_propagation_to_output={true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true}, frontend_attributes={arg_layout_modes="default;default",arg_memory_spaces="0;0",out_layout_modes="default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default;default",out_memory_spaces="0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "elementwise_zoo"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=125 end_line=125 column=10 end_column=17}
+3 {file_name_id=1 function_name_id=2 line=125 end_line=125 column=9 end_column=36}
+4 {file_name_id=1 function_name_id=2 line=126 end_line=126 column=10 end_column=17}
+5 {file_name_id=1 function_name_id=2 line=126 end_line=126 column=9 end_column=36}
+6 {file_name_id=1 function_name_id=2 line=133 end_line=133 column=89 end_column=108}
+7 {file_name_id=1 function_name_id=2 line=131 end_line=131 column=26 end_column=33}
+8 {file_name_id=1 function_name_id=2 line=131 end_line=131 column=17 end_column=24}
+9 {file_name_id=1 function_name_id=2 line=131 end_line=131 column=8 end_column=15}
+10 {file_name_id=1 function_name_id=2 line=132 end_line=132 column=34 end_column=45}
+11 {file_name_id=1 function_name_id=2 line=132 end_line=132 column=8 end_column=32}
+12 {file_name_id=1 function_name_id=2 line=131 end_line=131 column=58 end_column=88}
+13 {file_name_id=1 function_name_id=2 line=131 end_line=131 column=49 end_column=56}
+14 {file_name_id=1 function_name_id=2 line=131 end_line=131 column=40 end_column=47}
+15 {file_name_id=1 function_name_id=2 line=131 end_line=131 column=35 end_column=38}
+16 {file_name_id=1 function_name_id=2 line=132 end_line=132 column=47 end_column=85}
+17 {file_name_id=1 function_name_id=2 line=133 end_line=133 column=52 end_column=57}
+18 {file_name_id=1 function_name_id=2 line=133 end_line=133 column=62 end_column=67}
+19 {file_name_id=1 function_name_id=2 line=133 end_line=133 column=51 end_column=68}
+20 {file_name_id=1 function_name_id=2 line=130 end_line=130 column=45 end_column=50}
+21 {file_name_id=1 function_name_id=2 line=130 end_line=130 column=32 end_column=51}
+22 {file_name_id=1 function_name_id=2 line=133 end_line=133 column=70 end_column=87}
+23 {file_name_id=1 function_name_id=2 line=128 end_line=128 column=30 end_column=40}
+24 {file_name_id=1 function_name_id=2 line=129 end_line=129 column=8 end_column=32}
+25 {file_name_id=1 function_name_id=2 line=128 end_line=128 column=88 end_column=105}
+26 {file_name_id=1 function_name_id=2 line=133 end_line=133 column=28 end_column=49}
+27 {file_name_id=1 function_name_id=2 line=133 end_line=133 column=8 end_column=26}
+28 {file_name_id=1 function_name_id=2 line=130 end_line=130 column=66 end_column=96}
+29 {file_name_id=1 function_name_id=2 line=130 end_line=130 column=53 end_column=64}
+30 {file_name_id=1 function_name_id=2 line=130 end_line=130 column=8 end_column=30}
+31 {file_name_id=1 function_name_id=2 line=129 end_line=129 column=98 end_column=109}
+32 {file_name_id=1 function_name_id=2 line=129 end_line=129 column=84 end_column=96}
+33 {file_name_id=1 function_name_id=2 line=129 end_line=129 column=71 end_column=82}
+34 {file_name_id=1 function_name_id=2 line=129 end_line=129 column=57 end_column=69}
+35 {file_name_id=1 function_name_id=2 line=129 end_line=129 column=34 end_column=55}
+36 {file_name_id=1 function_name_id=2 line=128 end_line=128 column=69 end_column=86}
+37 {file_name_id=1 function_name_id=2 line=128 end_line=128 column=57 end_column=67}
+38 {file_name_id=1 function_name_id=2 line=128 end_line=128 column=43 end_column=55}
+39 {file_name_id=1 function_name_id=2 line=128 end_line=128 column=20 end_column=41}
+40 {file_name_id=1 function_name_id=2 line=128 end_line=128 column=8 end_column=18}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+8 {file_location_id=8 parent_frame_id=2}
+9 {file_location_id=9 parent_frame_id=2}
+10 {file_location_id=10 parent_frame_id=2}
+11 {file_location_id=11 parent_frame_id=2}
+12 {file_location_id=12 parent_frame_id=2}
+13 {file_location_id=13 parent_frame_id=2}
+14 {file_location_id=14 parent_frame_id=2}
+15 {file_location_id=15 parent_frame_id=2}
+16 {file_location_id=16 parent_frame_id=2}
+17 {file_location_id=17 parent_frame_id=2}
+18 {file_location_id=18 parent_frame_id=2}
+19 {file_location_id=19 parent_frame_id=2}
+20 {file_location_id=20 parent_frame_id=2}
+21 {file_location_id=21 parent_frame_id=2}
+22 {file_location_id=22 parent_frame_id=2}
+23 {file_location_id=23 parent_frame_id=2}
+24 {file_location_id=24 parent_frame_id=2}
+25 {file_location_id=25 parent_frame_id=2}
+26 {file_location_id=26 parent_frame_id=2}
+27 {file_location_id=27 parent_frame_id=2}
+28 {file_location_id=28 parent_frame_id=2}
+29 {file_location_id=29 parent_frame_id=2}
+30 {file_location_id=30 parent_frame_id=2}
+31 {file_location_id=31 parent_frame_id=2}
+32 {file_location_id=32 parent_frame_id=2}
+33 {file_location_id=33 parent_frame_id=2}
+34 {file_location_id=34 parent_frame_id=2}
+35 {file_location_id=35 parent_frame_id=2}
+36 {file_location_id=36 parent_frame_id=2}
+37 {file_location_id=36 parent_frame_id=37}
+38 {file_location_id=37 parent_frame_id=2}
+39 {file_location_id=38 parent_frame_id=2}
+40 {file_location_id=39 parent_frame_id=2}
+41 {file_location_id=40 parent_frame_id=2}
+
+
+%fused_computation.17 (param_0.50: f32[64,64], param_1.68: f32[64,64]) -> (f32[64,64], f32[64,64], f32[64,64], f16[64,64], s8[64,64], /*index=5*/f32[64,64], f32[64,64], f32[64,64], f32[64,64], f32[64,64], /*index=10*/f32[64,64], f32[64,64], f32[64,64], f32[64,64], f32[64,64], /*index=15*/f32[64,64], f32[64,64], f32[64,64]) {
+  %param_0.50 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  %param_1.68 = f32[64,64]{1,0:T(8,128)S(1)} parameter(1)
+  %max.6 = f32[64,64]{1,0:T(8,128)} maximum(%param_0.50, %param_1.68), metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %abs.0.clone.1 = f32[64,64]{1,0:T(8,128)} abs(%param_0.50), metadata={op_name="jit(elementwise_zoo)/abs" stack_frame_id=23}
+  %pow.0.clone.1 = f32[64,64]{1,0:T(8,128)} power(%abs.0.clone.1, %param_1.68), metadata={op_name="jit(elementwise_zoo)/pow" stack_frame_id=24}
+  %atan2.0 = f32[64,64]{1,0:T(8,128)} atan2(%param_0.50, %param_1.68), metadata={op_name="jit(elementwise_zoo)/atan2" stack_frame_id=25}
+  %convert_element_type.18 = f16[64,64]{1,0:T(8,128)(2,1)} convert(%param_0.50), metadata={op_name="jit(elementwise_zoo)/convert_element_type" stack_frame_id=26}
+  %convert_element_type.19 = s8[64,64]{1,0:T(32,128)(4,1)} convert(%param_0.50), metadata={op_name="jit(elementwise_zoo)/convert_element_type" stack_frame_id=27}
+  %reduce_precision.0 = f32[64,64]{1,0:T(8,128)} reduce-precision(%param_0.50), exponent_bits=5, mantissa_bits=10, metadata={op_name="jit(elementwise_zoo)/reduce_precision" stack_frame_id=28}
+  %cbrt.0 = f32[64,64]{1,0:T(8,128)} cbrt(%param_0.50), metadata={op_name="jit(elementwise_zoo)/cbrt" stack_frame_id=29}
+  %constant.25.clone.1 = f32[]{:T(128)} constant(-0.5)
+  %max.4.clone.1 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.25.clone.1), dimensions={}, metadata={op_name="jit(elementwise_zoo)/jit(clip)/max" stack_frame_id=30}
+  %constant.26.clone.1 = f32[]{:T(128)} constant(0.5)
+  %min.6.clone.1 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.26.clone.1), dimensions={}, metadata={op_name="jit(elementwise_zoo)/jit(clip)/min" stack_frame_id=30}
+  %clamp.1.clone.1 = f32[64,64]{1,0:T(8,128)} clamp(%max.4.clone.1, %param_0.50, %min.6.clone.1), metadata={op_name="jit(elementwise_zoo)/jit(clip)/min" stack_frame_id=30}
+  %sign.0 = f32[64,64]{1,0:T(8,128)} sign(%param_0.50), metadata={op_name="jit(elementwise_zoo)/sign" stack_frame_id=31}
+  %round.2 = f32[64,64]{1,0:T(8,128)} round-nearest-even(%param_0.50), metadata={op_name="jit(elementwise_zoo)/jit(round)/round" stack_frame_id=32}
+  %ceil.0 = f32[64,64]{1,0:T(8,128)} ceil(%param_0.50), metadata={op_name="jit(elementwise_zoo)/ceil" stack_frame_id=33}
+  %floor.0 = f32[64,64]{1,0:T(8,128)} floor(%param_0.50), metadata={op_name="jit(elementwise_zoo)/floor" stack_frame_id=34}
+  %constant.24.clone.1 = f32[]{:T(128)} constant(1.5)
+  %rem.5.clone.1 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.24.clone.1), dimensions={}, metadata={op_name="jit(elementwise_zoo)/jit(remainder)/rem" stack_frame_id=35}
+  %rem.4.clone.1 = f32[64,64]{1,0:T(8,128)} remainder(%param_0.50, %rem.5.clone.1), metadata={op_name="jit(elementwise_zoo)/jit(remainder)/rem" stack_frame_id=35}
+  %constant.3.clone.1 = f32[]{:T(128)} constant(0), metadata={op_name="jit(elementwise_zoo)/jit(remainder)" stack_frame_id=35}
+  %broadcast.1.clone.1 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.3.clone.1), dimensions={}, metadata={op_name="jit(elementwise_zoo)/jit(remainder)" stack_frame_id=35}
+  %ne.7.clone.1 = pred[64,64]{1,0:T(8,128)(4,1)} compare(%rem.4.clone.1, %broadcast.1.clone.1), direction=LT, metadata={op_name="jit(elementwise_zoo)/jit(remainder)/lt" stack_frame_id=35}
+  %ne.6.clone.1 = pred[64,64]{1,0:T(8,128)(4,1)} compare(%rem.4.clone.1, %broadcast.1.clone.1), direction=NE, metadata={op_name="jit(elementwise_zoo)/jit(remainder)/ne" stack_frame_id=35}
+  %and.3.clone.1 = pred[64,64]{1,0:T(8,128)(4,1)} and(%ne.7.clone.1, %ne.6.clone.1), metadata={op_name="jit(elementwise_zoo)/jit(remainder)/and" stack_frame_id=35}
+  %add.2.clone.1 = f32[64,64]{1,0:T(8,128)} add(%rem.4.clone.1, %rem.5.clone.1), metadata={op_name="jit(elementwise_zoo)/jit(remainder)/add" stack_frame_id=35}
+  %select_n.2.clone.1 = f32[64,64]{1,0:T(8,128)} select(%and.3.clone.1, %add.2.clone.1, %rem.4.clone.1), metadata={op_name="jit(elementwise_zoo)/jit(remainder)/select_n" stack_frame_id=35}
+  %constant.27.clone.1 = f32[]{:T(128)} constant(1)
+  %broadcast.15.clone.1 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.27.clone.1), dimensions={}
+  %neg.0.clone.1 = f32[64,64]{1,0:T(8,128)} negate(%param_0.50), metadata={op_name="jit(elementwise_zoo)/neg" stack_frame_id=37}
+  %exp.0.clone.1 = f32[64,64]{1,0:T(8,128)} exponential(%neg.0.clone.1), metadata={op_name="jit(elementwise_zoo)/exp" stack_frame_id=37}
+  %add.6.clone.1 = f32[64,64]{1,0:T(8,128)} add(%exp.0.clone.1, %broadcast.15.clone.1), metadata={op_name="jit(elementwise_zoo)/add" stack_frame_id=37}
+  %div.1.clone.1 = f32[64,64]{1,0:T(8,128)} divide(%broadcast.15.clone.1, %add.6.clone.1), metadata={op_name="jit(elementwise_zoo)/div" stack_frame_id=37}
+  %erf.0 = f32[64,64]{1,0:T(8,128)} erf(%param_0.50), metadata={op_name="jit(elementwise_zoo)/erf" stack_frame_id=38}
+  %expm1.0 = f32[64,64]{1,0:T(8,128)} exponential-minus-one(%param_0.50), metadata={op_name="jit(elementwise_zoo)/expm1" stack_frame_id=39}
+  %log1p.0.clone.1 = f32[64,64]{1,0:T(8,128)} log-plus-one(%abs.0.clone.1), metadata={op_name="jit(elementwise_zoo)/log1p" stack_frame_id=40}
+  %exp.1 = f32[64,64]{1,0:T(8,128)} exponential(%param_0.50), metadata={op_name="jit(elementwise_zoo)/exp" stack_frame_id=41}
+  ROOT %tuple.22 = (f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f16[64,64]{1,0:T(8,128)(2,1)}, s8[64,64]{1,0:T(32,128)(4,1)}, /*index=5*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, /*index=10*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, /*index=15*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}) tuple(%max.6, %pow.0.clone.1, %atan2.0, %convert_element_type.18, %convert_element_type.19, /*index=5*/%reduce_precision.0, %cbrt.0, %clamp.1.clone.1, %sign.0, %round.2, /*index=10*/%ceil.0, %floor.0, %select_n.2.clone.1, %div.1.clone.1, %erf.0, /*index=15*/%expm1.0, %log1p.0.clone.1, %exp.1)
+}
+
+%fused_computation.13 (param_0.27: f32[64,64], param_1.59: f32[64,64]) -> (pred[64,64], pred[64,64]) {
+  %param_0.27 = f32[64,64]{1,0:T(8,128)} parameter(0)
+  %param_1.59 = f32[64,64]{1,0:T(8,128)} parameter(1)
+  %gt.0 = pred[64,64]{1,0:T(8,128)(4,1)} compare(%param_0.27, %param_1.59), direction=GT, metadata={op_name="jit(elementwise_zoo)/gt" stack_frame_id=17}
+  %constant.28 = f32[]{:T(128)} constant(1)
+  %broadcast.16 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.28), dimensions={}
+  %lt.4 = pred[64,64]{1,0:T(8,128)(4,1)} compare(%param_0.27, %broadcast.16), direction=LT, metadata={op_name="jit(elementwise_zoo)/lt" stack_frame_id=18}
+  %and.6 = pred[64,64]{1,0:T(8,128)(4,1)} and(%gt.0, %lt.4), metadata={op_name="jit(elementwise_zoo)/and" stack_frame_id=19}
+  %copy = pred[64,64]{1,0:T(32,128)(4,1)} copy(%and.6)
+  %div.0.clone.1 = f32[64,64]{1,0:T(8,128)} divide(%param_0.27, %param_1.59), metadata={op_name="jit(elementwise_zoo)/div" stack_frame_id=20}
+  %is_finite.0.clone.1 = pred[64,64]{1,0:T(8,128)(4,1)} is-finite(%div.0.clone.1), metadata={op_name="jit(elementwise_zoo)/is_finite" stack_frame_id=21}
+  %copy.1 = pred[64,64]{1,0:T(32,128)(4,1)} copy(%is_finite.0.clone.1)
+  ROOT %tuple.7 = (pred[64,64]{1,0:T(32,128)(4,1)}, pred[64,64]{1,0:T(32,128)(4,1)}) tuple(%copy, %copy.1)
+}
+
+%fused_computation.3 (param_0.41: f32[64,64], param_1.53: f32[64,64]) -> (s32[64,64], s32[64,64], s32[64,64], s32[64,64], s32[64,64], /*index=5*/s32[64,64], s32[64,64], s32[64,64], s32[64,64], s32[64,64], /*index=10*/s32[64,64]) {
+  %param_1.53 = f32[64,64]{1,0:T(8,128)S(1)} parameter(1)
+  %constant.7 = f32[]{:T(128)} constant(100)
+  %broadcast.10 = f32[64,64]{1,0:T(8,128)} broadcast(%constant.7), dimensions={}
+  %mul.14 = f32[64,64]{1,0:T(8,128)} multiply(%param_1.53, %broadcast.10), metadata={op_name="jit(elementwise_zoo)/mul" stack_frame_id=2}
+  %convert_element_type.8 = s32[64,64]{1,0:T(8,128)} convert(%mul.14), metadata={op_name="jit(elementwise_zoo)/convert_element_type" stack_frame_id=3}
+  %param_0.41 = f32[64,64]{1,0:T(8,128)S(1)} parameter(0)
+  %mul.4 = f32[64,64]{1,0:T(8,128)} multiply(%param_0.41, %broadcast.10), metadata={op_name="jit(elementwise_zoo)/mul" stack_frame_id=4}
+  %convert_element_type.0 = s32[64,64]{1,0:T(8,128)} convert(%mul.4), metadata={op_name="jit(elementwise_zoo)/convert_element_type" stack_frame_id=5}
+  %min.4 = s32[64,64]{1,0:T(8,128)} minimum(%convert_element_type.8, %convert_element_type.0), metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %xor.0.clone.1 = s32[64,64]{1,0:T(8,128)} xor(%convert_element_type.8, %convert_element_type.0), metadata={op_name="jit(elementwise_zoo)/xor" stack_frame_id=7}
+  %or.0.clone.1 = s32[64,64]{1,0:T(8,128)} or(%convert_element_type.8, %convert_element_type.0), metadata={op_name="jit(elementwise_zoo)/or" stack_frame_id=8}
+  %and.2.clone.1 = s32[64,64]{1,0:T(8,128)} and(%convert_element_type.8, %convert_element_type.0), metadata={op_name="jit(elementwise_zoo)/and" stack_frame_id=9}
+  %clz.0.clone.1 = s32[64,64]{1,0:T(8,128)} count-leading-zeros(%convert_element_type.8), metadata={op_name="jit(elementwise_zoo)/clz" stack_frame_id=10}
+  %population_count.0.clone.1 = s32[64,64]{1,0:T(8,128)} popcnt(%convert_element_type.8), metadata={op_name="jit(elementwise_zoo)/population_count" stack_frame_id=11}
+  %constant.31.clone.1 = s32[]{:T(128)} constant(3)
+  %shift_right_logical.1.clone.1 = s32[64,64]{1,0:T(8,128)} broadcast(%constant.31.clone.1), dimensions={}, metadata={op_name="jit(elementwise_zoo)/shift_right_logical" stack_frame_id=12}
+  %shift_right_logical.0.clone.1 = s32[64,64]{1,0:T(8,128)} shift-right-logical(%convert_element_type.8, %shift_right_logical.1.clone.1), metadata={op_name="jit(elementwise_zoo)/shift_right_logical" stack_frame_id=12}
+  %constant.30.clone.1 = s32[]{:T(128)} constant(1)
+  %shift_right_arithmetic.1.clone.1 = s32[64,64]{1,0:T(8,128)} broadcast(%constant.30.clone.1), dimensions={}, metadata={op_name="jit(elementwise_zoo)/shift_right_arithmetic" stack_frame_id=13}
+  %shift_right_arithmetic.0.clone.1 = s32[64,64]{1,0:T(8,128)} shift-right-arithmetic(%convert_element_type.8, %shift_right_arithmetic.1.clone.1), metadata={op_name="jit(elementwise_zoo)/shift_right_arithmetic" stack_frame_id=13}
+  %constant.29.clone.1 = s32[]{:T(128)} constant(2)
+  %shift_left.1.clone.1 = s32[64,64]{1,0:T(8,128)} broadcast(%constant.29.clone.1), dimensions={}, metadata={op_name="jit(elementwise_zoo)/shift_left" stack_frame_id=14}
+  %shift_left.0.clone.1 = s32[64,64]{1,0:T(8,128)} shift-left(%convert_element_type.8, %shift_left.1.clone.1), metadata={op_name="jit(elementwise_zoo)/shift_left" stack_frame_id=14}
+  %not.0.clone.1 = s32[64,64]{1,0:T(8,128)} not(%convert_element_type.8), metadata={op_name="jit(elementwise_zoo)/not" stack_frame_id=15}
+  %bitcast_convert_type.0 = s32[64,64]{1,0:T(8,128)} bitcast-convert(%param_1.53), metadata={op_name="jit(elementwise_zoo)/bitcast_convert_type" stack_frame_id=16}
+  ROOT %tuple.29 = (s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, /*index=5*/s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, /*index=10*/s32[64,64]{1,0:T(8,128)}) tuple(%min.4, %xor.0.clone.1, %or.0.clone.1, %and.2.clone.1, %clz.0.clone.1, /*index=5*/%population_count.0.clone.1, %shift_right_logical.0.clone.1, %shift_right_arithmetic.0.clone.1, %shift_left.0.clone.1, %not.0.clone.1, /*index=10*/%bitcast_convert_type.0)
+}
+
+ENTRY %main.4 (x.1: f32[64,64], y.1: f32[64,64]) -> (f32[64,64], f32[64,64], f32[64,64], f32[64,64], f32[64,64], /*index=5*/f32[64,64], f32[64,64], f32[64,64], f32[64,64], f32[64,64], /*index=10*/f32[64,64], f32[64,64], f32[64,64], pred[64,64], f32[64,64], /*index=15*/f32[64,64], s32[64,64], s32[64,64], s32[64,64], s32[64,64], /*index=20*/s32[64,64], s32[64,64], s32[64,64], s32[64,64], s32[64,64], /*index=25*/s32[64,64], s8[64,64], f16[64,64], pred[64,64], f32[64,64], /*index=30*/s32[64,64]) {
+  %y.1 = f32[64,64]{1,0:T(8,128)} parameter(1), metadata={op_name="y"}
+  %copy-start.1 = (f32[64,64]{1,0:T(8,128)S(1)}, f32[64,64]{1,0:T(8,128)}, u32[]{:S(2)}) copy-start(%y.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %x.1 = f32[64,64]{1,0:T(8,128)} parameter(0), metadata={op_name="x"}
+  %copy-start = (f32[64,64]{1,0:T(8,128)S(1)}, f32[64,64]{1,0:T(8,128)}, u32[]{:S(2)}) copy-start(%x.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %compare_and_fusion = (pred[64,64]{1,0:T(32,128)(4,1)}, pred[64,64]{1,0:T(32,128)(4,1)}) fusion(%x.1, %y.1), kind=kLoop, calls=%fused_computation.13, metadata={op_name="jit(elementwise_zoo)/and" stack_frame_id=19}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"81920"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2284","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.39 = pred[64,64]{1,0:T(32,128)(4,1)} get-tuple-element(%compare_and_fusion), index=1, metadata={op_name="jit(elementwise_zoo)/and" stack_frame_id=19}
+  %get-tuple-element.38 = pred[64,64]{1,0:T(32,128)(4,1)} get-tuple-element(%compare_and_fusion), index=0, metadata={op_name="jit(elementwise_zoo)/and" stack_frame_id=19}
+  %copy-done.1 = f32[64,64]{1,0:T(8,128)S(1)} copy-done(%copy-start.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy-done = f32[64,64]{1,0:T(8,128)S(1)} copy-done(%copy-start), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %convert_minimum_fusion = (s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, /*index=5*/s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, /*index=10*/s32[64,64]{1,0:T(8,128)}) fusion(%copy-done.1, %copy-done), kind=kLoop, calls=%fused_computation.3, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"360448"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2555","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.61 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=10, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.60 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=9, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.59 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=8, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.58 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=7, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.57 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=6, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.56 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=5, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.55 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=4, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.34 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=3, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.33 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=2, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.32 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=1, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %get-tuple-element.31 = s32[64,64]{1,0:T(8,128)} get-tuple-element(%convert_minimum_fusion), index=0, metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=6}
+  %fusion = (f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f16[64,64]{1,0:T(8,128)(2,1)}, s8[64,64]{1,0:T(32,128)(4,1)}, /*index=5*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, /*index=10*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, /*index=15*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}) fusion(%copy-done, %copy-done.1), kind=kLoop, calls=%fused_computation.17, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"548864"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2956","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["8","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %get-tuple-element.54 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=17, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.53 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=16, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.52 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=15, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.51 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=14, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.50 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=13, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.49 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=12, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.48 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=11, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.47 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=10, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.46 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=9, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.45 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=8, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.44 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=7, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.43 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=6, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.42 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=5, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.41 = s8[64,64]{1,0:T(32,128)(4,1)} get-tuple-element(%fusion), index=4, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.40 = f16[64,64]{1,0:T(8,128)(2,1)} get-tuple-element(%fusion), index=3, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.37 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=2, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.36 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=1, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  %get-tuple-element.35 = f32[64,64]{1,0:T(8,128)} get-tuple-element(%fusion), index=0, metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=22}
+  ROOT %tuple = (f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, /*index=5*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, /*index=10*/f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, f32[64,64]{1,0:T(8,128)}, pred[64,64]{1,0:T(32,128)(4,1)}, f32[64,64]{1,0:T(8,128)}, /*index=15*/f32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, /*index=20*/s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, s32[64,64]{1,0:T(8,128)}, /*index=25*/s32[64,64]{1,0:T(8,128)}, s8[64,64]{1,0:T(32,128)(4,1)}, f16[64,64]{1,0:T(8,128)(2,1)}, pred[64,64]{1,0:T(32,128)(4,1)}, f32[64,64]{1,0:T(8,128)}, /*index=30*/s32[64,64]{1,0:T(8,128)}) tuple(%get-tuple-element.54, %get-tuple-element.53, %get-tuple-element.52, %get-tuple-element.51, %get-tuple-element.50, /*index=5*/%get-tuple-element.37, %get-tuple-element.36, %get-tuple-element.49, %get-tuple-element.48, %get-tuple-element.47, /*index=10*/%get-tuple-element.46, %get-tuple-element.45, %get-tuple-element.44, %get-tuple-element.39, %get-tuple-element.43, /*index=15*/%get-tuple-element.42, %get-tuple-element.34, %get-tuple-element.33, %get-tuple-element.32, %get-tuple-element.60, /*index=20*/%get-tuple-element.59, %get-tuple-element.58, %get-tuple-element.57, %get-tuple-element.56, %get-tuple-element.55, /*index=25*/%get-tuple-element.61, %get-tuple-element.41, %get-tuple-element.40, %get-tuple-element.38, %get-tuple-element.35, /*index=30*/%get-tuple-element.31)
+}
+

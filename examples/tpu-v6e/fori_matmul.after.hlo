@@ -1,0 +1,90 @@
+HloModule jit_fori_matmul, is_scheduled=true, entry_computation_layout={(bf16[128,128]{1,0:T(8,128)(2,1)}, bf16[128,128]{1,0:T(8,128)(2,1)})->bf16[128,128]{1,0:T(8,128)(2,1)}}, allow_spmd_sharding_propagation_to_parameters={true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={arg_layout_modes="default;default",arg_memory_spaces="0;0",out_layout_modes="default",out_memory_spaces="0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "fori_matmul"
+3 "fori_matmul.<locals>.<lambda>"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=209 end_line=209 column=18 end_column=56}
+2 {file_name_id=1 function_name_id=2 line=76 end_line=76 column=11 end_column=85}
+3 {file_name_id=1 function_name_id=3 line=76 end_line=76 column=56 end_column=63}
+4 {file_name_id=1 function_name_id=3 line=76 end_line=76 column=47 end_column=64}
+5 {file_name_id=1 function_name_id=3 line=76 end_line=76 column=67 end_column=81}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=2 parent_frame_id=3}
+4 {file_location_id=2 parent_frame_id=4}
+5 {file_location_id=3 parent_frame_id=5}
+6 {file_location_id=4 parent_frame_id=5}
+7 {file_location_id=5 parent_frame_id=5}
+
+
+%bitcast_fusion.clone.1 (bitcast_input.5: bf16[128,128]) -> bf16[128,128] {
+  %bitcast_input.5 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} parameter(0)
+  ROOT %bitcast.5 = bf16[128,128]{1,0:T(8,128)(2,1)} bitcast(%bitcast_input.5)
+}
+
+%bitcast_fusion.1.clone.1 (bitcast_input.4: bf16[128,128]) -> bf16[128,128] {
+  %bitcast_input.4 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} parameter(0)
+  ROOT %bitcast.4 = bf16[128,128]{1,0:T(8,128)(2,1)} bitcast(%bitcast_input.4)
+}
+
+%fused_computation.1.clone.1 (param_0.7: bf16[128,128], param_1.7: bf16[128,128], param_2.3: bf16[]) -> bf16[128,128] {
+  %param_0.7 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} parameter(0)
+  %fusion.6 = bf16[128,128]{1,0:T(8,128)(2,1)} fusion(%param_0.7), kind=kLoop, calls=%bitcast_fusion.clone.1
+  %param_1.7 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} parameter(1)
+  %fusion.7 = bf16[128,128]{1,0:T(8,128)(2,1)} fusion(%param_1.7), kind=kLoop, calls=%bitcast_fusion.1.clone.1
+  %convolution.5 = bf16[128,128]{1,0:T(8,128)(2,1)} convolution(%fusion.6, %fusion.7), dim_labels=bf_io->bf, metadata={op_name="jit(fori_matmul)/while/body/eval_jaxpr/dot_general" stack_frame_id=5}
+  %convert = f32[128,128]{1,0:T(8,128)} convert(%convolution.5)
+  %tanh.9 = f32[128,128]{1,0:T(8,128)} tanh(%convert), metadata={op_name="jit(fori_matmul)/while/body/eval_jaxpr/tanh" stack_frame_id=6}, backend_config={"flag_configs":[],"float_type_correction_info":{"original_shape":{"dimensions":["128","128"],"element_type":"BF16","is_dynamic_dimension":[false,false],"layout":{"dim_level_types":[],"dim_ordered":[],"dim_unique":[],"dynamic_shape_metadata_prefix_bytes":"0","element_size_in_bits":"0","index_primitive_type":"PRIMITIVE_TYPE_INVALID","memory_space":"0","minor_to_major":["1","0"],"pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","split_configs":[],"tail_padding_alignment_in_elements":"1","tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}]},"tuple_shapes":[]},"original_type":"BF16"},"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %param_2.3 = bf16[]{:T(256)S(6)} parameter(2)
+  %add.30 = bf16[128,128]{1,0:T(8,128)(2,1)} broadcast(%param_2.3), dimensions={}, metadata={op_name="jit(fori_matmul)/while/body/eval_jaxpr/add" stack_frame_id=6}
+  %convert.1 = f32[128,128]{1,0:T(8,128)} convert(%add.30)
+  %add.29 = f32[128,128]{1,0:T(8,128)} add(%tanh.9, %convert.1), metadata={op_name="jit(fori_matmul)/while/body/eval_jaxpr/add" stack_frame_id=6}, backend_config={"flag_configs":[],"float_type_correction_info":{"original_shape":{"dimensions":["128","128"],"element_type":"BF16","is_dynamic_dimension":[false,false],"layout":{"dim_level_types":[],"dim_ordered":[],"dim_unique":[],"dynamic_shape_metadata_prefix_bytes":"0","element_size_in_bits":"0","index_primitive_type":"PRIMITIVE_TYPE_INVALID","memory_space":"0","minor_to_major":["1","0"],"pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","split_configs":[],"tail_padding_alignment_in_elements":"1","tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}]},"tuple_shapes":[]},"original_type":"BF16"},"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  ROOT %convert.2 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} convert(%add.29)
+}
+
+%wide.region_0.1.clone.clone.sunk.clone.sunk (wide.arg_tuple.0: (s32[], bf16[128,128], bf16[128,128], s32[])) -> (s32[], bf16[128,128], bf16[128,128], s32[]) {
+  %constant.10..sunk = s32[]{:T(128)} constant(1)
+  %wide.arg_tuple.0 = (s32[]{:T(128)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, s32[]{:T(128)}) parameter(0)
+  %get-tuple-element.82 = s32[]{:T(128)} get-tuple-element(%wide.arg_tuple.0), index=0
+  %convert_element_type.6 = bf16[]{:T(256)S(6)} convert(%get-tuple-element.82), metadata={op_name="jit(fori_matmul)/while/body/eval_jaxpr/convert_element_type" stack_frame_id=7}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %add.31 = s32[]{:T(128)} add(%get-tuple-element.82, %constant.10..sunk), metadata={op_name="jit(fori_matmul)/while/body/add" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[{"indices":["0","2"]}]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %get-tuple-element.89 = s32[]{:T(128)} get-tuple-element(%wide.arg_tuple.0), index=3
+  %get-tuple-element.88 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} get-tuple-element(%wide.arg_tuple.0), index=2
+  %get-tuple-element.83 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} get-tuple-element(%wide.arg_tuple.0), index=1
+  %copy.11 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} copy(%get-tuple-element.83), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_INVALID","estimated_bundle_count":"0","estimated_cycles":"2194","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":[],"is_mask":false,"iteration_bounds":["1","1"],"kernel_window_bounds":[],"ml_estimated_microseconds":0,"output_window_bounds":["16","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  %fusion.8 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} fusion(%copy.11, %get-tuple-element.88, %convert_element_type.6), kind=kOutput, calls=%fused_computation.1.clone.1, metadata={op_name="jit(fori_matmul)/while/body/eval_jaxpr/dot_general" stack_frame_id=5}, backend_config={"aliasing_operands":{"lists":[]},"convolution_algorithm_config":{"emitter":"EmitAllBatchInSublanes"},"flag_configs":[],"retry_config":{"retry_count":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"window_config":{"buffering_level":"2","cost_model_type":"COST_MODEL_TYPE_CLASSIC","estimated_bundle_count":"0","estimated_cycles":"1056","estimated_scoped_vmem_bytes":"0","estimated_vmem_bytes":"0","input_window_bounds":["16","1"],"is_mask":false,"iteration_bounds":["1","1","1"],"kernel_window_bounds":["16","1"],"ml_estimated_microseconds":0,"output_window_bounds":["16","1"],"pad_input_on_minor_dim":"0","pad_output_on_minor_dim":"0"}}
+  ROOT %tuple.21 = (s32[]{:T(128)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, s32[]{:T(128)}) tuple(%add.31, %fusion.8, %get-tuple-element.88, %get-tuple-element.89)
+}
+
+%wide.region_1.2.clone.clone (wide.arg_tuple.6: (s32[], bf16[128,128], bf16[128,128], s32[])) -> pred[] {
+  %constant.12 = s32[]{:T(128)} constant(10)
+  %wide.arg_tuple.6 = (s32[]{:T(128)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, s32[]{:T(128)}) parameter(0)
+  %get-tuple-element.62 = s32[]{:T(128)} get-tuple-element(%wide.arg_tuple.6), index=0
+  ROOT %lt.3 = pred[]{:T(512)} compare(%get-tuple-element.62, %constant.12), direction=LT, metadata={op_name="jit(fori_matmul)/while/cond/lt" stack_frame_id=4}, backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
+ENTRY %main.3 (a.1: bf16[128,128], b.1: bf16[128,128]) -> bf16[128,128] {
+  %constant.5 = s32[]{:T(128)} constant(0)
+  %constant.10 = s32[]{:T(128)} constant(1)
+  %b.1 = bf16[128,128]{1,0:T(8,128)(2,1)} parameter(1), metadata={op_name="b"}
+  %copy-start.2 = (bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, bf16[128,128]{1,0:T(8,128)(2,1)}, u32[]{:S(2)}) copy-start(%b.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %a.1 = bf16[128,128]{1,0:T(8,128)(2,1)} parameter(0), metadata={op_name="a"}
+  %copy-start.1 = (bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, bf16[128,128]{1,0:T(8,128)(2,1)}, u32[]{:S(2)}) copy-start(%a.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy.10 = s32[]{:T(128)} copy(%constant.5), backend_config={"aliasing_operands":{"lists":[]},"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy-done.2 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} copy-done(%copy-start.2), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %copy-done.1 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} copy-done(%copy-start.1), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  %tuple.24 = (s32[]{:T(128)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, s32[]{:T(128)}) tuple(%copy.10, %copy-done.1, %copy-done.2, %constant.10)
+  %while.2 = (s32[]{:T(128)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, s32[]{:T(128)}) while(%tuple.24), condition=%wide.region_1.2.clone.clone, body=%wide.region_0.1.clone.clone.sunk.clone.sunk, metadata={op_name="jit(fori_matmul)/while" stack_frame_id=3}
+  %get-tuple-element.90 = bf16[128,128]{1,0:T(8,128)(2,1)S(1)} get-tuple-element(%while.2), index=1
+  %copy-start = (bf16[128,128]{1,0:T(8,128)(2,1)}, bf16[128,128]{1,0:T(8,128)(2,1)S(1)}, u32[]{:S(2)}) copy-start(%get-tuple-element.90), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+  ROOT %copy-done = bf16[128,128]{1,0:T(8,128)(2,1)} copy-done(%copy-start), backend_config={"dma_priority":1,"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[]}
+}
+
