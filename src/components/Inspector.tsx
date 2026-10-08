@@ -4,6 +4,7 @@ import { extractHloMetadata } from '../lib/metadata.ts';
 import { nodeCategory, nodeSummary } from '../lib/parser';
 import type { Computation, HloModule, HloNode } from '../lib/types';
 import { TypeTree } from './TypeTree';
+import { Icon } from './Icon';
 
 interface InspectorProps {
   module: HloModule;
@@ -22,9 +23,9 @@ function ReferenceList({ names, onNode }: { names: string[]; onNode: (name: stri
 
 export function Inspector({ module, computation, node, upstreamCount, downstreamCount, onClose, onNode, onComputation }: InspectorProps) {
   return <aside className={`inspector${node ? ' inspector-visible' : ''}`}>
-    <div className="inspector-header"><div><div className="eyebrow">INSPECTOR</div><h2>Node details</h2></div><button className="icon-button" type="button" aria-label="Clear selection" onClick={onClose}>×</button></div>
+    <div className="inspector-header"><div><div className="eyebrow">INSPECTOR</div><h2>Node details</h2></div><button className="icon-button" type="button" aria-label="Clear selection" onClick={onClose}><Icon name="close" /></button></div>
     <div className="inspector-content overscroll-contain">{node && computation ? <InstructionDetails key={node.id} {...{ module, computation, node, upstreamCount, downstreamCount, onNode, onComputation }} /> :
-      <div className="empty-inspector"><div className="empty-icon">◇</div><strong>Explore the graph</strong><p>Select any node to see its inputs, consumers, raw HLO, and linked computations.</p></div>}
+      <div className="empty-inspector"><div className="empty-icon"><Icon name="graph" size={28} /></div><strong>Explore the graph</strong><p>Select any node to see its inputs, consumers, raw HLO, and linked computations.</p></div>}
     </div>
   </aside>;
 }

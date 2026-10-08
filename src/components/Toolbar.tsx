@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { computationLinks } from '../lib/parser';
 import { computationRole } from '../lib/graph-layout';
 import type { HloModule } from '../lib/types';
+import { Icon } from './Icon';
 
 interface ToolbarProps {
   module: HloModule;
@@ -20,6 +21,30 @@ interface ToolbarProps {
   onZoom: (delta: number) => void;
   onSearch: () => void;
   onImport: () => void;
+}
+
+type Theme = 'system' | 'light' | 'dark';
+const themeOrder: Theme[] = ['system', 'light', 'dark'];
+const themeLabel = { system: 'Theme: follow system', light: 'Theme: light', dark: 'Theme: dark' };
+
+function ThemeButton() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    try { const saved = localStorage.getItem('theme'); if (saved === 'light' || saved === 'dark') return saved; } catch { /* storage blocked */ }
+    return 'system';
+  });
+  useEffect(() => {
+    try { if (theme === 'system') localStorage.removeItem('theme'); else localStorage.setItem('theme', theme); } catch { /* storage blocked */ }
+    const media = matchMedia('(prefers-color-scheme: dark)');
+    const apply = () => { document.documentElement.dataset.theme = theme === 'system' ? (media.matches ? 'dark' : 'light') : theme; };
+    apply();
+    if (theme !== 'system') return;
+    media.addEventListener('change', apply);
+    return () => media.removeEventListener('change', apply);
+  }, [theme]);
+  const next = themeOrder[(themeOrder.indexOf(theme) + 1) % themeOrder.length];
+  return <button className="icon-button theme-button" type="button" title={`${themeLabel[theme]} (click for ${next})`} aria-label={`${themeLabel[theme]}. Switch to ${next}`} onClick={() => setTheme(next)}>
+    <Icon name={theme === 'system' ? 'system' : theme === 'light' ? 'sun' : 'moon'} />
+  </button>;
 }
 
 export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastNameOnly, showMemoryLocation, onUseOpName, onShowLastNameOnly, onShowMemoryLocation, onBack, onComputation, onFit, onZoom, onSearch, onImport }: ToolbarProps) {
@@ -46,7 +71,7 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
   const hasLoopLinks = computation && links.some(link => link.from === computation.name && (link.role === 'body' || link.role === 'condition'));
   return <>
     <header className="topbar"><div className="crumb"><span>Workspace</span><span className="slash">/</span><strong>{!computation ? 'Overview' : computation.entry ? 'Entry' : computation.name}</strong></div>
-      <div className="top-actions"><button className="search-button" type="button" title="Search nodes (/)" onClick={onSearch}><span>⌕</span> Search nodes <kbd>/</kbd></button><button className="primary-button" type="button" onClick={onImport}>＋ Open HLO</button></div>
+      <div className="top-actions"><ThemeButton /><button className="search-button" type="button" title="Search nodes (/)" onClick={onSearch}><Icon name="search" /><span className="search-label">Search nodes</span><kbd>/</kbd></button><button className="primary-button" type="button" onClick={onImport}><Icon name="plus" /><span>Open HLO</span></button></div>
     </header>
     <section className="heading"><div>
       <div className="eyebrow">{!computation ? 'MODULE MAP' : computation.entry ? 'ENTRY COMPUTATION' : role}</div>
@@ -58,9 +83,9 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
       </select>
     </div><div className="heading-controls">
       <div className="view-actions">
-      {canGoBack && <button className="subtle-button" type="button" onClick={onBack}>← Back</button>}
+      {canGoBack && <button className="subtle-button" type="button" onClick={onBack}><Icon name="back" />Back</button>}
       <div className="display-menu" ref={displayRef}>
-        <button className={`subtle-button display-trigger${displayOpen ? ' active' : ''}`} type="button" aria-expanded={displayOpen} aria-controls="display-options" onClick={() => setDisplayOpen(value => !value)}>Display <span aria-hidden="true">⌄</span></button>
+        <button className={`subtle-button display-trigger${displayOpen ? ' active' : ''}`} type="button" aria-expanded={displayOpen} aria-controls="display-options" onClick={() => setDisplayOpen(value => !value)}>Display <Icon name="down" size={14} /></button>
         {displayOpen && <div className="display-popover" id="display-options" role="group" aria-label="Node display options">
           <strong>Node labels</strong>
           <label className="display-option"><input type="checkbox" checked={useOpName} onChange={event => onUseOpName(event.target.checked)} />Use op_name in metadata</label>
@@ -70,9 +95,9 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
       </div>
       <button className="subtle-button" type="button" onClick={onFit}>Fit view</button>
       <div className="zoom-controls">
-        <button className="icon-button" type="button" aria-label="Zoom out" onClick={() => onZoom(-0.15)}>−</button>
+        <button className="icon-button" type="button" aria-label="Zoom out" onClick={() => onZoom(-0.15)}><Icon name="minus" /></button>
         <span className="zoom-value">{Math.round(zoom * 100)}%</span>
-        <button className="icon-button" type="button" aria-label="Zoom in" onClick={() => onZoom(0.15)}>＋</button>
+        <button className="icon-button" type="button" aria-label="Zoom in" onClick={() => onZoom(0.15)}><Icon name="plus" /></button>
       </div>
       </div>
     </div></section>

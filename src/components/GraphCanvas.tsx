@@ -36,6 +36,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
 ) {
   const computation = current ? module.byName.get(current) : null;
   const [focusRadius, setFocusRadius] = useState<number | null>(null);
+  const [hops, setHops] = useState(1);
   const [pathPicking, setPathPicking] = useState(false);
   const [pathTarget, setPathTarget] = useState<string | null>(null);
   const [expandedNodeName, setExpandedNodeName] = useState<string | null>(null);
@@ -346,9 +347,11 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
       </div>
     </div>
     {computation && <div className="graph-controls">
-      <label>View <select aria-label="Dependency view" value={focusRadius ?? 'all'} onChange={event => { setFocusRadius(event.target.value === 'all' ? null : Number(event.target.value)); setPathTarget(null); setPathPicking(false); }}>
-        <option value="all">All nodes</option><option value="1">1 hop</option><option value="2">2 hops</option><option value="3">3 hops</option>
-      </select></label>
+      <select aria-label="Neighborhood size" value={hops} onChange={event => { const value = Number(event.target.value); setHops(value); if (focusRadius !== null) setFocusRadius(value); }}>
+        <option value="1">1 hop</option><option value="2">2 hops</option><option value="3">3 hops</option>
+      </select>
+      <button type="button" disabled={!selected && focusRadius === null} className={focusRadius !== null ? 'active' : ''} aria-pressed={focusRadius !== null}
+        onClick={() => { setFocusRadius(focusRadius === null ? hops : null); setPathTarget(null); setPathPicking(false); }}>{focusRadius === null ? 'View' : 'Show all'}</button>
       <button type="button" disabled={!selected} className={pathPicking ? 'active' : ''} onClick={() => { setPathTarget(null); setPathPicking(value => !value); }}>Find path</button>
       {pathTarget && <button type="button" onClick={() => setPathTarget(null)}>Clear path</button>}
       <span>{pathPicking ? 'Click the destination node' : pathTarget ? path ? `${path.length - 1} hops` : 'No dependency path' : selected && focusRadius !== null ? `${visibleNodes.length} of ${computation.nodes.length} nodes` : !selected && focusRadius !== null ? 'Select a node' : ''}</span>

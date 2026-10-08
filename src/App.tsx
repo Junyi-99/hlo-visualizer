@@ -5,6 +5,7 @@ import { ImportDialog } from './components/ImportDialog';
 import { Inspector } from './components/Inspector';
 import { SearchOverlay } from './components/SearchOverlay';
 import { Sidebar } from './components/Sidebar';
+import { Icon } from './components/Icon';
 import { Toolbar } from './components/Toolbar';
 import { parseHlo, reachable } from './lib/parser';
 import type { HloModule } from './lib/types';
@@ -90,6 +91,6 @@ export default function App() {
     </div>
     {searchOpen && <SearchOverlay module={module} useOpName={useOpName} showLastNameOnly={showLastNameOnly} onClose={() => setSearchOpen(false)} onSelect={(computationName, nodeName) => { setSearchOpen(false); openComputation(computationName, nodeName); }} />}
     {importOpen && <ImportDialog onClose={() => setImportOpen(false)} onLoad={loadText} />}
-    {notesOpen && <div className="notes-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setNotesOpen(false); }}><div className="notes-panel" role="dialog" aria-modal="true" aria-label="Parse notes"><header><strong>Parse notes</strong><button className="icon-button" type="button" aria-label="Close parse notes" onClick={() => setNotesOpen(false)}>×</button></header><p>Some input could not be represented exactly. Check these lines before relying on the graph.</p><ul>{module.warnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></div></div>}
+    {notesOpen && <div className="notes-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setNotesOpen(false); }}><div className="notes-panel" role="dialog" aria-modal="true" aria-label="Parse notes"><header><strong>Parse notes</strong><button className="icon-button" type="button" aria-label="Close parse notes" onClick={() => setNotesOpen(false)}><Icon name="close" /></button></header><p>Some input could not be represented exactly. Check these lines before relying on the graph.</p><ul>{module.warnings.map((warning, index) => <li key={index}>{warning}</li>)}</ul></div></div>}
   </>;
 }

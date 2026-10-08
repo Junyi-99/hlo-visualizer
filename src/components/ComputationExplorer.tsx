@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { layoutInstructions, NODE_HEIGHT, NODE_WIDTH } from '../lib/graph-layout';
 import { nodeCategory, nodeSummary } from '../lib/parser';
 import type { HloModule, HloNode } from '../lib/types';
+import { Icon } from './Icon';
 
 interface Step { name: string; role: string }
 
@@ -32,7 +33,7 @@ export function ComputationExplorer({ module, rootNode, onClose, onOpenFull }: C
   };
 
   return <aside id="computation-explorer" className="computation-explorer" aria-label="Expanded computation">
-    <header className="explorer-header"><div><span className="eyebrow">EXPANDED IN CANVAS</span><strong>%{rootNode.name}</strong></div><button type="button" className="icon-button" aria-label="Close expanded computation" onClick={onClose}>×</button></header>
+    <header className="explorer-header"><div><span className="eyebrow">EXPANDED IN CANVAS</span><strong>%{rootNode.name}</strong></div><button type="button" className="icon-button" aria-label="Close expanded computation" onClick={onClose}><Icon name="close" /></button></header>
     <div className="explorer-breadcrumb"><button type="button" onClick={() => { setSteps([]); setSelected(null); }}>%{rootNode.name}</button>{steps.map((step, index) =>
       <span key={`${index}/${step.name}`}><span>›</span><button type="button" aria-current={index === steps.length - 1 ? 'page' : undefined} onClick={() => { setSteps(prior => prior.slice(0, index + 1)); setSelected(null); }}>%{step.name}</button></span>)}</div>
     <div className="explorer-tabs">{entries.map(([role, name]) => <button type="button" key={role} className={steps[0]?.role === role ? 'active' : ''} onClick={() => chooseRoot(role, name)}>{role.toUpperCase()}</button>)}</div>

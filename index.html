@@ -4,9 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#ffffff" />
-    <meta name="color-scheme" content="light" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%233e6fcb'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-size='43' fill='white'%3E%E2%8C%98%3C/text%3E%3C/svg%3E" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f1f22" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230066cc'/%3E%3Cg fill='none' stroke='white' stroke-width='1.75' stroke-linecap='round'%3E%3Ccircle cx='6.5' cy='7' r='2'/%3E%3Ccircle cx='6.5' cy='17' r='2'/%3E%3Ccircle cx='17.5' cy='12' r='2'/%3E%3Cpath d='M8.5 7.5c4 0 3 4.5 7 4.5M8.5 16.5c4 0 3-4.5 7-4.5'/%3E%3C/g%3E%3C/svg%3E" />
+    <script>
+      // Set the theme before first paint so there is no light flash. "system" (or nothing stored) follows the OS.
+      try { var t = localStorage.getItem('theme'); } catch (e) {}
+      document.documentElement.dataset.theme = t === 'light' || t === 'dark' ? t : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    </script>
     <title>HLO Atlas — dependency explorer</title>
   </head>
   <body>
