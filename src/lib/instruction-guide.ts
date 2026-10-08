@@ -2,6 +2,8 @@ import type { Computation, GuidePart, HloModule, HloNode, InstructionGuide, Resu
 import { extractHloMetadata } from './metadata.ts';
 import { splitTopLevel } from './parser.ts';
 import { attributeKey, explainAttribute, opDescription } from './hlo-reference.ts';
+import { bufferStatus, type BufferStatus } from './memory-location.ts';
+import { memorySpaceLabel, shapeMemoryText } from './memory-space.ts';
 
 interface GuideContext { computation?: Computation; module?: HloModule }
 
@@ -88,7 +90,7 @@ function compactEncodedBody(html: string) {
 function operandHtml(args: string) {
   return splitTopLevel(args).map((piece, index, all) => {
     const separator = index < all.length - 1 ? ',' : '';
-    const match = /^([\s\S]*?)(%?[\w.-]+)(\s*)$/.exec(piece);
+    const match = /^([\s\S]*?)(%?[\w.-]+(?:#\d+)?)(\s*)$/.exec(piece);
     if (!match) return escapeHtml(piece) + separator;
     const head = match[1].replace(/\/\*[^*]*\*\//g, comment => `\u0000${comment}\u0000`).split('\u0000')
       .map(chunk => chunk.startsWith('/*') ? mark('operand-index', chunk) : escapeHtml(chunk)).join('');
@@ -98,7 +100,7 @@ function operandHtml(args: string) {
 
 function memoryLabel(shape: string) {
   const value = Number(/S\((\d+)\)/.exec(shape)?.[1] || 0);
-  return value === 0 ? 'HBM（省略 S(0)）' : value === 1 ? 'VMEM（S(1)）' : `S(${value})（后端专用空间）`;
+  return value === 0 ? 'HBM（省略 S(0)）' : `${memorySpaceLabel(value)}（S(${value})）`;
 }
 
 const DTYPES: Record<string, string> = {
@@ -108,6 +110,20 @@ const DTYPES: Record<string, string> = {
   f8e4m3fn: '8 位浮点数（e4m3）', f8e5m2: '8 位浮点数（e5m2）', c64: '64 位复数（两个 f32）', c128: '128 位复数（两个 f64）', token: '令牌（只用于排序副作用，不含数据）',
 };
 
+// What to say about where a value lives. `status` is null when the guide has no module context.
+function placement(shape: string, status: BufferStatus | null, node: HloNode) {
+  const space = /S\((\d+)\)/.exec(shape)?.[1];
+  const marked = space === undefined ? '布局里没有写 S(n)' : `布局里写的是 S(${space})`;
+  switch (status) {
+    case 'fusion':
+      if (node.op === 'parameter') return `fusion 的输入参数，就是调用方传入的操作数，本身不另占缓冲区；${marked}。`;
+      return `没有独立缓冲区：这条指令在 fusion 内核内部计算，结果不会单独写回 HBM 或 VMEM。${marked}，这不代表实际存放位置。${node.root ? '它的结果就是这个 fusion 的输出，实际位置看调用它的 fusion 指令。' : ''}`;
+    case 'thread-local': return `规约、比较等函数里的值，XLA 为它分配 thread-local 存储，不在 HBM 或 VMEM 中；${marked}。`;
+    case 'unassigned': return `编译前（未调度）的 HLO 还没有经过内存空间分配；${marked}，实际位置要看编译后的 HLO。`;
+    default: return `${shapeMemoryText(shape)}${status ? '' : '（前提是这条指令有自己的缓冲区）'}`;
+  }
+}
+
 function shapeDescription(shape: string, includeMemory = true) {
   const match = /([a-z][\w]*)\[([^\]]*)\]/.exec(shape);
   if (!match) return '该项的具体类型以原始 HLO 为准';
@@ -116,15 +132,14 @@ function shapeDescription(shape: string, includeMemory = true) {
   return `${match[1]}[${match[2]}]：${dtype}${logical}${includeMemory ? `；${memoryLabel(shape)}` : ''}`;
 }
 
-function typeDetails(shape: string): TypeDetail[] {
+function typeDetails(shape: string, status: BufferStatus | null = null, node?: HloNode): TypeDetail[] {
   const order = /\{(\d+(?:,\d+)*)(?=[:}])/.exec(shape)?.[1];
   const tile = /T(?:\([^)]*\))+/.exec(shape)?.[0];
-  const space = /S\((\d+)\)/.exec(shape)?.[1];
   return [
     { key:'shape', label:'元素类型与逻辑形状', text:shapeDescription(shape, false) },
     ...(order ? [{ key:'order', label:'维度顺序', text:`${order}：minor-to-major；排在前面的维度变化最快。` }] : []),
     ...(tile ? [{ key:'tile', label:'物理分块', text:shape.includes('[]') ? `${tile} 是标量的布局标记，不表示 ${tile.match(/\d+/)?.[0] || ''} 个逻辑元素。` : `${tile} 描述数组的物理 tiling。` }] : []),
-    { key:'space', label:'内存空间', text:space === undefined ? '未写 S(n)：通常是默认内存空间 S(0)，在 TPU 上为 HBM。' : memoryLabel(shape) }
+    { key:'space', label:'内存空间', text:node ? placement(shape, status, node) : shapeMemoryText(shape) }
   ];
 }
 
@@ -160,11 +175,13 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
   const tupleType = typeText.startsWith('(') && typeText.endsWith(')');
   const copyStart = node.op === 'copy-start' && tupleType;
   const opPart: GuidePart = { key:'op', label:'操作', text:opDescription(node) };
+  const status = context.module && context.computation ? bufferStatus(context.module, context.computation, node) : null;
+  const hasBuffer = status === null || status === 'buffer'; // only then does S(n) say where the value is
   let resultType: string, parts: GuidePart[], tupleGroup: { rawType: string; slots: (TypeSlot & GuidePart)[] } | null = null;
   if (copyStart) {
     const slots = splitTuple(typeText);
     const memory = (shape: string) => Number(/S\((\d+)\)/.exec(shape)?.[1] || 0);
-    const memoryLabel = (number: number) => number === 0 ? 'HBM（S(0) 省略）' : number === 1 ? 'VMEM（S(1)）' : `S(${number})（后端专用空间）`;
+    const memoryLabel = (number: number) => number === 0 ? 'HBM（S(0) 省略）' : `${memorySpaceLabel(number)}（S(${number})）`;
     const outputShape = /([a-z][\w]*)\[([^\]]*)\]/.exec(slots[0]?.body || '');
     const order = /\{(\d+(?:,\d+)*):/.exec(slots[0]?.body || '')?.[1];
     const tile = /T(?:\([^)]*\))+/.exec(slots[0]?.body || '')?.[0];
@@ -176,11 +193,11 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
       { key:'tuple', label:'三项结果', text:'括号表示返回一个 tuple；依次包含复制目标、复制源和上下文，供 copy-done 使用。' },
       { key:'dest', label:'第 0 项 · 目标', text:`复制完成后数据所在的目标缓冲区；这里位于 ${memoryLabel(memory(slots[0]?.body || ''))}。` },
       { key:'source', label:'第 1 项 · 源', text:`复制前数据所在的源缓冲区；这里位于 ${memoryLabel(memory(slots[1]?.body || ''))}。` },
-      { key:'context', label:'第 2 项 · 上下文', text:`${(slots[2]?.body || 'u32[]').trim()} 是异步复制的上下文标记，供 copy-done 识别这次复制；S(n) 若出现，是后端专用内存空间编号。` },
+      { key:'context', label:'第 2 项 · 上下文', text:`${(slots[2]?.body || 'u32[]').trim()} 是异步复制的同步标志，copy-done 据此等待复制完成；它位于 ${memoryLabel(memory(slots[2]?.body || ''))}。` },
       { key:'shape', label:'类型与形状', text:outputShape ? `${outputShape[1]}[${outputShape[2]}] 是结果张量的元素类型和逻辑形状；u32[] 表示标量。` : '这里写的是结果张量的元素类型和逻辑形状；u32[] 表示标量。' },
       { key:'order', label:'维度顺序', text:order ? `${order} 是 minor-to-major 物理顺序；排在最前面的维度变化最快。` : '大括号内的数字表示 minor-to-major 物理顺序。' },
       { key:'tile', label:'分块布局', text:tileLevels?.length === 2 ? `${tile} 是两层 tiling：外层 ${tileLevels[0]}，内层 ${tileLevels[1]}；可能引入填充。` : tile ? `${tile} 描述分块的物理布局与可能的填充。` : 'T(...) 描述分块的物理布局与可能的填充。' },
-      { key:'space', label:'内存空间', text:'S(1) 在 TPU 上表示 VMEM；未写 S(n) 通常等同 S(0)，即 HBM。S(2) 等其他编号的用途由后端定义。' },
+      { key:'space', label:'内存空间', text:'S(n) 是内存空间编号。在 TPU 上，S(1) 是 VMEM，S(2) 是 SFLAG（同步标志），S(6) 是 SMEM（标量内存）；未写 S(n) 即默认的 S(0)，也就是 HBM。' },
       opPart,
       { key:'operand', label:'输入', text:`${operandList(node) || '括号内的节点'} 提供要复制的数据；点击上方 Direct inputs 可跳到该节点。` },
     ];
@@ -205,11 +222,11 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
         node.op === 'tuple' && node.operands[index] ? `这一项来自 %${node.operands[index]}。` : '';
       const readers = used.has(index) ? `此 computation 通过 ${used.get(index)!.map(name=>`%${name}`).join('、')} 读取它。` : node.op === 'parameter' && context.computation ? '此 computation 没有直接取出这一项。' : '';
       const details = [
-        ...typeDetails(body),
+        ...typeDetails(body, status, node),
         ...(origin ? [{ label:node.op === 'parameter' ? '循环状态来源' : '数据来源', text:origin }] : []),
         ...(readers ? [{ label:'本计算中的使用', text:readers }] : [])
       ];
-      return { key:`slot-${index}`, label:`第 ${index} 项`, raw:body.trim(), text:`${shapeDescription(body)}。${origin}${readers}`, details };
+      return { key:`slot-${index}`, label:`第 ${index} 项`, raw:body.trim(), text:`${shapeDescription(body, hasBuffer)}。${origin}${readers}`, details };
     });
     tupleGroup = { rawType: typeText, slots: slotParts };
     parts = [
@@ -229,16 +246,16 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
     if (!/S\(/.test(typeText)) parts = parts.filter(part => part.key !== 'space');
   } else {
     resultType = shapeHtml(typeText);
-    const details = typeDetails(typeText);
+    const details = typeDetails(typeText, status, node);
     const detail = (key: string) => details.find(item => item.key === key);
     parts = [
       { key:'name', label:'结果名', text:`${prefix[2]} 是这条指令的结果标识。` },
-      { key:'shape', label:'结果类型', text:`${shapeDescription(typeText)}。等号后面是结果的数据类型、逻辑形状与可选的物理布局。` },
+      { key:'shape', label:'结果类型', text:`${shapeDescription(typeText, hasBuffer)}。等号后面是结果的数据类型、逻辑形状与可选的物理布局。` },
       ...(/\{\d+(?:,\d+)*[:}]/.test(typeText) ? [{ key:'order', label:'维度顺序', text:detail('order')!.text }] : []),
       ...(/T\(/.test(typeText) ? [{ key:'tile', label:'物理分块', text:detail('tile')!.text }] : []),
       ...(/S\(/.test(typeText) ? [{ key:'space', label:'内存空间', text:detail('space')!.text }] : []),
       opPart,
-      { key:'operand', label:'输入', text:`括号内的 ${operandList(node)} 是这条指令依赖的上游节点${node.operands.length > 1 ? '，按操作数顺序排列' : ''}。` }
+      { key:'operand', label:'输入', text:`括号内的 ${operandList(node)} 是这条指令依赖的上游节点${node.operands.length > 1 ? '，按操作数顺序排列' : ''}。${/#\d/.test(args) ? '%t#N 是 XLA dump 的写法，表示取 tuple %t 的第 N 项（相当于 get-tuple-element）。' : ''}` }
     ];
     if (node.op === 'parameter') parts.push({ key:'parameter-index', label:'参数序号', text:`parameter(${args}) 表示当前 computation 的第 ${args} 个输入。` });
     if (node.op === 'constant') parts.push({ key:'literal', label:'常量值', text:`括号中的 ${args.length > 80 ? `${args.slice(0, 77)}…` : args} 是这条指令直接给出的值；结果类型决定它的数据类型与形状，不依赖上游节点。` });
@@ -256,9 +273,9 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
       key:['dest','source','context'][index] || `slot-${index}`,
       label:`第 ${index} 项${copyStart ? [' · 目标',' · 源',' · 上下文'][index] || '' : ''}`,
       raw:body.trim(),
-      details:typeDetails(body)
+      details:typeDetails(body, status, node)
     }))
-  } : { kind:'array', rawType:typeText, details:typeDetails(typeText) };
+  } : { kind:'array', rawType:typeText, details:typeDetails(typeText, status, node) };
   const argumentsHtml = node.op === 'constant' ? mark('literal', `(${args})`) :
     '(' + (node.op === 'parameter' ? mark('parameter-index', args) : operandHtml(args)) + ')';
   const html = escapeHtml(prefix[1] || '') + mark('name', prefix[2]) + escapeHtml(prefix[3]) + resultType +
@@ -273,7 +290,7 @@ export function layoutDiagram(node: HloNode): string | null {
   const slots = splitTuple(node.type);
   if (!slots.length) return null;
   const space = (shape: string) => Number(/S\((\d+)\)/.exec(shape)?.[1] || 0);
-  const location = (number: number) => number === 0 ? 'HBM' : number === 1 ? 'VMEM' : `S(${number})`;
+  const location = memorySpaceLabel;
   const copyStart = node.op === 'copy-start';
   const matrixSlots = slots.map((slot,index) => ({ slot,index })).filter(({slot}) => /\{1,0:T\(8,128\)\(2,1\)/.test(slot.body));
   const reference = matrixSlots[0]?.slot.body;

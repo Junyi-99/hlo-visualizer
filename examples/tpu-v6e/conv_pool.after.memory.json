@@ -1,0 +1,85 @@
+{
+"add_rsqrt_fusion": {
+"": 1
+},
+"broadcast_multiply_fusion": {
+"": 1
+},
+"copy": {
+"": 1
+},
+"copy-done": {
+"": 1
+},
+"copy-start": {
+"": 0,
+"0": 1,
+"1": 0,
+"2": 2
+},
+"copy.1": {
+"": 0
+},
+"fusion": {
+"": 1
+},
+"fusion.10": {
+"": 0,
+"0": 1,
+"1": 1
+},
+"get-tuple-element": {
+"": 1
+},
+"get-tuple-element.1": {
+"": 1
+},
+"k.1": {
+"": 0
+},
+"multiply_add_fusion": {
+"": 1
+},
+"multiply_reduce_fusion": {
+"": 1
+},
+"reduce_sum.17": {
+"": "thread-local"
+},
+"reduce_sum.18": {
+"": "thread-local"
+},
+"reduce_sum.19": {
+"": "thread-local"
+},
+"reduce_sum.3": {
+"": "thread-local"
+},
+"reduce_sum.4": {
+"": "thread-local"
+},
+"reduce_sum.5": {
+"": "thread-local"
+},
+"reduce_window_max.3": {
+"": "thread-local"
+},
+"reduce_window_max.4": {
+"": "thread-local"
+},
+"reduce_window_max.5": {
+"": "thread-local"
+},
+"reduce_window_sum.3": {
+"": "thread-local"
+},
+"reduce_window_sum.4": {
+"": "thread-local"
+},
+"reduce_window_sum.5": {
+"": "thread-local"
+},
+"x.1": {
+"": 0
+}
+}

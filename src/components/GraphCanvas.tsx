@@ -2,15 +2,13 @@ import { Fragment, forwardRef, useEffect, useImperativeHandle, useLayoutEffect, 
 import { computationLinks, dependencyNeighborhood, nodeCategory, nodeSummary, reachable, shortestDependencyPath } from '../lib/parser';
 import { computationRole, linkLabel, layoutInstructions, layoutOverview, NODE_HEIGHT, NODE_WIDTH, OVERVIEW_HEIGHT, OVERVIEW_WIDTH } from '../lib/graph-layout';
 import { hloOpName, lastOpNameSegment } from '../lib/metadata';
-import { memoryLocations, type MemoryLocation } from '../lib/memory-location';
+import { nodeMemoryLocations, type MemoryLocation } from '../lib/memory-location';
+import { memorySpaceText } from '../lib/memory-space';
 import type { HloModule } from '../lib/types';
 import { ComputationExplorer } from './ComputationExplorer';
 
 function memoryTooltip(location: MemoryLocation) {
-  const result = location.path === null ? '结果' : `结果第 ${location.path} 项`;
-  const detail = !location.explicit ? '省略 S(0)' :
-    location.label.startsWith('S(') ? '后端专用内存空间' : `S(${location.space})`;
-  return `${result}：${location.label}（${detail}）`;
+  return `${location.path === null ? '结果' : `结果第 ${location.path} 项`}：${memorySpaceText(location.space, location.explicit)}`;
 }
 
 export interface GraphHandle {
@@ -315,7 +313,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
             {computation ? visibleNodes.map(node => {
               const position = positions.get(node.name)!;
               const detail = nodeSummary(node);
-              const locations = showMemoryLocation ? memoryLocations(node.type) : [];
+              const locations = showMemoryLocation ? nodeMemoryLocations(module, computation, node) : [];
               const opName = useOpName ? hloOpName(node.raw) : null;
               const label = opName ? (showLastNameOnly ? lastOpNameSegment(opName) : opName.replaceAll('/', '/\n')) : `%${node.name}`;
               const canExpand = Object.values(node.calls).some(name => module.byName.has(name));

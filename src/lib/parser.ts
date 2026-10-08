@@ -2,6 +2,7 @@
 // It keeps the original instruction line for inspection and only interprets
 // the parts needed to draw data dependencies and computation links.
 import type { Computation, ComputationLink, HloModule, HloNode, SourceFrame } from './types';
+import { memorySpaceLabel } from './memory-space.ts';
 
 function openBraceCount(text: string): number {
   let depth = 0, quoted = false, escaped = false;
@@ -51,18 +52,19 @@ export function computationCalls(suffix: string): Record<string, string> {
   return calls;
 }
 
-// Operand names in an argument list: "%a, %b", "a, b", "/*index=5*/%f", or typed "f32[2]{0} %a".
+// Operand names in an argument list: "%a, %b", "a, b", "/*index=5*/%f", typed "f32[2]{0} %a",
+// or XLA dump projections "%t#0" (element 0 of tuple %t).
 export function operandNames(args: string): string[] {
   if (!args.trim()) return [];
   return splitTopLevel(args).flatMap(piece => {
-    const name = /%?([\w.-]+)\s*$/.exec(piece.replace(/\/\*.*?\*\//g, ''))?.[1];
+    const name = /%?([\w.-]+)(?:#\d+)?\s*$/.exec(piece.replace(/\/\*.*?\*\//g, ''))?.[1];
     return name ? [name] : [];
   });
 }
 
 export function parseHlo(source: string): HloModule {
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
-  const module: HloModule = { name: '', computations: [], byName: new Map(), warnings: [], stackFrames: new Map() };
+  const module: HloModule = { name: '', computations: [], byName: new Map(), warnings: [], scheduled: false, stackFrames: new Map() };
   // FileNames / FunctionNames / FileLocations / StackFrames tables printed before the computations.
   const tables: Record<string, Map<number, string>> = { FileNames: new Map(), FunctionNames: new Map(), FileLocations: new Map(), StackFrames: new Map() };
   let table: Map<number, string> | null = null;
@@ -112,6 +114,7 @@ export function parseHlo(source: string): HloModule {
     if (!line || line.startsWith('//')) continue;
     if (line.startsWith('HloModule ')) {
       module.name = line.slice(10).split(',')[0].trim();
+      module.scheduled = /\bis_scheduled=true\b/.test(line);
       continue;
     }
     if (line === '}' && pending && openBraceCount(pending.text) > 0) {
@@ -296,7 +299,7 @@ export function copyDirection(node: HloNode): string | null {
   if (slots.length < 2 || !slots[0] || !slots[1]) return null;
   const location = (shape: string) => {
     const space = /S\((\d+)\)/.exec(shape)?.[1] ?? '0';
-    return space === '0' ? 'HBM' : space === '1' ? 'VMEM' : `S(${space})`;
+    return memorySpaceLabel(Number(space));
   };
   // copy-start returns (destination, source, context).
   return `${location(slots[1])} → ${location(slots[0])}`;

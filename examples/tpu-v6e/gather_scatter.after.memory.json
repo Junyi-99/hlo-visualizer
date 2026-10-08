@@ -1,0 +1,114 @@
+{
+"add.3": {
+"": "thread-local"
+},
+"add_bitcast_fusion": {
+"": 1
+},
+"bitcast.7": {
+"": 1
+},
+"compare_select_fusion.3": {
+"": 0,
+"0": 1,
+"1": 1
+},
+"copy-done": {
+"": 1
+},
+"copy-start": {
+"": 0,
+"0": 1,
+"1": 0,
+"2": 2
+},
+"copy.11": {
+"": 0
+},
+"copy.12": {
+"": 0
+},
+"copy.14": {
+"": 1
+},
+"copy.8": {
+"": 1
+},
+"fusion": {
+"": 0
+},
+"gather_fusion": {
+"": 0
+},
+"gather_fusion.1": {
+"": 1
+},
+"get-tuple-element.8": {
+"": 1
+},
+"get-tuple-element.9": {
+"": 1
+},
+"idx.1": {
+"": 0
+},
+"iota": {
+"": 1
+},
+"max.1": {
+"": "thread-local"
+},
+"or_bitcast_fusion": {
+"": 1
+},
+"pad_clamp_fusion": {
+"": 1
+},
+"param_0.48": {
+"": 0
+},
+"scatter-add.2": {
+"": "thread-local"
+},
+"scatter-add.3": {
+"": "thread-local"
+},
+"scatter-max.2": {
+"": "thread-local"
+},
+"scatter-max.3": {
+"": "thread-local"
+},
+"scatter_fusion": {
+"": 1
+},
+"scatter_fusion.1": {
+"": 1
+},
+"slice-done": {
+"": 1
+},
+"slice-start": {
+"": 0,
+"0": 0,
+"0,0": 0,
+"1": 1,
+"2": 2
+},
+"slice.7": {
+"": 1
+},
+"table.1": {
+"": 0
+},
+"tuple.2": {
+"": 0,
+"0": 0,
+"1": 0,
+"2": 0,
+"3": 0
+},
+"upd.1": {
+"": 0
+}
+}

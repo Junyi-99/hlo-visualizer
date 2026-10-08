@@ -1,0 +1,73 @@
+{
+"add.1": {
+"": "thread-local"
+},
+"constant.5": {
+"": 0
+},
+"copy": {
+"": 1
+},
+"copy-done": {
+"": 1
+},
+"copy-start": {
+"": 0,
+"0": 1,
+"1": 0,
+"2": 2
+},
+"copy.2": {
+"": 0
+},
+"fusion": {
+"": 1
+},
+"fusion.1": {
+"": 0
+},
+"fusion.2": {
+"": 1
+},
+"ge.1": {
+"": "thread-local"
+},
+"k.1": {
+"": 0
+},
+"reduce-window_multiply_fusion": {
+"": 1
+},
+"reduce_window_max.3": {
+"": "thread-local"
+},
+"reduce_window_max.4": {
+"": "thread-local"
+},
+"reduce_window_max.5": {
+"": "thread-local"
+},
+"select_and_scatter.2": {
+"": "thread-local"
+},
+"select_and_scatter.3": {
+"": "thread-local"
+},
+"select_and_scatter.6": {
+"": "thread-local"
+},
+"select_and_scatter.7": {
+"": "thread-local"
+},
+"select_and_scatter.9": {
+"": 1
+},
+"tuple": {
+"": 0,
+"0": 0,
+"1": 0
+},
+"x.1": {
+"": 0
+}
+}

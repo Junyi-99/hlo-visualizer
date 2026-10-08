@@ -29,6 +29,9 @@ export interface HloModule {
   computations: Computation[];
   byName: Map<string, Computation>;
   warnings: string[];
+  // is_scheduled=true in the header: the module went through XLA's optimization passes, so layouts carry
+  // the memory spaces chosen by memory-space assignment. Unscheduled (lowered) modules have none yet.
+  scheduled: boolean;
   // Module-level source table that metadata stack_frame_id refers to.
   stackFrames: Map<number, SourceFrame>;
 }

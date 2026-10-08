@@ -1,0 +1,64 @@
+{
+"b1.1": {
+"": 0
+},
+"convert.5": {
+"": 1
+},
+"copy": {
+"": 0
+},
+"copy-done": {
+"": 1
+},
+"copy-start": {
+"": 0,
+"0": 1,
+"1": 0,
+"2": 2
+},
+"fusion.13": {
+"": 1
+},
+"fusion.14": {
+"": 1
+},
+"fusion.19": {
+"": 0,
+"0": 1,
+"1": 1
+},
+"get-tuple-element": {
+"": 1
+},
+"get-tuple-element.1": {
+"": 1
+},
+"reduce_max.0": {
+"": "thread-local"
+},
+"reduce_max.1": {
+"": "thread-local"
+},
+"reduce_max.2": {
+"": "thread-local"
+},
+"reduce_sum.3": {
+"": "thread-local"
+},
+"reduce_sum.4": {
+"": "thread-local"
+},
+"reduce_sum.5": {
+"": "thread-local"
+},
+"w1.1": {
+"": 0
+},
+"w2.1": {
+"": 0
+},
+"x.1": {
+"": 0
+}
+}

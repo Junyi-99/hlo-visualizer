@@ -1,0 +1,64 @@
+{
+"broadcast_add_fusion": {
+"": 1
+},
+"broadcast_multiply_fusion": {
+"": 1
+},
+"constant.4": {
+"": 0
+},
+"copy-done": {
+"": 1
+},
+"copy-start": {
+"": 0,
+"0": 1,
+"1": 0,
+"2": 2
+},
+"debug_print.10": {
+"": 0,
+"0": 0,
+"1": 2,
+"2": 0
+},
+"debug_print.11": {
+"": 0,
+"0": 0,
+"1": 0
+},
+"debug_print.7": {
+"": 0
+},
+"debug_print.8": {
+"": 0,
+"0": 0,
+"1": 2,
+"2": 0
+},
+"debug_print.9": {
+"": 0
+},
+"fusion": {
+"": 0
+},
+"reduce_sum.3": {
+"": "thread-local"
+},
+"reduce_sum.4": {
+"": "thread-local"
+},
+"reduce_sum.5": {
+"": "thread-local"
+},
+"reduce_sum.7": {
+"": 0
+},
+"x.1": {
+"": 0
+},
+"y.1": {
+"": 0
+}
+}

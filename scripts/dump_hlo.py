@@ -3,12 +3,18 @@
 For each program: <name>.after.hlo  = compiled (post-optimization, scheduled) module
                   <name>.before.hlo = lowered module before XLA optimizations
 
-Usage (on a TPU VM with JAX installed):  python scripts/dump_hlo.py examples/tpu-v6e
+Usage (on a TPU VM with JAX installed):  python scripts/dump_hlo.py OUT
+Also writes XLA's own dumps to OUT/xla_dump (buffer assignment included), from the same compilation,
+for scripts/extract_memory_truth.py. Compilation is not byte-identical across runs, so always take
+the examples and the memory ground truth from one run.
 The files in examples/tpu-v6e were produced on a v6e-1 with JAX 0.11.2.
 """
 import os
 import sys
 import traceback
+
+out = sys.argv[1] if len(sys.argv) > 1 else "hlo-out"
+os.environ["XLA_FLAGS"] = f"{os.environ.get('XLA_FLAGS', '')} --xla_dump_to={out}/xla_dump --xla_dump_hlo_as_text".strip()
 
 import jax
 import jax.numpy as jnp
@@ -16,7 +22,6 @@ import numpy as np
 from jax import lax
 from jax.experimental import pallas as pl
 
-out = sys.argv[1] if len(sys.argv) > 1 else "hlo-out"
 os.makedirs(out, exist_ok=True)
 key = jax.random.key(0)
 f32, bf16 = jnp.float32, jnp.bfloat16

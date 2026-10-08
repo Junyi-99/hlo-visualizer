@@ -1,0 +1,129 @@
+{
+"add.15": {
+"": "thread-local"
+},
+"add.19": {
+"": "thread-local"
+},
+"add.20": {
+"": "thread-local"
+},
+"add_add_fusion": {
+"": 0,
+"0": 0,
+"1": 0
+},
+"bitcast.10": {
+"": 1
+},
+"bitcast.11": {
+"": 1
+},
+"bitcast.12": {
+"": 1
+},
+"bitcast.13": {
+"": 1
+},
+"convolution_bitcast_fusion.1": {
+"": 1
+},
+"convolution_subtract_fusion.1": {
+"": 1
+},
+"copy-done": {
+"": 1
+},
+"copy-done.1": {
+"": 1
+},
+"copy-start": {
+"": 0,
+"0": 1,
+"1": 0,
+"2": 2
+},
+"copy-start.1": {
+"": 0,
+"0": 1,
+"1": 0,
+"2": 2
+},
+"fusion.1": {
+"": 0
+},
+"fusion.2": {
+"": 1
+},
+"fusion.25": {
+"": 1
+},
+"fusion.3": {
+"": 1
+},
+"fusion.4": {
+"": 0,
+"0": 1,
+"1": 1
+},
+"fusion.5": {
+"": 1
+},
+"get-tuple-element": {
+"": 1
+},
+"get-tuple-element.1": {
+"": 1
+},
+"get-tuple-element.2": {
+"": 0
+},
+"get-tuple-element.3": {
+"": 0
+},
+"negate.1": {
+"": 1
+},
+"reverse.0": {
+"": 1
+},
+"reverse.1": {
+"": 1
+},
+"scalar_lhs": {
+"": "thread-local"
+},
+"scalar_lhs.1": {
+"": "thread-local"
+},
+"scalar_lhs.2": {
+"": "thread-local"
+},
+"scalar_rhs": {
+"": "thread-local"
+},
+"scalar_rhs.1": {
+"": "thread-local"
+},
+"scalar_rhs.2": {
+"": "thread-local"
+},
+"slice.1": {
+"": 1
+},
+"slice.3": {
+"": 1
+},
+"tuple.19": {
+"": 0,
+"0": 0,
+"1": 0,
+"2": 0
+},
+"x.1": {
+"": 0
+},
+"y.1": {
+"": 0
+}
+}

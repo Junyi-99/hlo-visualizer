@@ -99,7 +99,7 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
           <strong>Node labels</strong>
           <label className="display-option"><input type="checkbox" checked={useOpName} onChange={event => onUseOpName(event.target.checked)} />Use op_name in metadata</label>
           <label className="display-option"><input type="checkbox" checked={showLastNameOnly} disabled={!useOpName} onChange={event => onShowLastNameOnly(event.target.checked)} />Show last name only</label>
-          <label className="display-option"><input type="checkbox" checked={showMemoryLocation} onChange={event => onShowMemoryLocation(event.target.checked)} />展示内存位置</label>
+          <label className="display-option" title={module.scheduled ? undefined : 'XLA 在编译时才决定每个值放在 HBM 还是 VMEM。这是编译前的 HLO（模块头没有 is_scheduled=true），还没有这些信息；请载入编译后的 HLO。'}><input type="checkbox" checked={showMemoryLocation && module.scheduled} disabled={!module.scheduled} onChange={event => onShowMemoryLocation(event.target.checked)} />展示内存位置{!module.scheduled && <small className="display-note">这是编译前的 HLO，XLA 编译时才决定放在 HBM 还是 VMEM</small>}</label>
         </div>}
       </div>
       <button className="subtle-button" type="button" onClick={onFit}>Fit view</button>

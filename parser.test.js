@@ -84,3 +84,14 @@ test('metadata stack_frame_id resolves through the module source table, innermos
     assert.equal(sourceStack(module, frame)[0].file, 'scripts/dump_hlo.py');
   }
 });
+
+test('XLA dump tuple projections (%t#N) resolve to the tuple operand', () => {
+  const module = parseHlo(`HloModule dump, is_scheduled=true
+ENTRY %main (p: (f32[4], f32[4])) -> f32[4] {
+  %p = (f32[4]{0}, f32[4]{0}) parameter(0)
+  ROOT %add = f32[4]{0} add(%p#0, %p#1)
+}`);
+  assert.deepEqual(module.warnings, []);
+  assert.deepEqual(module.byName.get('main').byName.get('add').operands, ['p', 'p']);
+  assert.equal(module.scheduled, true);
+});
