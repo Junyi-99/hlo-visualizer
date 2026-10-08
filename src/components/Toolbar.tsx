@@ -71,7 +71,6 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
   const computation = current ? module.byName.get(current) : null;
   const links = computationLinks(module);
   const role = computation && computationRole(computation, links);
-  const hasLoopLinks = computation && links.some(link => link.from === computation.name && (link.role === 'body' || link.role === 'condition'));
   return <>
     <header className="topbar"><div className="crumb"><span>Workspace</span><span className="slash">/</span><strong>{!computation ? 'Overview' : computation.entry ? 'Entry' : computation.name}</strong></div>
       <div className="top-actions"><a className="icon-button repo-link" href="https://github.com/Junyi-99/hlo-visualizer" target="_blank" rel="noreferrer" aria-label="Source code on GitHub" title="Source code on GitHub"><Icon name="github" /></a><ThemeButton />
@@ -85,7 +84,6 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
     <section className="heading"><div>
       <div className="eyebrow">{!computation ? 'MODULE MAP' : computation.entry ? 'ENTRY COMPUTATION' : role}</div>
       <h2>{computation ? `%${computation.name}` : 'Computation overview'}</h2>
-      <p>{!computation ? 'Arrows show which computation an instruction invokes. Click a computation to inspect its instruction dependencies.' : hasLoopLinks ? 'Follow the inputs into the loop, then open its body or condition.' : `The ${computation.nodes.length} instructions in this computation, shown in data dependency order.`}</p>
       <select id="mobile-computations" aria-label="Choose computation" value={current || ''} onChange={event => onComputation(event.target.value || null)}>
         <option value="">Overview · all computations</option>
         {module.computations.map(c => <option key={c.name} value={c.name}>%{c.name}{c.entry ? ' · entry' : ''}</option>)}

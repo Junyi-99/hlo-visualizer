@@ -100,8 +100,8 @@ export default function App() {
           onBack={goBack} onComputation={name => openComputation(name)} onFit={() => graphRef.current?.fit()}
           onZoom={delta => setZoom(value => Math.min(1.5, Math.max(0.45, value + delta)))} onSearch={() => setSearchOpen(true)} onImport={() => setImportOpen(true)} exampleId={exampleId} onExample={id => void loadExample(id)} />
         <GraphCanvas ref={graphRef} module={module} current={current} selected={selected} zoom={zoom} useOpName={useOpName} showLastNameOnly={showLastNameOnly} showMemoryLocation={showMemoryLocation} onZoom={setZoom} onSelect={setSelected} onComputation={name => openComputation(name)} />
-        <div className="bottom-bar"><div>{node ? `%${node.name} · ${upstream.size} upstream · ${downstream.size} downstream` : computation ? 'Select a node to inspect its dependencies' : 'Computation links · instruction data edges are inside each computation'}</div>
-          <div>{module.warnings.length ? <button type="button" className="parse-notes-button" onClick={() => setNotesOpen(true)}>{module.warnings.length} parse notes ↗</button> : 'Parsed without warnings'}</div></div>
+        <div className="bottom-bar"><div>{node ? `%${node.name} · ${upstream.size} upstream · ${downstream.size} downstream` : computation ? '' : 'Computation links · instruction data edges are inside each computation'}</div>
+          <div>{module.warnings.length ? <button type="button" className="parse-notes-button" onClick={() => setNotesOpen(true)}>{module.warnings.length} parse notes ↗</button> : null}</div></div>
       </main>
       <Inspector module={module} computation={computation} node={node} upstreamCount={upstream.size} downstreamCount={downstream.size} onClose={() => setSelected(null)} onNode={openReference} onComputation={name => openComputation(name)} />
     </div>

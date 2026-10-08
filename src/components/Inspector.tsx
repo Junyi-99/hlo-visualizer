@@ -3,6 +3,7 @@ import { instructionGuide, layoutDiagram, partColor } from '../lib/instruction-g
 import { extractHloMetadata } from '../lib/metadata.ts';
 import { nodeCategory, nodeSummary, sourceStack } from '../lib/parser';
 import type { Computation, HloModule, HloNode } from '../lib/types';
+import { Drawer } from 'vaul';
 import { TypeTree } from './TypeTree';
 import { Icon } from './Icon';
 
@@ -21,10 +22,38 @@ function ReferenceList({ names, onNode }: { names: string[]; onNode: (name: stri
   return names.length ? <>{names.map((name, index) => <button type="button" className="reference" key={`${index}-${name}`} onClick={() => onNode(name)}><span>%{name}</span><span>↗</span></button>)}</> : <p className="none">None in this computation</p>;
 }
 
+const phoneQuery = '(max-width: 700px)';
+
+function useIsPhone() {
+  const [isPhone, setIsPhone] = useState(() => window.matchMedia(phoneQuery).matches);
+  useEffect(() => {
+    const media = window.matchMedia(phoneQuery);
+    const onChange = () => setIsPhone(media.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+  return isPhone;
+}
+
 export function Inspector({ module, computation, node, upstreamCount, downstreamCount, onClose, onNode, onComputation }: InspectorProps) {
+  const isPhone = useIsPhone();
+  const details = node && computation ? <InstructionDetails key={node.id} {...{ module, computation, node, upstreamCount, downstreamCount, onNode, onComputation }} /> : null;
+  // On phones the inspector is a draggable bottom drawer; the last node stays rendered while it slides away.
+  const lastDetails = useRef(details);
+  if (details) lastDetails.current = details;
+  if (isPhone) return <Drawer.Root open={!!details} onOpenChange={open => { if (!open) onClose(); }}>
+    <Drawer.Portal>
+      <Drawer.Overlay className="drawer-overlay" />
+      <Drawer.Content className="inspector-drawer" aria-describedby={undefined}>
+        <div className="drawer-handle" aria-hidden="true" />
+        <div className="inspector-header"><Drawer.Title>Node details</Drawer.Title><button className="icon-button" type="button" aria-label="Close node details" onClick={onClose}><Icon name="close" /></button></div>
+        <div className="inspector-content overscroll-contain">{lastDetails.current}</div>
+      </Drawer.Content>
+    </Drawer.Portal>
+  </Drawer.Root>;
   return <aside className={`inspector${node ? ' inspector-visible' : ''}`}>
     <div className="inspector-header"><div><div className="eyebrow">INSPECTOR</div><h2>Node details</h2></div><button className="icon-button" type="button" aria-label="Clear selection" onClick={onClose}><Icon name="close" /></button></div>
-    <div className="inspector-content overscroll-contain">{node && computation ? <InstructionDetails key={node.id} {...{ module, computation, node, upstreamCount, downstreamCount, onNode, onComputation }} /> :
+    <div className="inspector-content overscroll-contain">{details ||
       <div className="empty-inspector"><div className="empty-icon"><Icon name="graph" size={28} /></div><strong>Explore the graph</strong><p>Select any node to see its inputs, consumers, raw HLO, and linked computations.</p></div>}
     </div>
   </aside>;

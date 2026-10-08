@@ -135,7 +135,7 @@ code, pre, kbd { font-family: var(--font-mono); }
 .brand-mark { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); }
 .brand strong { display: block; font-size: 14px; font-weight: 650; letter-spacing: -.01em; }
 .brand span { display: block; font-size: 11px; line-height: 1.3; color: var(--text-3); }
-.module-section { padding: 14px 18px 16px; border-bottom: 1px solid var(--border-soft); }
+.sidebar-section.module-section { padding: 14px 18px 16px; border-bottom: 1px solid var(--border-soft); }
 .module-section h1 { font: 600 15px/1.3 var(--font-mono); letter-spacing: -.01em; margin: 6px 0 4px; overflow-wrap: anywhere; }
 .sidebar-section { padding: 14px 10px 0; min-height: 0; display: flex; flex-direction: column; }
 .section-title { display: flex; justify-content: space-between; align-items: center; padding: 0 8px 6px; font-size: 11px; font-weight: 600; color: var(--text-3); }
@@ -329,6 +329,14 @@ marker path { fill: var(--edge); }
 .explorer-empty { padding: 20px 14px; font-size: 12px; color: var(--text-3); }
 
 /* ───────────── Inspector ───────────── */
+.drawer-overlay { position: fixed; inset: 0; z-index: 40; background: var(--scrim); }
+.inspector-drawer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; display: flex; flex-direction: column; height: 85dvh; max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+  background: var(--surface); color: var(--text); border-top: 1px solid var(--border); border-radius: 14px 14px 0 0; box-shadow: var(--shadow-lg); outline: none; }
+.inspector-drawer::after { background: var(--surface); }
+.drawer-handle { flex: none; width: 36px; height: 5px; margin: 8px auto 0; border-radius: 3px; background: var(--fill-2); }
+.inspector-drawer .inspector-header { height: 48px; padding-right: calc(12px + env(safe-area-inset-right, 0px)); }
+.inspector-drawer .inspector-header h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.inspector-drawer .inspector-content { padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px)); }
 .inspector { position: fixed; right: 0; top: var(--topbar); bottom: 0; z-index: 5; width: 430px; display: flex; flex-direction: column;
   background: var(--surface); border-left: 1px solid var(--border-soft); box-shadow: var(--shadow-lg); transform: translateX(105%); transition: transform .35s var(--spring); }
 .inspector.inspector-visible, .inspect-open .inspector { transform: translateX(0); }
@@ -444,7 +452,7 @@ marker path { fill: var(--edge); }
 .inspector-section .metadata-original pre { max-height: 180px; overflow-wrap: anywhere; }
 
 /* ───────────── Overlays ───────────── */
-dialog { width: min(720px, calc(100vw - 32px)); padding: 24px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+dialog { margin: auto; width: min(720px, calc(100vw - 32px)); padding: 24px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
 dialog[open] { animation: pop-in .25s var(--spring); }
 dialog::backdrop { background: var(--scrim); backdrop-filter: blur(2px); }
 .dialog-head { display: flex; justify-content: space-between; align-items: flex-start; }
@@ -557,19 +565,9 @@ dialog textarea:focus { outline: 3px solid var(--focus); outline-offset: 0; bord
   .graph-hint { display: none; }
   .bottom-bar { height: calc(40px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); }
   .bottom-bar > div:last-child { flex: none; }
-  .inspector { width: min(430px, 94vw); }
-  .inspector-content { padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px)); }
 
-  /* Inspector becomes a bottom sheet */
-  .app.inspector-open { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(220px, 34vh); }
-  .app.inspector-open .main { grid-column: 1; grid-row: 1; }
-  .app.inspector-open .inspector { position: relative; grid-column: 1; grid-row: 2; inset: auto; width: 100%; height: 100%; min-height: 0; transform: none; overflow: hidden;
-    border-left: 0; border-top: 1px solid var(--border); border-radius: 14px 14px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, .12); }
-
-  .app.inspector-open:has(.graph-shell.explorer-open) { grid-template-rows: minmax(0, 1fr); }
-  .app.inspector-open:has(.graph-shell.explorer-open) .inspector, .app:has(.graph-shell.explorer-open) :is(.heading, .bottom-bar) { display: none; }
+  .app:has(.graph-shell.explorer-open) :is(.heading, .bottom-bar) { display: none; }
   .app:has(.graph-shell.explorer-open) .graph-shell { margin-top: 8px; margin-bottom: 8px; }
-  .app.inspector-open .graph-shell.explorer-open { grid-template-rows: minmax(130px, 27%) minmax(0, 73%); }
 
   dialog { width: calc(100vw - 20px); max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px); overflow: auto; padding: 18px; }
   dialog textarea { height: min(32dvh, 280px); min-height: 140px; }
