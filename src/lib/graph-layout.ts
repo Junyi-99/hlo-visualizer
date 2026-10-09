@@ -4,6 +4,10 @@ import type { Computation, ComputationLink, HloModule, HloNode } from './types';
 export type LayoutDirection = 'horizontal' | 'vertical';
 export type LayoutMode = 'auto' | LayoutDirection;
 
+export const MIN_ZOOM = 0.45;
+export const MAX_ZOOM = 1.5;
+export const clampZoom = (zoom: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
+
 export interface Point {
   x: number;
   y: number;

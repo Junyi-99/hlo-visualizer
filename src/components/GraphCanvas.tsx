@@ -1,6 +1,15 @@
 import { Fragment, forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { computationLinks, dependencyNeighborhood, nodeCategory, nodeSummary, reachable, shortestDependencyPath } from '../lib/parser';
-import { computationRole, linkLabel, NODE_HEIGHT, NODE_WIDTH, type LayoutDirection, type LayoutMode } from '../lib/graph-layout';
+import {
+  clampZoom,
+  computationRole,
+  linkLabel,
+  MIN_ZOOM,
+  NODE_HEIGHT,
+  NODE_WIDTH,
+  type LayoutDirection,
+  type LayoutMode
+} from '../lib/graph-layout';
 import { hloOpName, lastOpNameSegment } from '../lib/metadata';
 import { nodeMemoryLocations, type MemoryLocation } from '../lib/memory-location';
 import { memorySpaceText } from '../lib/memory-space';
@@ -227,7 +236,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     const wheel = (event: WheelEvent) => {
       if (!event.ctrlKey || gestureStartZoomRef.current) return;
       event.preventDefault();
-      zoomAt(event.clientX, event.clientY, Math.max(0.45, Math.min(1.5, zoomRef.current * Math.exp(-event.deltaY / 100))));
+      zoomAt(event.clientX, event.clientY, clampZoom(zoomRef.current * Math.exp(-event.deltaY / 100)));
     };
     const gestureStart = (event: Event) => {
       event.preventDefault();
@@ -236,11 +245,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     const gestureChange = (event: Event) => {
       event.preventDefault();
       const gesture = event as Event & { scale: number; clientX: number; clientY: number };
-      zoomAt(
-        gesture.clientX,
-        gesture.clientY,
-        Math.max(0.45, Math.min(1.5, (gestureStartZoomRef.current || zoomRef.current) * gesture.scale))
-      );
+      zoomAt(gesture.clientX, gesture.clientY, clampZoom((gestureStartZoomRef.current || zoomRef.current) * gesture.scale));
     };
     const gestureEnd = () => {
       gestureStartZoomRef.current = 0;
@@ -260,7 +265,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
   const fit = () => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
-    onZoom(Math.max(0.45, Math.min(1, (scroller.clientWidth - 32) / stageWidth, (scroller.clientHeight - 32) / stageHeight)));
+    onZoom(Math.max(MIN_ZOOM, Math.min(1, (scroller.clientWidth - 32) / stageWidth, (scroller.clientHeight - 32) / stageHeight)));
     scroller.scrollTo(0, 0);
   };
   useImperativeHandle(ref, () => ({
@@ -431,10 +436,10 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     if (event.key === '+' || event.key === '=') {
       event.preventDefault();
-      onZoom(Math.min(1.5, zoom + 0.15));
+      onZoom(clampZoom(zoom + 0.15));
     } else if (event.key === '-' || event.key === '_') {
       event.preventDefault();
-      onZoom(Math.max(0.45, zoom - 0.15));
+      onZoom(clampZoom(zoom - 0.15));
     } else if (event.key === '0') {
       event.preventDefault();
       fit();

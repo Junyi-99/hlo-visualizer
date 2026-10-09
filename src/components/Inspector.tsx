@@ -7,6 +7,8 @@ import { Drawer } from 'vaul';
 import { TypeTree } from './TypeTree';
 import type { CopyGroup } from '../lib/copy-grouping';
 import { Icon } from './Icon';
+import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useStoredState } from '../hooks/useStoredState';
 
 interface InspectorProps {
   copyGroup?: CopyGroup | null;
@@ -35,19 +37,6 @@ function ReferenceList({ names, onNode }: { names: string[]; onNode: (name: stri
   );
 }
 
-const phoneQuery = '(max-width: 700px)';
-
-function useIsPhone() {
-  const [isPhone, setIsPhone] = useState(() => window.matchMedia(phoneQuery).matches);
-  useEffect(() => {
-    const media = window.matchMedia(phoneQuery);
-    const onChange = () => setIsPhone(media.matches);
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
-  }, []);
-  return isPhone;
-}
-
 const MIN_WIDTH = 300;
 const MIN_GRAPH_WIDTH = 360;
 
@@ -61,25 +50,15 @@ const clampWidth = (width: number) => Math.round(Math.min(maxInspectorWidth(), M
 
 // The docked inspector's width is the --inspector-w custom property; unset means the responsive default.
 // Dragging writes the property directly so the graph does not re-render on every pointer move.
+const readWidth = (saved: string | null) => (Number(saved) > 0 ? Number(saved) : null);
+const writeWidth = (width: number | null) => (width === null ? null : String(width));
+
 function useInspectorWidth() {
-  const [width, setWidth] = useState<number | null>(() => {
-    try {
-      const saved = Number(localStorage.getItem('inspector-width'));
-      return saved > 0 ? saved : null;
-    } catch {
-      return null;
-    }
-  });
+  const [width, setWidth] = useStoredState('inspector-width', readWidth, writeWidth);
   useEffect(() => {
     const root = document.documentElement.style;
     if (width === null) root.removeProperty('--inspector-w');
     else root.setProperty('--inspector-w', `${width}px`);
-    try {
-      if (width === null) localStorage.removeItem('inspector-width');
-      else localStorage.setItem('inspector-width', String(width));
-    } catch {
-      /* storage blocked */
-    }
   }, [width]);
   return [width, setWidth] as const;
 }
@@ -157,7 +136,7 @@ export function Inspector({
   onNode,
   onComputation
 }: InspectorProps) {
-  const isPhone = useIsPhone();
+  const isPhone = useMediaQuery('(max-width: 700px)');
   const panelRef = useRef<HTMLElement>(null);
   const shown = node && computation ? { copyGroup, module, computation, node, upstreamCount, downstreamCount } : null;
   // On phones the inspector is a draggable bottom drawer; the last node stays rendered while it slides away.

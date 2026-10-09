@@ -4,6 +4,7 @@ import { computationRole, type LayoutMode } from '../lib/graph-layout';
 import { examples } from '../lib/examples';
 import type { HloModule } from '../lib/types';
 import { Icon } from './Icon';
+import { useStoredState } from '../hooks/useStoredState';
 
 interface ToolbarProps {
   autoGroup: boolean;
@@ -35,23 +36,12 @@ type Theme = 'system' | 'light' | 'dark';
 const themeOrder: Theme[] = ['system', 'light', 'dark'];
 const themeLabel = { system: 'Theme: follow system', light: 'Theme: light', dark: 'Theme: dark' };
 
+const readTheme = (saved: string | null): Theme => (saved === 'light' || saved === 'dark' ? saved : 'system');
+const writeTheme = (theme: Theme) => (theme === 'system' ? null : theme);
+
 function ThemeButton() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    try {
-      const saved = localStorage.getItem('theme');
-      if (saved === 'light' || saved === 'dark') return saved;
-    } catch {
-      /* storage blocked */
-    }
-    return 'system';
-  });
+  const [theme, setTheme] = useStoredState('theme', readTheme, writeTheme);
   useEffect(() => {
-    try {
-      if (theme === 'system') localStorage.removeItem('theme');
-      else localStorage.setItem('theme', theme);
-    } catch {
-      /* storage blocked */
-    }
     const media = matchMedia('(prefers-color-scheme: dark)');
     const apply = () => {
       document.documentElement.dataset.theme = theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
