@@ -32,25 +32,26 @@ function tupleItems(type: string): string[] {
   return items;
 }
 
-export function memoryLocations(type: string): MemoryLocation[] {
-  const visit = (shape: string, path: string | null): MemoryLocation[] => {
-    const trimmed = shape.replace(/\/\*[^*]*\*\//g, '').trim(); // long tuples carry /*index=N*/ comments
-    if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
-      return tupleItems(trimmed).flatMap((item, index) => visit(item, path === null ? String(index) : `${path}.${index}`));
+function shapeLocations(shape: string, path: string | null): MemoryLocation[] {
+  const trimmed = shape.replace(/\/\*[^*]*\*\//g, '').trim(); // long tuples carry /*index=N*/ comments
+  if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
+    return tupleItems(trimmed).flatMap((item, index) => shapeLocations(item, path === null ? String(index) : `${path}.${index}`));
+  }
+  if (!/^[a-z][\w]*\[[^\]]*\]/.test(trimmed) || trimmed.startsWith('token[')) return []; // tokens hold no data
+  const match = /\bS\((\d+)\)/.exec(trimmed);
+  const space = match ? Number(match[1]) : 0;
+  return [
+    {
+      path,
+      space,
+      explicit: !!match,
+      label: memorySpaceLabel(space)
     }
-    if (!/^[a-z][\w]*\[[^\]]*\]/.test(trimmed) || trimmed.startsWith('token[')) return []; // tokens hold no data
-    const match = /\bS\((\d+)\)/.exec(trimmed);
-    const space = match ? Number(match[1]) : 0;
-    return [
-      {
-        path,
-        space,
-        explicit: !!match,
-        label: memorySpaceLabel(space)
-      }
-    ];
-  };
-  return visit(type, null);
+  ];
+}
+
+export function memoryLocations(type: string): MemoryLocation[] {
+  return shapeLocations(type, null);
 }
 
 // Calls whose callee runs inside the caller's kernel or per element, so its values never get buffers of their own:

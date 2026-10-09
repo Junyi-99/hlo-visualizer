@@ -96,17 +96,24 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     [computation, visibleNodes]
   );
   const [nodeHeights, setNodeHeights] = useState<Record<string, number>>({});
-  const viewportRef = useRef({ width: 1, height: 1 });
-  const [viewportMeasured, setViewportMeasured] = useState(false);
+  const [viewport, setViewport] = useState<{ width: number; height: number } | null>(null);
   const [arrangeRevision, setArrangeRevision] = useState(0);
   const { layouts, pending, failed, retry } = useGraphLayouts(module, viewComputation, nodeHeights);
   // Auto picks the direction that fits the canvas better when the graph or its layout changes,
   // not on every resize: opening the inspector must not flip the graph under the click.
-  const autoDirection = useMemo<LayoutDirection>(() => {
-    const viewport = viewportRef.current;
-    const score = (candidate: typeof layouts.horizontal) => Math.min(viewport.width / candidate.width, viewport.height / candidate.height);
-    return score(layouts.vertical) > score(layouts.horizontal) * 1.08 ? 'vertical' : 'horizontal';
-  }, [layouts, viewportMeasured, arrangeRevision]);
+  const [autoPick, setAutoPick] = useState<{
+    layouts: typeof layouts;
+    arrangeRevision: number;
+    measured: boolean;
+    direction: LayoutDirection;
+  } | null>(null);
+  let autoDirection = autoPick?.direction ?? 'horizontal';
+  if (!autoPick || autoPick.layouts !== layouts || autoPick.arrangeRevision !== arrangeRevision || autoPick.measured !== !!viewport) {
+    const { width, height } = viewport ?? { width: 1, height: 1 };
+    const score = (candidate: typeof layouts.horizontal) => Math.min(width / candidate.width, height / candidate.height);
+    autoDirection = score(layouts.vertical) > score(layouts.horizontal) * 1.08 ? 'vertical' : 'horizontal';
+    setAutoPick({ layouts, arrangeRevision, measured: !!viewport, direction: autoDirection });
+  }
   const direction = layoutMode === 'auto' ? autoDirection : layoutMode;
   const layout = layouts[direction];
   const vertical = direction === 'vertical';
@@ -137,8 +144,9 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     const scroller = scrollerRef.current;
     if (!scroller) return;
     const observer = new ResizeObserver(() => {
-      viewportRef.current = { width: Math.max(1, scroller.clientWidth - 32), height: Math.max(1, scroller.clientHeight - 32) };
-      setViewportMeasured(true);
+      const width = Math.max(1, scroller.clientWidth - 32),
+        height = Math.max(1, scroller.clientHeight - 32);
+      setViewport(prior => (prior?.width === width && prior.height === height ? prior : { width, height }));
     });
     observer.observe(scroller);
     return () => observer.disconnect();
@@ -165,7 +173,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     });
     cards.forEach(card => observer.observe(card));
     return () => observer.disconnect();
-  }, [visibleNodes, useOpName, showLastNameOnly, showMemoryLocation]);
+  }, [computation, visibleNodes, useOpName, showLastNameOnly, showMemoryLocation]);
   const nodeHeight = (name: string) => (computation ? (nodeHeights[`${computation.name}/${name}`] ?? NODE_HEIGHT) : NODE_HEIGHT);
   const positions = useMemo(() => {
     if (!computation) return layout.positions;
@@ -202,8 +210,8 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     const scroller = scrollerRef.current;
     if (!scroller) return;
     const zoomAt = (clientX: number, clientY: number, next: number) => {
-      const current = zoomRef.current;
-      if (Math.abs(next - current) < 0.001) return;
+      const currentZoom = zoomRef.current;
+      if (Math.abs(next - currentZoom) < 0.001) return;
       const rect = scroller.getBoundingClientRect();
       const x = clientX - rect.left,
         y = clientY - rect.top;
@@ -285,14 +293,15 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     const scroller = scrollerRef.current;
     if (!scroller) return;
     const ensureVisible = () => {
-      const { positions, zoom, nodeHeights } = viewRef.current;
-      const position = positions.get(selected);
+      const view = viewRef.current;
+      const position = view.positions.get(selected);
       if (!scroller || !position) return;
-      const height = nodeHeights[`${computation.name}/${selected}`] ?? NODE_HEIGHT;
-      const left = position.x * zoom,
-        right = (position.x + NODE_WIDTH) * zoom;
-      const top = position.y * zoom,
-        bottom = (position.y + height) * zoom;
+      const height = view.nodeHeights[`${computation.name}/${selected}`] ?? NODE_HEIGHT;
+      const scale = view.zoom;
+      const left = position.x * scale,
+        right = (position.x + NODE_WIDTH) * scale;
+      const top = position.y * scale,
+        bottom = (position.y + height) * scale;
       if (
         left < scroller.scrollLeft + 18 ||
         right > scroller.scrollLeft + scroller.clientWidth - 18 ||
@@ -300,8 +309,8 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
         bottom > scroller.scrollTop + scroller.clientHeight - 18
       ) {
         scroller.scrollTo({
-          left: Math.max(0, (position.x + NODE_WIDTH / 2) * zoom - scroller.clientWidth / 2),
-          top: Math.max(0, (position.y + height / 2) * zoom - scroller.clientHeight / 2),
+          left: Math.max(0, (position.x + NODE_WIDTH / 2) * scale - scroller.clientWidth / 2),
+          top: Math.max(0, (position.y + height / 2) * scale - scroller.clientHeight / 2),
           behavior: 'smooth'
         });
       }

@@ -83,6 +83,9 @@ export function operandNames(args: string): string[] {
   });
 }
 
+const field = (text: string, name: string) => Number(new RegExp(`\\b${name}=(\\d+)`).exec(text)?.[1] ?? 0);
+const unquote = (text = '') => text.replace(/^"|"$/g, '');
+
 export function parseHlo(source: string): HloModule {
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
   const module: HloModule = { name: '', computations: [], byName: new Map(), warnings: [], scheduled: false, stackFrames: new Map() };
@@ -201,8 +204,6 @@ export function parseHlo(source: string): HloModule {
     else module.warnings.push(`Line ${i + 1}: unrecognized content in %${current.name}`);
   }
   commit();
-  const field = (text: string, name: string) => Number(new RegExp(`\\b${name}=(\\d+)`).exec(text)?.[1] ?? 0);
-  const unquote = (text = '') => text.replace(/^"|"$/g, '');
   for (const [id, frame] of tables.StackFrames) {
     const location = tables.FileLocations.get(field(frame, 'file_location_id')) || '';
     module.stackFrames.set(id, {
@@ -352,6 +353,8 @@ export function tupleArity(type: string): number | null {
   return null;
 }
 
+const shapeLocation = (shape: string) => memorySpaceLabel(Number(/S\((\d+)\)/.exec(shape)?.[1] ?? '0'));
+
 export function copyDirection(node: HloNode): string | null {
   if (node.op !== 'copy-start' || !node.type.startsWith('(')) return null;
   const slots: string[] = [];
@@ -374,12 +377,8 @@ export function copyDirection(node: HloNode): string | null {
     if (parens === 0) break;
   }
   if (slots.length < 2 || !slots[0] || !slots[1]) return null;
-  const location = (shape: string) => {
-    const space = /S\((\d+)\)/.exec(shape)?.[1] ?? '0';
-    return memorySpaceLabel(Number(space));
-  };
   // copy-start returns (destination, source, context).
-  return `${location(slots[1])} → ${location(slots[0])}`;
+  return `${shapeLocation(slots[1])} → ${shapeLocation(slots[0])}`;
 }
 
 export function nodeSummary(node: HloNode): string {

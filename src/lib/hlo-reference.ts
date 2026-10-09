@@ -180,28 +180,29 @@ function rootSummary(name: string, module?: HloModule): string {
   return ` Its ROOT is ${root.op}${meaning[root.op] ? ` (${meaning[root.op]})` : ''}.`;
 }
 
+const dimRoles = (labels: string, kind: 'lhs' | 'rhs') =>
+  [...labels]
+    .map((ch, index) => {
+      const role =
+        kind === 'rhs'
+          ? ch === 'o'
+            ? 'output feature'
+            : ch === 'i'
+              ? 'input feature'
+              : `spatial ${ch}`
+          : ch === 'b'
+            ? 'batch'
+            : ch === 'f'
+              ? 'feature'
+              : `spatial ${ch}`;
+      return `dim ${index} = ${role}`;
+    })
+    .join(', ');
+
 function dimLabels(value: string): string {
   const [inputs, output] = value.split('->');
   const [lhs, rhs] = (inputs || '').split('_');
-  const describe = (labels: string, kind: 'lhs' | 'rhs') =>
-    [...labels]
-      .map((ch, index) => {
-        const role =
-          kind === 'rhs'
-            ? ch === 'o'
-              ? 'output feature'
-              : ch === 'i'
-                ? 'input feature'
-                : `spatial ${ch}`
-            : ch === 'b'
-              ? 'batch'
-              : ch === 'f'
-                ? 'feature'
-                : `spatial ${ch}`;
-        return `dim ${index} = ${role}`;
-      })
-      .join(', ');
-  return `dim_labels=${value} gives the role of each dimension by position (b = batch, f = feature, o/i = kernel output/input feature, digits = spatial). Input ${lhs}: ${describe(lhs || '', 'lhs')}; kernel ${rhs}: ${describe(rhs || '', 'rhs')}; output ${output}: ${describe(output || '', 'lhs')}.`;
+  return `dim_labels=${value} gives the role of each dimension by position (b = batch, f = feature, o/i = kernel output/input feature, digits = spatial). Input ${lhs}: ${dimRoles(lhs || '', 'lhs')}; kernel ${rhs}: ${dimRoles(rhs || '', 'rhs')}; output ${output}: ${dimRoles(output || '', 'lhs')}.`;
 }
 
 function windowText(value: string): string {

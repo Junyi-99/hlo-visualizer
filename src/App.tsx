@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import sampleHlo from '../sample.hlo?raw';
 import { GraphCanvas, type GraphHandle } from './components/GraphCanvas';
 import { ImportDialog } from './components/ImportDialog';
@@ -99,17 +99,7 @@ export default function App() {
     setCurrent(previous.current);
     setSelected(previous.selected);
   };
-  const loadExample = async (id: string) => {
-    const example = examples.find(item => item.id === id);
-    if (!example) return;
-    loadText(await example.load(), id);
-  };
-  // ?example=<id> loads a bundled example, so a reviewed module can be linked directly.
-  useEffect(() => {
-    const id = new URLSearchParams(location.search).get('example');
-    if (id) void loadExample(id);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const loadText = (source: string, example: string | null = null) => {
+  const loadText = useCallback((source: string, example: string | null = null) => {
     const parsed = parseHlo(source);
     if (!parsed.computations.length) throw new Error('No computations found. Paste a textual HLO module with %computation { … } blocks.');
     setModule(parsed);
@@ -124,7 +114,20 @@ export default function App() {
     if (example) url.searchParams.set('example', example);
     else url.searchParams.delete('example');
     window.history.replaceState(null, '', url);
-  };
+  }, []);
+  const loadExample = useCallback(
+    (id: string) =>
+      examples
+        .find(item => item.id === id)
+        ?.load()
+        .then(source => loadText(source, id)),
+    [loadText]
+  );
+  // ?example=<id> loads a bundled example, so a reviewed module can be linked directly.
+  useEffect(() => {
+    const id = new URLSearchParams(location.search).get('example');
+    if (id) void loadExample(id);
+  }, [loadExample]);
   const openReference = (name: string) => {
     setSelected(name);
     requestAnimationFrame(() => graphRef.current?.centerNode(name));

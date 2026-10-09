@@ -87,6 +87,14 @@ function useInspectorWidth() {
 function ResizeHandle({ panelRef }: { panelRef: React.RefObject<HTMLElement | null> }) {
   const [width, setWidth] = useInspectorWidth();
   const dragRef = useRef<{ pointerId: number; x: number; width: number; next: number } | null>(null);
+  const [measured, setMeasured] = useState(MIN_WIDTH);
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const observer = new ResizeObserver(() => setMeasured(panel.getBoundingClientRect().width));
+    observer.observe(panel);
+    return () => observer.disconnect();
+  }, [panelRef]);
   const current = () => panelRef.current?.getBoundingClientRect().width ?? MIN_WIDTH;
   return (
     <div
@@ -96,7 +104,7 @@ function ResizeHandle({ panelRef }: { panelRef: React.RefObject<HTMLElement | nu
       aria-label="Resize node details"
       tabIndex={0}
       aria-valuemin={MIN_WIDTH}
-      aria-valuenow={Math.round(width ?? current())}
+      aria-valuenow={Math.round(width ?? measured)}
       title="Drag to resize · double-click to reset"
       onPointerDown={event => {
         if (event.button !== 0) return;
@@ -151,16 +159,13 @@ export function Inspector({
 }: InspectorProps) {
   const isPhone = useIsPhone();
   const panelRef = useRef<HTMLElement>(null);
-  const details =
-    node && computation ? (
-      <InstructionDetails
-        key={node.id}
-        {...{ copyGroup, module, computation, node, upstreamCount, downstreamCount, onNode, onComputation }}
-      />
-    ) : null;
+  const shown = node && computation ? { copyGroup, module, computation, node, upstreamCount, downstreamCount } : null;
   // On phones the inspector is a draggable bottom drawer; the last node stays rendered while it slides away.
-  const lastDetails = useRef(details);
-  if (details) lastDetails.current = details;
+  const [lastShown, setLastShown] = useState(shown);
+  if (shown && !sameDetails(shown, lastShown)) setLastShown(shown);
+  const renderDetails = (props: DetailsProps | null) =>
+    props && <InstructionDetails key={props.node.id} {...props} onNode={onNode} onComputation={onComputation} />;
+  const details = renderDetails(shown);
   if (isPhone)
     return (
       <Drawer.Root
@@ -179,7 +184,7 @@ export function Inspector({
                 <Icon name="close" />
               </button>
             </div>
-            <div className="inspector-content overscroll-contain">{lastDetails.current}</div>
+            <div className="inspector-content overscroll-contain">{details || renderDetails(lastShown)}</div>
           </Drawer.Content>
         </Drawer.Portal>
       </Drawer.Root>
@@ -211,6 +216,16 @@ export function Inspector({
   );
 }
 
+type DetailsProps = Omit<InspectorProps, 'onClose' | 'onNode' | 'onComputation'> & { node: HloNode; computation: Computation };
+
+const sameDetails = (a: DetailsProps, b: DetailsProps | null) =>
+  !!b && (Object.keys(a) as (keyof DetailsProps)[]).every(key => a[key] === b[key]);
+
+function codeTarget(target: EventTarget) {
+  const part = target instanceof Element ? target.closest<HTMLElement>('[data-part]') : null;
+  return { key: part?.dataset.part || null, slot: part?.closest<HTMLElement>('.hlo-slot')?.dataset.part || null };
+}
+
 function InstructionDetails({
   copyGroup,
   module,
@@ -220,7 +235,7 @@ function InstructionDetails({
   downstreamCount,
   onNode,
   onComputation
-}: Omit<InspectorProps, 'onClose'> & { node: HloNode; computation: Computation }) {
+}: DetailsProps & Pick<InspectorProps, 'onNode' | 'onComputation'>) {
   const guide = useMemo(() => instructionGuide(node, { computation, module }), [node, computation, module]);
   const [activePart, setActivePart] = useState<string | null>(null);
   const [activeSlot, setActiveSlot] = useState<string | null>(null);
@@ -268,6 +283,7 @@ function InstructionDetails({
       const fallbackType = !hasMatchingPart && !activeSlot && activePart === 'space' && element.classList.contains('hlo-type');
       element.classList.toggle('active-part', !!(matchesPart || matchesSlot || fallbackType));
     });
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- dangerouslySetInnerHTML replaces the spans, so re-apply highlights when the HTML changes
   }, [activePart, activeSlot, displayedHtml]);
 
   const activate = (part: string | null, slot: string | null = null) => {
@@ -275,10 +291,6 @@ function InstructionDetails({
     setActiveSlot(slot);
   };
 
-  const codeTarget = (target: EventTarget) => {
-    const part = target instanceof Element ? target.closest<HTMLElement>('[data-part]') : null;
-    return { key: part?.dataset.part || null, slot: part?.closest<HTMLElement>('.hlo-slot')?.dataset.part || null };
-  };
   const activateFromCode = (event: React.MouseEvent<HTMLPreElement>) => {
     const { key, slot } = codeTarget(event.target);
     if (!key) return;

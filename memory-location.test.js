@@ -69,14 +69,14 @@ for (const file of readdirSync(dir)
   .filter(name => name.endsWith('.after.hlo'))
   .sort()) {
   test(`${file}: memory labels match XLA buffer assignment`, () => {
-    const module = parseHlo(readFileSync(new URL(file, dir), 'utf8'));
+    const hloModule = parseHlo(readFileSync(new URL(file, dir), 'utf8'));
     const truth = JSON.parse(readFileSync(new URL(file.replace('.hlo', '.memory.json'), dir), 'utf8'));
-    assert.equal(module.scheduled, true);
+    assert.equal(hloModule.scheduled, true);
     let checked = 0;
-    for (const computation of module.computations)
+    for (const computation of hloModule.computations)
       for (const node of computation.nodes) {
         const shown = new Map(
-          nodeMemoryLocations(module, computation, node).map(location => [
+          nodeMemoryLocations(hloModule, computation, node).map(location => [
             location.path === null ? '' : location.path.replaceAll('.', ','),
             location.label
           ])
@@ -103,11 +103,11 @@ for (const file of readdirSync(dir)
   .filter(name => name.endsWith('.after.hlo'))
   .sort()) {
   test(`${file}: the inspector's memory-space text agrees with XLA buffer assignment`, () => {
-    const module = parseHlo(readFileSync(new URL(file, dir), 'utf8'));
+    const hloModule = parseHlo(readFileSync(new URL(file, dir), 'utf8'));
     const truth = JSON.parse(readFileSync(new URL(file.replace('.hlo', '.memory.json'), dir), 'utf8'));
-    for (const computation of module.computations)
+    for (const computation of hloModule.computations)
       for (const node of computation.nodes) {
-        const group = instructionGuide(node, { module, computation }).resultGroup;
+        const group = instructionGuide(node, { module: hloModule, computation }).resultGroup;
         const rows = group.kind === 'array' ? [['', group.details]] : group.slots.map((slot, index) => [String(index), slot.details]);
         for (const [leaf, details] of rows) {
           const text = details.find(detail => detail.key === 'space')?.text || '';
@@ -124,10 +124,11 @@ for (const file of readdirSync(dir)
 
 test('lowered (unscheduled) modules show no memory locations: spaces are not assigned yet', () => {
   for (const file of readdirSync(dir).filter(name => name.endsWith('.before.hlo'))) {
-    const module = parseHlo(readFileSync(new URL(file, dir), 'utf8'));
-    assert.equal(module.scheduled, false);
-    for (const computation of module.computations)
-      for (const node of computation.nodes) assert.deepEqual(nodeMemoryLocations(module, computation, node), [], `${file} %${node.name}`);
+    const hloModule = parseHlo(readFileSync(new URL(file, dir), 'utf8'));
+    assert.equal(hloModule.scheduled, false);
+    for (const computation of hloModule.computations)
+      for (const node of computation.nodes)
+        assert.deepEqual(nodeMemoryLocations(hloModule, computation, node), [], `${file} %${node.name}`);
   }
 });
 

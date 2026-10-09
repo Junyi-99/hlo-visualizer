@@ -96,12 +96,10 @@ export function layoutOverview(module: HloModule, direction: LayoutDirection = '
     if (!columns.has(level)) columns.set(level, []);
     columns.get(level)!.push(c);
   }
+  const priority = (c: Computation) =>
+    computationRole(c, links) === 'WHILE BODY' ? -1 : computationRole(c, links) === 'WHILE CONDITION' ? 1 : 0;
   for (const group of columns.values())
-    group.sort((a, b) => {
-      const priority = (c: Computation) =>
-        computationRole(c, links) === 'WHILE BODY' ? -1 : computationRole(c, links) === 'WHILE CONDITION' ? 1 : 0;
-      return priority(a) - priority(b) || module.computations.indexOf(a) - module.computations.indexOf(b);
-    });
+    group.sort((a, b) => priority(a) - priority(b) || module.computations.indexOf(a) - module.computations.indexOf(b));
   const gapX = 64,
     gapY = 68,
     padX = 48,

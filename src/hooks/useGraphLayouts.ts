@@ -21,55 +21,51 @@ export function useGraphLayouts(module: HloModule, computation: Computation | nu
       vertical: fallbackRoutes(place('vertical'), graph.nodes, graph.edges, 'vertical')
     };
     return { graph, fallback };
-  }, [module, computation, heights, revision]);
-  const [result, setResult] = useState<{ input: typeof input; layouts: Record<LayoutDirection, RoutedLayout> } | null>(null);
-  const [failure, setFailure] = useState<typeof input | null>(null);
+  }, [module, computation, heights]);
+  // A retry is a new attempt on the same input, so its result and failure are tracked separately.
+  const attempt = useMemo(() => ({ input, revision }), [input, revision]);
+  const [result, setResult] = useState<{ attempt: typeof attempt; layouts: Record<LayoutDirection, RoutedLayout> } | null>(null);
+  const [failure, setFailure] = useState<typeof attempt | null>(null);
   useEffect(() => {
     let cancelled = false;
-    const createEngine = () =>
-      new ELK({
+    let engine: InstanceType<typeof ELK> | undefined;
+    // Constructing the worker can throw; the promise turns that into an asynchronous failure.
+    new Promise<[RoutedLayout, RoutedLayout]>(resolve => {
+      const created = new ELK({
         workerFactory: () => {
           const worker = new Worker(workerUrl);
           worker.addEventListener('error', () => {
-            if (!cancelled) setFailure(input);
+            if (!cancelled) setFailure(attempt);
           });
           return worker;
         }
       });
-    let engine: ReturnType<typeof createEngine>;
-    try {
-      engine = createEngine();
-    } catch (error) {
-      console.error('Graph worker failed', error);
-      setFailure(input);
-      return;
-    }
-    Promise.all([
-      routeGraph(engine, input.graph.nodes, input.graph.edges, 'horizontal'),
-      routeGraph(engine, input.graph.nodes, input.graph.edges, 'vertical')
-    ])
+      engine = created;
+      const { nodes, edges } = attempt.input.graph;
+      resolve(Promise.all([routeGraph(created, nodes, edges, 'horizontal'), routeGraph(created, nodes, edges, 'vertical')]));
+    })
       .then(([horizontal, vertical]) => {
         if (!cancelled) {
-          setResult({ input, layouts: { horizontal, vertical } });
+          setResult({ attempt, layouts: { horizontal, vertical } });
           setFailure(null);
         }
       })
       .catch(error => {
         if (!cancelled) {
           console.error('Graph layout failed', error);
-          setFailure(input);
+          setFailure(attempt);
         }
       });
     return () => {
       cancelled = true;
-      engine.terminateWorker();
+      engine?.terminateWorker();
     };
-  }, [input]);
-  const ready = result?.input === input;
+  }, [attempt]);
+  const ready = result?.attempt === attempt;
   return {
     layouts: ready ? result.layouts : input.fallback,
-    pending: !ready && failure !== input,
-    failed: failure === input,
+    pending: !ready && failure !== attempt,
+    failed: failure === attempt,
     retry: () => setRevision(value => value + 1)
   };
 }

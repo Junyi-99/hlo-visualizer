@@ -122,8 +122,10 @@ function operandHtml(args: string) {
     .join('');
 }
 
+const memorySpace = (shape: string) => Number(/S\((\d+)\)/.exec(shape)?.[1] || 0);
+
 function memoryLabel(shape: string) {
-  const value = Number(/S\((\d+)\)/.exec(shape)?.[1] || 0);
+  const value = memorySpace(shape);
   return value === 0 ? 'HBM (S(0) omitted)' : `${memorySpaceLabel(value)} (S(${value}))`;
 }
 
@@ -240,8 +242,6 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
     tupleGroup: { rawType: string; slots: (TypeSlot & GuidePart)[] } | null = null;
   if (copyStart) {
     const slots = splitTuple(typeText);
-    const memory = (shape: string) => Number(/S\((\d+)\)/.exec(shape)?.[1] || 0);
-    const memoryLabel = (number: number) => (number === 0 ? 'HBM (S(0) omitted)' : `${memorySpaceLabel(number)} (S(${number}))`);
     const outputShape = /([a-z][\w]*)\[([^\]]*)\]/.exec(slots[0]?.body || '');
     const order = /\{(\d+(?:,\d+)*):/.exec(slots[0]?.body || '')?.[1];
     const tile = /T(?:\([^)]*\))+/.exec(slots[0]?.body || '')?.[0];
@@ -267,17 +267,17 @@ export function instructionGuide(node: HloNode, context: GuideContext = {}): Ins
       {
         key: 'dest',
         label: 'Element 0 · destination',
-        text: `The buffer that holds the data after the copy; here it is in ${memoryLabel(memory(slots[0]?.body || ''))}.`
+        text: `The buffer that holds the data after the copy; here it is in ${memoryLabel(slots[0]?.body || '')}.`
       },
       {
         key: 'source',
         label: 'Element 1 · source',
-        text: `The buffer the data is copied from; here it is in ${memoryLabel(memory(slots[1]?.body || ''))}.`
+        text: `The buffer the data is copied from; here it is in ${memoryLabel(slots[1]?.body || '')}.`
       },
       {
         key: 'context',
         label: 'Element 2 · context',
-        text: `${(slots[2]?.body || 'u32[]').trim()} is the sync flag of the asynchronous copy; copy-done waits on it. It is in ${memoryLabel(memory(slots[2]?.body || ''))}.`
+        text: `${(slots[2]?.body || 'u32[]').trim()} is the sync flag of the asynchronous copy; copy-done waits on it. It is in ${memoryLabel(slots[2]?.body || '')}.`
       },
       {
         key: 'shape',
@@ -497,15 +497,14 @@ export function layoutDiagram(node: HloNode): string | null {
   if (!['copy-start', 'parameter'].includes(node.op) || !/\{1,0:T\(8,128\)\(2,1\)/.test(node.type)) return null;
   const slots = splitTuple(node.type);
   if (!slots.length) return null;
-  const space = (shape: string) => Number(/S\((\d+)\)/.exec(shape)?.[1] || 0);
   const location = memorySpaceLabel;
   const copyStart = node.op === 'copy-start';
   const matrixSlots = slots.map((slot, index) => ({ slot, index })).filter(({ slot }) => /\{1,0:T\(8,128\)\(2,1\)/.test(slot.body));
   const reference = matrixSlots[0]?.slot.body;
   if (!reference) return null;
   const locationText = copyStart
-    ? `${location(space(slots[1].body))} S(${space(slots[1].body)}) → ${location(space(slots[0].body))} S(${space(slots[0].body)})`
-    : `Element${matrixSlots.length > 1 ? 's' : ''} ${matrixSlots.map(({ index }) => index).join(', ')} · ${location(space(reference))} S(${space(reference)})`;
+    ? `${location(memorySpace(slots[1].body))} S(${memorySpace(slots[1].body)}) → ${location(memorySpace(slots[0].body))} S(${memorySpace(slots[0].body)})`
+    : `Element${matrixSlots.length > 1 ? 's' : ''} ${matrixSlots.map(({ index }) => index).join(', ')} · ${location(memorySpace(reference))} S(${memorySpace(reference)})`;
   const dimensions = /\[(\d+),(\d+)\]/.exec(reference);
   const tileCount = dimensions ? Math.ceil(Number(dimensions[1]) / 8) * Math.ceil(Number(dimensions[2]) / 128) : null;
   const cells = [];

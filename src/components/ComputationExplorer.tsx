@@ -36,7 +36,7 @@ export function ComputationExplorer({ autoGroup, module, rootNode, onClose, onOp
   const { layouts } = useGraphLayouts(module, computation, emptyHeights);
   const layout = layouts.horizontal;
   useEffect(() => {
-    scrollerRef.current?.scrollTo(0, 0);
+    if (computation) scrollerRef.current?.scrollTo(0, 0);
   }, [computation]);
   const selectedGroup = selected ? grouping?.groups.get(selected) : null;
   const selectedNode = selected && computation?.byName.get(selected);
