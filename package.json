@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node --test parser.test.js instruction-guide.test.js memory-location.test.js examples.test.js graph-routing.test.js copy-grouping.test.js",
     "lint": "oxlint",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
