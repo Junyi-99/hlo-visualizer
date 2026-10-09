@@ -1,0 +1,8 @@
+dist
+node_modules
+examples
+package-lock.json
+*.hlo
+.agents
+.claude
+skills-lock.json

@@ -8,9 +8,12 @@
 const SPACES: Record<number, { label: string; text: string }> = {
   0: { label: 'HBM', text: 'high-bandwidth memory, the TPU main memory and the largest.' },
   1: { label: 'VMEM', text: 'on-chip vector memory next to the TensorCore; compute reads and writes it directly. Small and fast.' },
-  2: { label: 'SFLAG', text: 'sync flag memory; records whether an asynchronous DMA (copy-start, send, …) has finished, and the matching *-done waits on it.' },
+  2: {
+    label: 'SFLAG',
+    text: 'sync flag memory; records whether an asynchronous DMA (copy-start, send, …) has finished, and the matching *-done waits on it.'
+  },
   5: { label: 'HOST', text: 'host (CPU) memory.' },
-  6: { label: 'SMEM', text: 'scalar memory for loop counters, indices, comparison results and other scalars used by the scalar unit.' },
+  6: { label: 'SMEM', text: 'scalar memory for loop counters, indices, comparison results and other scalars used by the scalar unit.' }
 };
 
 export const memorySpaceLabel = (space: number) => SPACES[space]?.label ?? `S(${space})`;
@@ -19,7 +22,9 @@ export const memorySpaceLabel = (space: number) => SPACES[space]?.label ?? `S(${
 export function memorySpaceText(space: number, explicit = space !== 0) {
   const marker = explicit ? `S(${space})` : 'no S(n), so the default space S(0)';
   const known = SPACES[space];
-  return known ? `${known.label} (${marker}): ${known.text}` : `S(${space}): a memory space number private to the TPU backend; its meaning is not public.`;
+  return known
+    ? `${known.label} (${marker}): ${known.text}`
+    : `S(${space}): a memory space number private to the TPU backend; its meaning is not public.`;
 }
 
 // Memory space of an array shape string such as "f32[8]{0:T(128)S(1)}".

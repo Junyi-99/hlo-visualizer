@@ -5,7 +5,9 @@ import type { Computation, ComputationLink, HloModule, HloNode, SourceFrame } fr
 import { memorySpaceLabel } from './memory-space.ts';
 
 function openBraceCount(text: string): number {
-  let depth = 0, quoted = false, escaped = false;
+  let depth = 0,
+    quoted = false,
+    escaped = false;
   for (const char of text) {
     if (quoted) {
       if (escaped) escaped = false;
@@ -21,7 +23,10 @@ function openBraceCount(text: string): number {
 // Split on commas that are not nested inside (), [], {} or a quoted string.
 export function splitTopLevel(text: string): string[] {
   const pieces: string[] = [];
-  let depth = 0, quoted = false, escaped = false, start = 0;
+  let depth = 0,
+    quoted = false,
+    escaped = false,
+    start = 0;
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
     if (quoted) {
@@ -31,15 +36,29 @@ export function splitTopLevel(text: string): string[] {
     } else if (char === '"') quoted = true;
     else if (char === '(' || char === '[' || char === '{') depth++;
     else if (char === ')' || char === ']' || char === '}') depth--;
-    else if (char === ',' && depth === 0) { pieces.push(text.slice(start, i)); start = i + 1; }
+    else if (char === ',' && depth === 0) {
+      pieces.push(text.slice(start, i));
+      start = i + 1;
+    }
   }
   pieces.push(text.slice(start));
   return pieces;
 }
 
 // Attributes whose value names other computations. Newer XLA/JAX printers omit the % sigil.
-const CALL_ATTRIBUTES = new Set(['calls', 'to_apply', 'body', 'condition', 'select', 'scatter', 'branch_computations',
-  'true_computation', 'false_computation', 'called_computations', 'comparator']);
+const CALL_ATTRIBUTES = new Set([
+  'calls',
+  'to_apply',
+  'body',
+  'condition',
+  'select',
+  'scatter',
+  'branch_computations',
+  'true_computation',
+  'false_computation',
+  'called_computations',
+  'comparator'
+]);
 
 export function computationCalls(suffix: string): Record<string, string> {
   const calls: Record<string, string> = {};
@@ -47,7 +66,9 @@ export function computationCalls(suffix: string): Record<string, string> {
     const match = /^\s*([\w-]+)=(.*)$/s.exec(piece);
     if (!match || !CALL_ATTRIBUTES.has(match[1])) continue;
     const names = [...match[2].matchAll(/%?([\w.-]+)/g)].map(m => m[1]);
-    names.forEach((name, index) => { calls[names.length > 1 ? `${match[1]}[${index}]` : match[1]] = name; });
+    names.forEach((name, index) => {
+      calls[names.length > 1 ? `${match[1]}[${index}]` : match[1]] = name;
+    });
   }
   return calls;
 }
@@ -66,7 +87,12 @@ export function parseHlo(source: string): HloModule {
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
   const module: HloModule = { name: '', computations: [], byName: new Map(), warnings: [], scheduled: false, stackFrames: new Map() };
   // FileNames / FunctionNames / FileLocations / StackFrames tables printed before the computations.
-  const tables: Record<string, Map<number, string>> = { FileNames: new Map(), FunctionNames: new Map(), FileLocations: new Map(), StackFrames: new Map() };
+  const tables: Record<string, Map<number, string>> = {
+    FileNames: new Map(),
+    FunctionNames: new Map(),
+    FileLocations: new Map(),
+    StackFrames: new Map()
+  };
   let table: Map<number, string> | null = null;
   let current: Computation | null = null;
   let pending: { text: string; line: number } | null = null;
@@ -76,18 +102,28 @@ export function parseHlo(source: string): HloModule {
     const { text: raw, line: lineNumber } = pending;
     pending = null;
     const match = raw.match(/^(ROOT\s+)?%?([^\s=]+)\s*=\s*([\s\S]*)$/);
-    if (!match) { module.warnings.push(`Line ${lineNumber}: unrecognized instruction`); return; }
+    if (!match) {
+      module.warnings.push(`Line ${lineNumber}: unrecognized instruction`);
+      return;
+    }
     const rhs = match[3];
     const opMatch = /\s([a-z][a-z0-9-]*)\(/g.exec(rhs);
-    if (!opMatch) { module.warnings.push(`Line ${lineNumber}: operation not found`); return; }
+    if (!opMatch) {
+      module.warnings.push(`Line ${lineNumber}: operation not found`);
+      return;
+    }
     const op = opMatch[1];
     const opStart = opMatch.index + opMatch[0].length - 1;
-    let depth = 0, end = opStart;
+    let depth = 0,
+      end = opStart;
     for (; end < rhs.length; end++) {
       if (rhs[end] === '(') depth++;
       if (rhs[end] === ')' && --depth === 0) break;
     }
-    if (end >= rhs.length) { module.warnings.push(`Line ${lineNumber}: unclosed ${op} operands`); return; }
+    if (end >= rhs.length) {
+      module.warnings.push(`Line ${lineNumber}: unclosed ${op} operands`);
+      return;
+    }
     const args = rhs.slice(opStart + 1, end);
     const operands = op === 'constant' || op === 'parameter' ? [] : operandNames(args);
     const suffix = rhs.slice(end + 1);
@@ -98,11 +134,21 @@ export function parseHlo(source: string): HloModule {
     const kind = /\bkind=([\w]+)/.exec(suffix);
     const direction = /\bdirection=([\w]+)/.exec(suffix);
     const node: HloNode = {
-      id: `${current.name}/${match[2]}`, name: match[2], op, type: rhs.slice(0, opMatch.index).trim(),
-      operands, controlPredecessors, controlSuccessors: [], calls,
+      id: `${current.name}/${match[2]}`,
+      name: match[2],
+      op,
+      type: rhs.slice(0, opMatch.index).trim(),
+      operands,
+      controlPredecessors,
+      controlSuccessors: [],
+      calls,
       index: index ? Number(index[1]) : null,
-      kind: kind?.[1] || null, direction: direction?.[1] || null,
-      root: !!match[1], raw, line: lineNumber, users: []
+      kind: kind?.[1] || null,
+      direction: direction?.[1] || null,
+      root: !!match[1],
+      raw,
+      line: lineNumber,
+      users: []
     };
     if (current.byName.has(node.name)) module.warnings.push(`Line ${lineNumber}: duplicate instruction %${node.name}`);
     current.nodes.push(node);
@@ -121,9 +167,15 @@ export function parseHlo(source: string): HloModule {
       pending.text += `\n${line}`;
       continue;
     }
-    if (line === '}') { commit(); current = null; continue; }
-    const header = line.endsWith('{') && !/\s=\s/.test(line.split('(')[0]) && !(pending && openBraceCount(pending.text) > 0)
-      ? /^(ENTRY\s+)?%?([^\s(={]+)\s*[({]/.exec(line) : null;
+    if (line === '}') {
+      commit();
+      current = null;
+      continue;
+    }
+    const header =
+      line.endsWith('{') && !/\s=\s/.test(line.split('(')[0]) && !(pending && openBraceCount(pending.text) > 0)
+        ? /^(ENTRY\s+)?%?([^\s(={]+)\s*[({]/.exec(line)
+        : null;
     if (header) {
       commit();
       const match = header;
@@ -136,7 +188,10 @@ export function parseHlo(source: string): HloModule {
     }
     if (!current) {
       if (line in tables) table = tables[line];
-      else if (table) { const row = /^(\d+)\s+(.*)$/.exec(line); if (row) table.set(Number(row[1]), row[2]); }
+      else if (table) {
+        const row = /^(\d+)\s+(.*)$/.exec(line);
+        if (row) table.set(Number(row[1]), row[2]);
+      }
       continue;
     }
     if (/^(?:ROOT\s+)?%?[\w.-]+\s=\s/.test(line) && !(pending && openBraceCount(pending.text) > 0)) {
@@ -153,9 +208,10 @@ export function parseHlo(source: string): HloModule {
     module.stackFrames.set(id, {
       file: unquote(tables.FileNames.get(field(location, 'file_name_id'))),
       func: unquote(tables.FunctionNames.get(field(location, 'function_name_id'))),
-      line: field(location, 'line'), column: field(location, 'column'),
+      line: field(location, 'line'),
+      column: field(location, 'column'),
       // XLA prints parent_frame_id as the parent's id + 1, so 1 means "no parent" (checked against a 3-level call chain).
-      parent: Math.max(0, field(frame, 'parent_frame_id') - 1),
+      parent: Math.max(0, field(frame, 'parent_frame_id') - 1)
     });
   }
   for (const computation of module.computations) {
@@ -182,7 +238,8 @@ export function parseHlo(source: string): HloModule {
 // Call stack for a metadata stack_frame_id, innermost frame first.
 export function sourceStack(module: HloModule, frameId: number): SourceFrame[] {
   const stack: SourceFrame[] = [];
-  for (let id = frameId; id && module.stackFrames.has(id) && stack.length < 64; id = module.stackFrames.get(id)!.parent) stack.push(module.stackFrames.get(id)!);
+  for (let id = frameId; id && module.stackFrames.has(id) && stack.length < 64; id = module.stackFrames.get(id)!.parent)
+    stack.push(module.stackFrames.get(id)!);
   return stack;
 }
 
@@ -203,7 +260,10 @@ export function reachable(computation: Computation, startName: string, direction
     const node = computation.byName.get(name);
     if (!node) continue;
     for (const next of direction === 'up' ? [...node.operands, ...node.controlPredecessors] : [...node.users, ...node.controlSuccessors]) {
-      if (!found.has(next) && next !== startName) { found.add(next); queue.push(next); }
+      if (!found.has(next) && next !== startName) {
+        found.add(next);
+        queue.push(next);
+      }
     }
   }
   return found;
@@ -218,7 +278,10 @@ export function dependencyNeighborhood(computation: Computation, startName: stri
       const node = computation.byName.get(name);
       if (!node) continue;
       for (const neighbor of [...node.operands, ...node.controlPredecessors, ...node.users, ...node.controlSuccessors]) {
-        if (!seen.has(neighbor)) { seen.add(neighbor); next.push(neighbor); }
+        if (!seen.has(neighbor)) {
+          seen.add(neighbor);
+          next.push(neighbor);
+        }
       }
     }
     frontier = next;
@@ -239,7 +302,10 @@ export function shortestDependencyPath(computation: Computation, from: string, t
     }
     const node = computation.byName.get(name)!;
     for (const neighbor of [...node.operands, ...node.controlPredecessors, ...node.users, ...node.controlSuccessors]) {
-      if (computation.byName.has(neighbor) && !previous.has(neighbor)) { previous.set(neighbor, name); queue.push(neighbor); }
+      if (computation.byName.has(neighbor) && !previous.has(neighbor)) {
+        previous.set(neighbor, name);
+        queue.push(neighbor);
+      }
     }
   }
   return null;
@@ -252,9 +318,14 @@ export function computationLinks(module: HloModule): ComputationLink[] {
   for (const computation of module.computations) {
     for (const node of computation.nodes) {
       for (const [role, target] of Object.entries(node.calls)) {
-        if (module.byName.has(target)) links.push({
-          from: computation.name, to: target, role, via: node.name, op: node.op
-        });
+        if (module.byName.has(target))
+          links.push({
+            from: computation.name,
+            to: target,
+            role,
+            via: node.name,
+            op: node.op
+          });
       }
     }
   }
@@ -263,7 +334,10 @@ export function computationLinks(module: HloModule): ComputationLink[] {
 
 export function tupleArity(type: string): number | null {
   if (!type.startsWith('(')) return null;
-  let parens = 0, brackets = 0, braces = 0, count = 1;
+  let parens = 0,
+    brackets = 0,
+    braces = 0,
+    count = 1;
   for (const char of type) {
     if (char === '(') parens++;
     else if (char === ')') {
@@ -281,7 +355,10 @@ export function tupleArity(type: string): number | null {
 export function copyDirection(node: HloNode): string | null {
   if (node.op !== 'copy-start' || !node.type.startsWith('(')) return null;
   const slots: string[] = [];
-  let start = 1, parens = 1, brackets = 0, braces = 0;
+  let start = 1,
+    parens = 1,
+    brackets = 0,
+    braces = 0;
   for (let i = 1; i < node.type.length; i++) {
     const char = node.type[i];
     if (char === '(') parens++;

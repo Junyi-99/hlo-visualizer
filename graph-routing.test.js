@@ -16,23 +16,33 @@ function checkGeometry(layout, nodes, edges, direction = 'horizontal') {
     assert(card.x >= 0 && card.y >= 0);
     assert(card.x + card.width <= layout.width && card.y + card.height <= layout.height);
   }
-  for (const [i, a] of cards.entries()) for (const b of cards.slice(i + 1)) {
-    assert(a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y, a.name + ' overlaps ' + b.name);
-  }
+  for (const [i, a] of cards.entries())
+    for (const b of cards.slice(i + 1)) {
+      assert(
+        a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y,
+        a.name + ' overlaps ' + b.name
+      );
+    }
   for (const edge of layout.edges) {
     assert.equal((edge.points.length - 1) % 3, 0, 'invalid cubic control points');
     assert(edgePath(edge.points).includes('C'));
     const points = curvePoints(edge.points, direction);
     // Test points on the actual Bézier curves, not their control polygons.
     for (let i = 1; i < points.length; i += 3) {
-      const p0 = points[i - 1], p1 = points[i], p2 = points[i + 1], p3 = points[i + 2];
+      const p0 = points[i - 1],
+        p1 = points[i],
+        p2 = points[i + 1],
+        p3 = points[i + 2];
       for (let step = 1; step < 80; step++) {
-        const t = step / 80, u = 1 - t;
-        const x = u*u*u*p0.x + 3*u*u*t*p1.x + 3*u*t*t*p2.x + t*t*t*p3.x;
-        const y = u*u*u*p0.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*p3.y;
+        const t = step / 80,
+          u = 1 - t;
+        const x = u * u * u * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x;
+        const y = u * u * u * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y;
         for (const c of cards) {
-          assert(!(x > c.x + epsilon && x < c.x + c.width - epsilon && y > c.y + epsilon && y < c.y + c.height - epsilon),
-            edge.source + ' → ' + edge.target + ' crosses ' + c.name);
+          assert(
+            !(x > c.x + epsilon && x < c.x + c.width - epsilon && y > c.y + epsilon && y < c.y + c.height - epsilon),
+            edge.source + ' → ' + edge.target + ' crosses ' + c.name
+          );
         }
       }
     }
@@ -54,8 +64,10 @@ for (const direction of ['horizontal', 'vertical']) {
   test(direction + ': duplicate inputs, control dependencies, cycles and missing references', async () => {
     const nodes = ['a', 'b', 'c', 'isolated'].map(name => ({ name, width: 218, height: 91 }));
     const edges = [
-      { source: 'a', target: 'b' }, { source: 'a', target: 'b' },
-      { source: 'b', target: 'c' }, { source: 'c', target: 'a', control: true },
+      { source: 'a', target: 'b' },
+      { source: 'a', target: 'b' },
+      { source: 'b', target: 'c' },
+      { source: 'c', target: 'a', control: true },
       { source: 'missing', target: 'c' }
     ];
     const layout = await routeGraph(engine, nodes, edges, direction);
@@ -75,12 +87,27 @@ test('empty and filtered graphs remain finite; unknown dependencies are omitted'
   checkGeometry(await routeGraph(engine, graph.nodes, graph.edges, 'vertical'), graph.nodes, graph.edges, 'vertical');
 });
 test('cubic curves leave room for arrows and stay attached during dragging', () => {
-  const edge = { source: 'a', target: 'b', points: [{ x: 218, y: 40 }, { x: 260, y: 40 }, { x: 280, y: 140 }, { x: 320, y: 140 }] };
+  const edge = {
+    source: 'a',
+    target: 'b',
+    points: [
+      { x: 218, y: 40 },
+      { x: 260, y: 40 },
+      { x: 280, y: 140 },
+      { x: 320, y: 140 }
+    ]
+  };
   const path = edgePath(edge.points);
   assert(path.includes('C'));
   assert(!/[LQ]/.test(path));
   assert(path.endsWith('315 140'));
-  const moved = movedEdgePoints(edge, new Map([['a', { x: 20, y: 30 }], ['b', { x: -10, y: 15 }]]));
+  const moved = movedEdgePoints(
+    edge,
+    new Map([
+      ['a', { x: 20, y: 30 }],
+      ['b', { x: -10, y: 15 }]
+    ])
+  );
   assert.deepEqual(moved[0], { x: 238, y: 70 });
   assert.deepEqual(moved[1], { x: 280, y: 70 });
   assert.deepEqual(moved.at(-1), { x: 310, y: 155 });
@@ -99,11 +126,12 @@ for (const direction of ['horizontal', 'vertical']) {
     checkGeometry(layout, graph.nodes, graph.edges, direction);
     for (const node of graph.nodes) {
       for (const side of ['input', 'output']) {
-        const ports = layout.edges.filter(e => side === 'input' ? e.target === node.name : e.source === node.name)
-          .map(e => side === 'input' ? e.points.at(-1) : e.points[0]);
+        const ports = layout.edges
+          .filter(e => (side === 'input' ? e.target === node.name : e.source === node.name))
+          .map(e => (side === 'input' ? e.points.at(-1) : e.points[0]));
         assert.equal(new Set(ports.map(p => p.x + ':' + p.y)).size, ports.length, node.name + ' merged ' + side + ' ports');
-        const offsets = ports.map(p => direction === 'horizontal' ? p.y : p.x).sort((a,b) => a-b);
-        for (let i = 1; i < offsets.length; i++) assert(offsets[i] - offsets[i-1] >= 8, node.name + ' ports too close');
+        const offsets = ports.map(p => (direction === 'horizontal' ? p.y : p.x)).sort((a, b) => a - b);
+        for (let i = 1; i < offsets.length; i++) assert(offsets[i] - offsets[i - 1] >= 8, node.name + ' ports too close');
       }
     }
   });
@@ -121,12 +149,17 @@ test('grouped copy pairs retain all external data and control routes in both dir
   }
 });
 
-
 test('angled spline controls enter input ports squarely with a small, fixed gap', () => {
   for (const direction of ['horizontal', 'vertical']) {
-    const raw = [{ x: 100, y: 100 }, { x: 100, y: 100 }, { x: 150, y: 300 }, { x: 200, y: 400 }];
+    const raw = [
+      { x: 100, y: 100 },
+      { x: 100, y: 100 },
+      { x: 150, y: 300 },
+      { x: 200, y: 400 }
+    ];
     const controls = curvePoints(raw, direction);
-    const end = controls.at(-1), tangent = controls.at(-2);
+    const end = controls.at(-1),
+      tangent = controls.at(-2);
     if (direction === 'vertical') {
       assert.equal(end.x, raw.at(-1).x);
       assert.equal(end.x, tangent.x);
@@ -145,9 +178,27 @@ test('angled spline controls enter input ports squarely with a small, fixed gap'
 
 test('routed edges keep their input index, and straight or non-spline routes still draw', async () => {
   const nodes = ['a', 'b'].map(name => ({ name, width: 218, height: 91 }));
-  const edges = [{ source: 'missing', target: 'b' }, { source: 'a', target: 'b', label: 'BODY' }];
+  const edges = [
+    { source: 'missing', target: 'b' },
+    { source: 'a', target: 'b', label: 'BODY' }
+  ];
   const layout = await routeGraph(engine, nodes, edges, 'horizontal');
-  assert.deepEqual(layout.edges.map(e => e.index), [1]);
-  assert(edgePath([{ x: 0, y: 0 }, { x: 100, y: 0 }]).startsWith('M0 0 C'));
-  assert.equal(edgePath([{ x: 0, y: 0 }, { x: 50, y: 0 }, { x: 100, y: 0 }]), 'M0 0 L50 0 L100 0');
+  assert.deepEqual(
+    layout.edges.map(e => e.index),
+    [1]
+  );
+  assert(
+    edgePath([
+      { x: 0, y: 0 },
+      { x: 100, y: 0 }
+    ]).startsWith('M0 0 C')
+  );
+  assert.equal(
+    edgePath([
+      { x: 0, y: 0 },
+      { x: 50, y: 0 },
+      { x: 100, y: 0 }
+    ]),
+    'M0 0 L50 0 L100 0'
+  );
 });

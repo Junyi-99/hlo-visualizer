@@ -37,24 +37,64 @@ interface GraphCanvasProps {
 }
 
 export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function GraphCanvas(
-  { copyGrouping, autoGroup, layoutMode, module, current, selected: originalSelected, zoom, useOpName, showLastNameOnly, showMemoryLocation, onZoom, onSelect, onComputation }, ref
+  {
+    copyGrouping,
+    autoGroup,
+    layoutMode,
+    module,
+    current,
+    selected: originalSelected,
+    zoom,
+    useOpName,
+    showLastNameOnly,
+    showMemoryLocation,
+    onZoom,
+    onSelect,
+    onComputation
+  },
+  ref
 ) {
   const computation = copyGrouping?.computation ?? null;
-  const selected = originalSelected ? copyGrouping?.aliases.get(originalSelected) ?? originalSelected : null;
+  const selected = originalSelected ? (copyGrouping?.aliases.get(originalSelected) ?? originalSelected) : null;
   const [focusRadius, setFocusRadius] = useState<number | null>(null);
   const [hops, setHops] = useState(1);
   const [pathPicking, setPathPicking] = useState(false);
   const [pathTarget, setPathTarget] = useState<string | null>(null);
   const [expandedNodeName, setExpandedNodeName] = useState<string | null>(null);
-  useEffect(() => { setPathPicking(false); setPathTarget(null); }, [selected, current, module, autoGroup]);
-  useEffect(() => { setExpandedNodeName(null); }, [selected, current, module, autoGroup]);
-  const path = useMemo(() => computation && selected && pathTarget ? shortestDependencyPath(computation, selected, pathTarget) : null, [computation, selected, pathTarget]);
-  const pathEdges = useMemo(() => path ? new Set(path.slice(1).map((name, index) => [path[index], name].sort().join('\u0000'))) : null, [path]);
-  const visibleNames = useMemo(() => computation && selected
-    ? pathTarget ? new Set(path || [selected, pathTarget]) : focusRadius !== null && !pathPicking ? dependencyNeighborhood(computation, selected, focusRadius) : null
-    : null, [computation, selected, pathTarget, path, focusRadius, pathPicking]);
-  const visibleNodes = useMemo(() => computation ? computation.nodes.filter(node => !visibleNames || visibleNames.has(node.name)) : [], [computation, visibleNames]);
-  const viewComputation = useMemo(() => computation ? { ...computation, nodes: visibleNodes, byName: new Map(visibleNodes.map(node => [node.name, node])) } : null, [computation, visibleNodes]);
+  useEffect(() => {
+    setPathPicking(false);
+    setPathTarget(null);
+  }, [selected, current, module, autoGroup]);
+  useEffect(() => {
+    setExpandedNodeName(null);
+  }, [selected, current, module, autoGroup]);
+  const path = useMemo(
+    () => (computation && selected && pathTarget ? shortestDependencyPath(computation, selected, pathTarget) : null),
+    [computation, selected, pathTarget]
+  );
+  const pathEdges = useMemo(
+    () => (path ? new Set(path.slice(1).map((name, index) => [path[index], name].sort().join('\u0000'))) : null),
+    [path]
+  );
+  const visibleNames = useMemo(
+    () =>
+      computation && selected
+        ? pathTarget
+          ? new Set(path || [selected, pathTarget])
+          : focusRadius !== null && !pathPicking
+            ? dependencyNeighborhood(computation, selected, focusRadius)
+            : null
+        : null,
+    [computation, selected, pathTarget, path, focusRadius, pathPicking]
+  );
+  const visibleNodes = useMemo(
+    () => (computation ? computation.nodes.filter(node => !visibleNames || visibleNames.has(node.name)) : []),
+    [computation, visibleNames]
+  );
+  const viewComputation = useMemo(
+    () => (computation ? { ...computation, nodes: visibleNodes, byName: new Map(visibleNodes.map(node => [node.name, node])) } : null),
+    [computation, visibleNodes]
+  );
   const [nodeHeights, setNodeHeights] = useState<Record<string, number>>({});
   const viewportRef = useRef({ width: 1, height: 1 });
   const [viewportMeasured, setViewportMeasured] = useState(false);
@@ -81,9 +121,18 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
   const panRef = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
   const [nodeOffsets, setNodeOffsets] = useState<Record<string, { x: number; y: number }>>({});
   const [draggingNode, setDraggingNode] = useState<string | null>(null);
-  const dragRef = useRef<{ name: string; pointerId: number; x: number; y: number; position: { x: number; y: number }; moved: boolean } | null>(null);
+  const dragRef = useRef<{
+    name: string;
+    pointerId: number;
+    x: number;
+    y: number;
+    position: { x: number; y: number };
+    moved: boolean;
+  } | null>(null);
   const suppressClickRef = useRef<string | null>(null);
-  useEffect(() => { setNodeOffsets({}); }, [module, current, direction, autoGroup]);
+  useEffect(() => {
+    setNodeOffsets({});
+  }, [module, current, direction, autoGroup]);
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
@@ -106,7 +155,10 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
           const id = (entry.target as HTMLElement).dataset.nodeId;
           if (!id) continue;
           const height = (entry.target as HTMLElement).offsetHeight;
-          if (next[id] !== height) { next[id] = height; changed = true; }
+          if (next[id] !== height) {
+            next[id] = height;
+            changed = true;
+          }
         }
         return changed ? next : prior;
       });
@@ -114,7 +166,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     cards.forEach(card => observer.observe(card));
     return () => observer.disconnect();
   }, [visibleNodes, useOpName, showLastNameOnly, showMemoryLocation]);
-  const nodeHeight = (name: string) => computation ? nodeHeights[`${computation.name}/${name}`] ?? NODE_HEIGHT : NODE_HEIGHT;
+  const nodeHeight = (name: string) => (computation ? (nodeHeights[`${computation.name}/${name}`] ?? NODE_HEIGHT) : NODE_HEIGHT);
   const positions = useMemo(() => {
     if (!computation) return layout.positions;
     const adjusted = new Map(layout.positions);
@@ -127,8 +179,12 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
   }, [layout, computation, visibleNodes, nodeOffsets]);
   const viewRef = useRef({ positions, zoom, nodeHeights });
   viewRef.current = { positions, zoom, nodeHeights };
-  const stageWidth = computation ? Math.max(layout.width, ...[...positions.values()].map(point => point.x + NODE_WIDTH + 58)) : layout.width;
-  const stageHeight = computation ? Math.max(layout.height, ...[...positions].map(([name, point]) => point.y + nodeHeight(name) + 66)) : layout.height;
+  const stageWidth = computation
+    ? Math.max(layout.width, ...[...positions.values()].map(point => point.x + NODE_WIDTH + 58))
+    : layout.width;
+  const stageHeight = computation
+    ? Math.max(layout.height, ...[...positions].map(([name, point]) => point.y + nodeHeight(name) + 66))
+    : layout.height;
   const selectedNode = selected && computation?.byName.get(selected);
   const expandedNode = expandedNodeName && computation?.byName.get(expandedNodeName);
   const upstream = selectedNode && computation ? reachable(computation, selectedNode.name, 'up') : new Set<string>();
@@ -149,9 +205,11 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
       const current = zoomRef.current;
       if (Math.abs(next - current) < 0.001) return;
       const rect = scroller.getBoundingClientRect();
-      const x = clientX - rect.left, y = clientY - rect.top;
+      const x = clientX - rect.left,
+        y = clientY - rect.top;
       pendingZoomAnchorRef.current = {
-        x, y,
+        x,
+        y,
         canvasX: (scroller.scrollLeft + x) / renderedZoomRef.current,
         canvasY: (scroller.scrollTop + y) / renderedZoomRef.current
       };
@@ -170,9 +228,15 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     const gestureChange = (event: Event) => {
       event.preventDefault();
       const gesture = event as Event & { scale: number; clientX: number; clientY: number };
-      zoomAt(gesture.clientX, gesture.clientY, Math.max(0.45, Math.min(1.5, (gestureStartZoomRef.current || zoomRef.current) * gesture.scale)));
+      zoomAt(
+        gesture.clientX,
+        gesture.clientY,
+        Math.max(0.45, Math.min(1.5, (gestureStartZoomRef.current || zoomRef.current) * gesture.scale))
+      );
     };
-    const gestureEnd = () => { gestureStartZoomRef.current = 0; };
+    const gestureEnd = () => {
+      gestureStartZoomRef.current = 0;
+    };
     scroller.addEventListener('wheel', wheel, { passive: false });
     scroller.addEventListener('gesturestart', gestureStart, { passive: false });
     scroller.addEventListener('gesturechange', gestureChange, { passive: false });
@@ -193,7 +257,11 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
   };
   useImperativeHandle(ref, () => ({
     fit,
-    arrange() { setNodeOffsets({}); setArrangeRevision(value => value + 1); if (failed) retry(); },
+    arrange() {
+      setNodeOffsets({});
+      setArrangeRevision(value => value + 1);
+      if (failed) retry();
+    },
     centerNode(name) {
       const displayName = copyGrouping?.aliases.get(name) ?? name;
       const position = positions.get(displayName);
@@ -221,10 +289,16 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
       const position = positions.get(selected);
       if (!scroller || !position) return;
       const height = nodeHeights[`${computation.name}/${selected}`] ?? NODE_HEIGHT;
-      const left = position.x * zoom, right = (position.x + NODE_WIDTH) * zoom;
-      const top = position.y * zoom, bottom = (position.y + height) * zoom;
-      if (left < scroller.scrollLeft + 18 || right > scroller.scrollLeft + scroller.clientWidth - 18 ||
-          top < scroller.scrollTop + 18 || bottom > scroller.scrollTop + scroller.clientHeight - 18) {
+      const left = position.x * zoom,
+        right = (position.x + NODE_WIDTH) * zoom;
+      const top = position.y * zoom,
+        bottom = (position.y + height) * zoom;
+      if (
+        left < scroller.scrollLeft + 18 ||
+        right > scroller.scrollLeft + scroller.clientWidth - 18 ||
+        top < scroller.scrollTop + 18 ||
+        bottom > scroller.scrollTop + scroller.clientHeight - 18
+      ) {
         scroller.scrollTo({
           left: Math.max(0, (position.x + NODE_WIDTH / 2) * zoom - scroller.clientWidth / 2),
           top: Math.max(0, (position.y + height / 2) * zoom - scroller.clientHeight / 2),
@@ -235,19 +309,27 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     const frame = requestAnimationFrame(ensureVisible);
     const observer = new ResizeObserver(ensureVisible);
     observer.observe(scroller);
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); };
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
     // Resize tracks the canvas when the inspector docks or the viewport changes.
     // Node dragging updates viewRef without triggering a recenter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, current, nodeHeights, layout]);
 
-  const offsets = new Map(visibleNodes.flatMap(node => {
-    const offset = nodeOffsets[node.id];
-    return offset ? [[node.name, offset] as const] : [];
-  }));
+  const offsets = new Map(
+    visibleNodes.flatMap(node => {
+      const offset = nodeOffsets[node.id];
+      return offset ? [[node.name, offset] as const] : [];
+    })
+  );
   const ports = new Map<string, { x: number; y: number }[]>();
   for (const edge of layout.edges) {
-    for (const [name, point] of [[edge.source, edge.points[0]], [edge.target, edge.points.at(-1)!]] as const) {
+    for (const [name, point] of [
+      [edge.source, edge.points[0]],
+      [edge.target, edge.points.at(-1)!]
+    ] as const) {
       const base = layout.positions.get(name);
       if (!base) continue;
       const list = ports.get(name) ?? [];
@@ -255,20 +337,36 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
       ports.set(name, list);
     }
   }
-  const instructionEdges = layout.edges.filter(edge => !pathEdges || pathEdges.has([edge.source, edge.target].sort().join('\u0000'))).map(edge => {
-    const highlightedUp = !!selectedNode && (edge.target === selected || (upstream.has(edge.source) && upstream.has(edge.target)));
-    const highlightedDown = !!selectedNode && (edge.source === selected || (downstream.has(edge.source) && downstream.has(edge.target)));
-    return <path key={edge.id} className={`edge${edge.control ? ' control-edge' : ''}${pathEdges ? ' path-edge' : ''}${highlightedUp ? ' upstream' : ''}${highlightedDown ? ' downstream' : ''}${selectedNode && !pathEdges && !highlightedUp && !highlightedDown ? ' dimmed' : ''}`}
-      d={edgePath(movedEdgePoints(edge, offsets), direction)} markerEnd="url(#arrow)" />;
-  });
+  const instructionEdges = layout.edges
+    .filter(edge => !pathEdges || pathEdges.has([edge.source, edge.target].sort().join('\u0000')))
+    .map(edge => {
+      const highlightedUp = !!selectedNode && (edge.target === selected || (upstream.has(edge.source) && upstream.has(edge.target)));
+      const highlightedDown = !!selectedNode && (edge.source === selected || (downstream.has(edge.source) && downstream.has(edge.target)));
+      return (
+        <path
+          key={edge.id}
+          className={`edge${edge.control ? ' control-edge' : ''}${pathEdges ? ' path-edge' : ''}${highlightedUp ? ' upstream' : ''}${highlightedDown ? ' downstream' : ''}${selectedNode && !pathEdges && !highlightedUp && !highlightedDown ? ' dimmed' : ''}`}
+          d={edgePath(movedEdgePoints(edge, offsets), direction)}
+          markerEnd="url(#arrow)"
+        />
+      );
+    });
   const overviewEdges = layout.edges.map(edge => {
     const link = links[edge.index];
-    return <g key={edge.id}>
-      <path className="call-edge" d={edgePath(edge.points, direction)} markerEnd="url(#call-arrow)">
-        <title>%{edge.source} → %{edge.target} via %{link.via} ({link.role})</title>
-      </path>
-      {edge.label && <text className="call-label" x={edge.label.x} y={edge.label.y} textAnchor="middle">{linkLabel(link.role)}</text>}
-    </g>;
+    return (
+      <g key={edge.id}>
+        <path className="call-edge" d={edgePath(edge.points, direction)} markerEnd="url(#call-arrow)">
+          <title>
+            %{edge.source} → %{edge.target} via %{link.via} ({link.role})
+          </title>
+        </path>
+        {edge.label && (
+          <text className="call-label" x={edge.label.x} y={edge.label.y} textAnchor="middle">
+            {linkLabel(link.role)}
+          </text>
+        )}
+      </g>
+    );
   });
 
   const startPan = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -280,7 +378,8 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     scroller.classList.add('panning');
   };
   const movePan = (event: React.PointerEvent<HTMLDivElement>) => {
-    const pan = panRef.current, scroller = scrollerRef.current;
+    const pan = panRef.current,
+      scroller = scrollerRef.current;
     if (!pan || !scroller) return;
     scroller.scrollLeft = pan.left - (event.clientX - pan.x);
     scroller.scrollTop = pan.top - (event.clientY - pan.y);
@@ -301,7 +400,8 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
   const moveNode = (event: React.PointerEvent<HTMLButtonElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId || !computation) return;
-    const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+    const dx = event.clientX - drag.x,
+      dy = event.clientY - drag.y;
     if (!drag.moved && Math.hypot(dx, dy) < 4) return;
     drag.moved = true;
     setDraggingNode(drag.name);
@@ -332,66 +432,275 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     }
   };
 
-  return <section className={`graph-shell ${vertical ? 'flow-vertical' : 'flow-horizontal'}${expandedNode ? ' explorer-open' : ''}`} aria-label="HLO graph" aria-busy={pending}>
-    {pending && <div className="layout-status" role="status">Arranging graph…</div>}
-    {failed && <div className="layout-status" role="status">Could not arrange graph. <button type="button" onClick={retry}>Retry</button></div>}
-    <div ref={scrollerRef} className="graph-scroller overscroll-contain" tabIndex={0} aria-label="Graph canvas: + and - to zoom, 0 to fit" onKeyDown={handleZoomKey} onPointerDown={startPan} onPointerMove={movePan} onPointerUp={endPan} onPointerCancel={endPan}
-      onDoubleClick={event => { if (computation && !(event.target instanceof Element && event.target.closest('.node-card'))) onSelect(null); }}>
-      <div className="graph-content" style={{ width: stageWidth * zoom, height: stageHeight * zoom }}>
-        <div className="graph-stage" style={{ width: stageWidth, height: stageHeight, transform: `scale(${zoom})` }}>
-          <svg className="graph-edges" width={stageWidth} height={stageHeight} viewBox={`0 0 ${stageWidth} ${stageHeight}`} aria-hidden="true">
-            <defs><marker id="arrow" markerWidth="7" markerHeight="7" viewBox="0 0 7 7" markerUnits="userSpaceOnUse" refX="6" refY="3.5" orient="auto"><path d="M1 1 L6 3.5 L1 6 Z" /></marker>
-              <marker id="call-arrow" markerWidth="7" markerHeight="7" viewBox="0 0 7 7" markerUnits="userSpaceOnUse" refX="6" refY="3.5" orient="auto"><path d="M1 1 L6 3.5 L1 6 Z" /></marker></defs>
-            {computation ? instructionEdges : overviewEdges}
-          </svg>
-          <div className="graph-nodes">
-            {computation ? visibleNodes.map(node => {
-              const position = positions.get(node.name)!;
-              const copyGroup = copyGrouping?.groups.get(node.name);
-              const detail = copyGroup ? copyGroup.shape : nodeSummary(node);
-              const locations = showMemoryLocation ? nodeMemoryLocations(module, computation, node) : [];
-              const opName = useOpName && !copyGroup ? hloOpName(node.raw) : null;
-              const label = copyGroup ? copyGroup.direction : opName ? (showLastNameOnly ? lastOpNameSegment(opName) : opName.replaceAll('/', '/\n')) : `%${node.name}`;
-              const canExpand = Object.values(node.calls).some(name => module.byName.has(name));
-              const isExpanded = expandedNodeName === node.name;
-              return <Fragment key={node.name}><button type="button" data-node-id={node.id} className={`node-card ${nodeCategory(node)}${copyGroup ? ' copy-group' : ''}${canExpand ? ' has-expand' : ''}${draggingNode === node.name ? ' dragging' : ''}${selected === node.name ? ' selected' : ''}${path?.includes(node.name) ? ' path-node' : ''}${upstream.has(node.name) ? ' upstream' : ''}${downstream.has(node.name) ? ' downstream' : ''}${selectedNode && selected !== node.name && !path?.includes(node.name) && !upstream.has(node.name) && !downstream.has(node.name) ? ' dimmed' : ''}`}
-                style={{ left: position.x, top: position.y }} onPointerDown={event => startNodeDrag(event, node.name)} onPointerMove={moveNode} onPointerUp={endNodeDrag} onPointerCancel={endNodeDrag}
-                onClick={() => { if (suppressClickRef.current === node.name) { suppressClickRef.current = null; return; } if (pathPicking && selected && node.name !== selected) { setPathTarget(node.name); setPathPicking(false); return; } onSelect(selected === node.name ? null : node.name); }}>
-                <span className="node-top"><span className="node-op">{node.op}</span>{node.root && <span className="root-tag">ROOT</span>}</span>
-                <strong className={opName ? 'op-name' : undefined} title={copyGroup ? `%${copyGroup.start.name} + %${copyGroup.done.name}` : opName ? `${opName}\nHLO: %${node.name}` : `%${node.name}`}>{label}</strong><span className="node-detail" title={detail}>{detail}</span>
-                {locations.length > 0 && <span className="node-memory-list">{locations.map(location => <span key={location.path ?? 'result'} className={`node-memory memory-space-${location.space}`} title={memoryTooltip(location)}>
-                  {location.path !== null && <span className="node-memory-path">{location.path}</span>}{location.label}
-                </span>)}</span>}
-                {copyGroup && <span className="copy-group-members">copy-start + copy-done</span>}
-                {ports.get(node.name)?.map((port, index) => <span key={index} className="node-port" style={{ left: port.x - 4, top: port.y - 4 }} />)}
-              </button>{canExpand && <button type="button" className={`node-expand${isExpanded ? ' active' : ''}`} style={{ left: position.x + NODE_WIDTH - 78, top: position.y + 9 }}
-                aria-label={`${isExpanded ? 'Close expansion of' : 'Expand calls of'} %${node.name}`} aria-expanded={isExpanded} aria-controls="computation-explorer"
-                onPointerDown={event => event.stopPropagation()} onClick={event => { event.stopPropagation(); setExpandedNodeName(isExpanded ? null : node.name); }}>
-                {isExpanded ? 'Close' : 'Expand'}
-              </button>}</Fragment>;
-            }) : module.computations.map(c => {
-              const position = layout.positions.get(c.name)!;
-              const role = computationRole(c, links);
-              return <button type="button" key={c.name} className={`overview-card ${role.toLowerCase().replaceAll(' ', '-')}`} style={{ left: position.x, top: position.y }} onClick={() => onComputation(c.name)}>
-                <span className="overview-role">{role}</span><strong title={`%${c.name}`}>%{c.name}</strong>
-                <span className="overview-meta">{c.nodes.length} instructions <span>Open graph ↗</span></span>
-              </button>;
-            })}
+  return (
+    <section
+      className={`graph-shell ${vertical ? 'flow-vertical' : 'flow-horizontal'}${expandedNode ? ' explorer-open' : ''}`}
+      aria-label="HLO graph"
+      aria-busy={pending}
+    >
+      {pending && (
+        <div className="layout-status" role="status">
+          Arranging graph…
+        </div>
+      )}
+      {failed && (
+        <div className="layout-status" role="status">
+          Could not arrange graph.{' '}
+          <button type="button" onClick={retry}>
+            Retry
+          </button>
+        </div>
+      )}
+      <div
+        ref={scrollerRef}
+        className="graph-scroller overscroll-contain"
+        tabIndex={0}
+        aria-label="Graph canvas: + and - to zoom, 0 to fit"
+        onKeyDown={handleZoomKey}
+        onPointerDown={startPan}
+        onPointerMove={movePan}
+        onPointerUp={endPan}
+        onPointerCancel={endPan}
+        onDoubleClick={event => {
+          if (computation && !(event.target instanceof Element && event.target.closest('.node-card'))) onSelect(null);
+        }}
+      >
+        <div className="graph-content" style={{ width: stageWidth * zoom, height: stageHeight * zoom }}>
+          <div className="graph-stage" style={{ width: stageWidth, height: stageHeight, transform: `scale(${zoom})` }}>
+            <svg
+              className="graph-edges"
+              width={stageWidth}
+              height={stageHeight}
+              viewBox={`0 0 ${stageWidth} ${stageHeight}`}
+              aria-hidden="true"
+            >
+              <defs>
+                <marker
+                  id="arrow"
+                  markerWidth="7"
+                  markerHeight="7"
+                  viewBox="0 0 7 7"
+                  markerUnits="userSpaceOnUse"
+                  refX="6"
+                  refY="3.5"
+                  orient="auto"
+                >
+                  <path d="M1 1 L6 3.5 L1 6 Z" />
+                </marker>
+                <marker
+                  id="call-arrow"
+                  markerWidth="7"
+                  markerHeight="7"
+                  viewBox="0 0 7 7"
+                  markerUnits="userSpaceOnUse"
+                  refX="6"
+                  refY="3.5"
+                  orient="auto"
+                >
+                  <path d="M1 1 L6 3.5 L1 6 Z" />
+                </marker>
+              </defs>
+              {computation ? instructionEdges : overviewEdges}
+            </svg>
+            <div className="graph-nodes">
+              {computation
+                ? visibleNodes.map(node => {
+                    const position = positions.get(node.name)!;
+                    const copyGroup = copyGrouping?.groups.get(node.name);
+                    const detail = copyGroup ? copyGroup.shape : nodeSummary(node);
+                    const locations = showMemoryLocation ? nodeMemoryLocations(module, computation, node) : [];
+                    const opName = useOpName && !copyGroup ? hloOpName(node.raw) : null;
+                    const label = copyGroup
+                      ? copyGroup.direction
+                      : opName
+                        ? showLastNameOnly
+                          ? lastOpNameSegment(opName)
+                          : opName.replaceAll('/', '/\n')
+                        : `%${node.name}`;
+                    const canExpand = Object.values(node.calls).some(name => module.byName.has(name));
+                    const isExpanded = expandedNodeName === node.name;
+                    return (
+                      <Fragment key={node.name}>
+                        <button
+                          type="button"
+                          data-node-id={node.id}
+                          className={`node-card ${nodeCategory(node)}${copyGroup ? ' copy-group' : ''}${canExpand ? ' has-expand' : ''}${draggingNode === node.name ? ' dragging' : ''}${selected === node.name ? ' selected' : ''}${path?.includes(node.name) ? ' path-node' : ''}${upstream.has(node.name) ? ' upstream' : ''}${downstream.has(node.name) ? ' downstream' : ''}${selectedNode && selected !== node.name && !path?.includes(node.name) && !upstream.has(node.name) && !downstream.has(node.name) ? ' dimmed' : ''}`}
+                          style={{ left: position.x, top: position.y }}
+                          onPointerDown={event => startNodeDrag(event, node.name)}
+                          onPointerMove={moveNode}
+                          onPointerUp={endNodeDrag}
+                          onPointerCancel={endNodeDrag}
+                          onClick={() => {
+                            if (suppressClickRef.current === node.name) {
+                              suppressClickRef.current = null;
+                              return;
+                            }
+                            if (pathPicking && selected && node.name !== selected) {
+                              setPathTarget(node.name);
+                              setPathPicking(false);
+                              return;
+                            }
+                            onSelect(selected === node.name ? null : node.name);
+                          }}
+                        >
+                          <span className="node-top">
+                            <span className="node-op">{node.op}</span>
+                            {node.root && <span className="root-tag">ROOT</span>}
+                          </span>
+                          <strong
+                            className={opName ? 'op-name' : undefined}
+                            title={
+                              copyGroup
+                                ? `%${copyGroup.start.name} + %${copyGroup.done.name}`
+                                : opName
+                                  ? `${opName}\nHLO: %${node.name}`
+                                  : `%${node.name}`
+                            }
+                          >
+                            {label}
+                          </strong>
+                          <span className="node-detail" title={detail}>
+                            {detail}
+                          </span>
+                          {locations.length > 0 && (
+                            <span className="node-memory-list">
+                              {locations.map(location => (
+                                <span
+                                  key={location.path ?? 'result'}
+                                  className={`node-memory memory-space-${location.space}`}
+                                  title={memoryTooltip(location)}
+                                >
+                                  {location.path !== null && <span className="node-memory-path">{location.path}</span>}
+                                  {location.label}
+                                </span>
+                              ))}
+                            </span>
+                          )}
+                          {copyGroup && <span className="copy-group-members">copy-start + copy-done</span>}
+                          {ports.get(node.name)?.map((port, index) => (
+                            <span key={index} className="node-port" style={{ left: port.x - 4, top: port.y - 4 }} />
+                          ))}
+                        </button>
+                        {canExpand && (
+                          <button
+                            type="button"
+                            className={`node-expand${isExpanded ? ' active' : ''}`}
+                            style={{ left: position.x + NODE_WIDTH - 78, top: position.y + 9 }}
+                            aria-label={`${isExpanded ? 'Close expansion of' : 'Expand calls of'} %${node.name}`}
+                            aria-expanded={isExpanded}
+                            aria-controls="computation-explorer"
+                            onPointerDown={event => event.stopPropagation()}
+                            onClick={event => {
+                              event.stopPropagation();
+                              setExpandedNodeName(isExpanded ? null : node.name);
+                            }}
+                          >
+                            {isExpanded ? 'Close' : 'Expand'}
+                          </button>
+                        )}
+                      </Fragment>
+                    );
+                  })
+                : module.computations.map(c => {
+                    const position = layout.positions.get(c.name)!;
+                    const role = computationRole(c, links);
+                    return (
+                      <button
+                        type="button"
+                        key={c.name}
+                        className={`overview-card ${role.toLowerCase().replaceAll(' ', '-')}`}
+                        style={{ left: position.x, top: position.y }}
+                        onClick={() => onComputation(c.name)}
+                      >
+                        <span className="overview-role">{role}</span>
+                        <strong title={`%${c.name}`}>%{c.name}</strong>
+                        <span className="overview-meta">
+                          {c.nodes.length} instructions <span>Open graph ↗</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    {computation && <div className="graph-controls">
-      <select aria-label="Neighborhood size" value={hops} onChange={event => { const value = Number(event.target.value); setHops(value); if (focusRadius !== null) setFocusRadius(value); }}>
-        <option value="1">1 hop</option><option value="2">2 hops</option><option value="3">3 hops</option>
-      </select>
-      <button type="button" disabled={!selected && focusRadius === null} className={focusRadius !== null ? 'active' : ''} aria-pressed={focusRadius !== null}
-        onClick={() => { setFocusRadius(focusRadius === null ? hops : null); setPathTarget(null); setPathPicking(false); }}>{focusRadius === null ? 'View' : 'Show all'}</button>
-      <button type="button" disabled={!selected} className={pathPicking ? 'active' : ''} onClick={() => { setPathTarget(null); setPathPicking(value => !value); }}>Find path</button>
-      {pathTarget && <button type="button" onClick={() => setPathTarget(null)}>Clear path</button>}
-      <span>{pathPicking ? 'Click the destination node' : pathTarget ? path ? `${path.length - 1} hops` : 'No dependency path' : selected && focusRadius !== null ? `${visibleNodes.length} of ${computation.nodes.length} nodes` : !selected && focusRadius !== null ? 'Select a node' : ''}</span>
-    </div>}
-    {expandedNode && <ComputationExplorer autoGroup={autoGroup} key={expandedNode.id} module={module} rootNode={expandedNode} onClose={() => setExpandedNodeName(null)} onOpenFull={onComputation} />}
-    <div className="graph-hint"><span className="flow-icon">{vertical ? '↓' : '→'}</span> {computation ? 'Data flow · Drag nodes · Background pans' : 'Calls · Drag to pan'} <span className="hint-divider">·</span> Pinch / + / − zoom · 0 fit <span className="hint-divider">·</span> {computation ? `${visibleNodes.length} nodes · ${instructionEdges.length} edges` : `${module.computations.length} computations · ${links.length} links`}</div>
-  </section>;
+      {computation && (
+        <div className="graph-controls">
+          <select
+            aria-label="Neighborhood size"
+            value={hops}
+            onChange={event => {
+              const value = Number(event.target.value);
+              setHops(value);
+              if (focusRadius !== null) setFocusRadius(value);
+            }}
+          >
+            <option value="1">1 hop</option>
+            <option value="2">2 hops</option>
+            <option value="3">3 hops</option>
+          </select>
+          <button
+            type="button"
+            disabled={!selected && focusRadius === null}
+            className={focusRadius !== null ? 'active' : ''}
+            aria-pressed={focusRadius !== null}
+            onClick={() => {
+              setFocusRadius(focusRadius === null ? hops : null);
+              setPathTarget(null);
+              setPathPicking(false);
+            }}
+          >
+            {focusRadius === null ? 'View' : 'Show all'}
+          </button>
+          <button
+            type="button"
+            disabled={!selected}
+            className={pathPicking ? 'active' : ''}
+            onClick={() => {
+              setPathTarget(null);
+              setPathPicking(value => !value);
+            }}
+          >
+            Find path
+          </button>
+          {pathTarget && (
+            <button type="button" onClick={() => setPathTarget(null)}>
+              Clear path
+            </button>
+          )}
+          <span>
+            {pathPicking
+              ? 'Click the destination node'
+              : pathTarget
+                ? path
+                  ? `${path.length - 1} hops`
+                  : 'No dependency path'
+                : selected && focusRadius !== null
+                  ? `${visibleNodes.length} of ${computation.nodes.length} nodes`
+                  : !selected && focusRadius !== null
+                    ? 'Select a node'
+                    : ''}
+          </span>
+        </div>
+      )}
+      {expandedNode && (
+        <ComputationExplorer
+          autoGroup={autoGroup}
+          key={expandedNode.id}
+          module={module}
+          rootNode={expandedNode}
+          onClose={() => setExpandedNodeName(null)}
+          onOpenFull={onComputation}
+        />
+      )}
+      <div className="graph-hint">
+        <span className="flow-icon">{vertical ? '↓' : '→'}</span>{' '}
+        {computation ? 'Data flow · Drag nodes · Background pans' : 'Calls · Drag to pan'} <span className="hint-divider">·</span> Pinch / +
+        / − zoom · 0 fit <span className="hint-divider">·</span>{' '}
+        {computation
+          ? `${visibleNodes.length} nodes · ${instructionEdges.length} edges`
+          : `${module.computations.length} computations · ${links.length} links`}
+      </div>
+    </section>
+  );
 });

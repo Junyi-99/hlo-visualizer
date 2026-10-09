@@ -9,7 +9,10 @@ export function extractHloMetadata(text: string): HloMetadata | null {
   const match = /\bmetadata=\{/.exec(text);
   if (!match) return null;
   const opening = match.index + match[0].length - 1;
-  let depth = 0, quoted = false, escaped = false, closing = -1;
+  let depth = 0,
+    quoted = false,
+    escaped = false,
+    closing = -1;
   for (let index = opening; index < text.length; index++) {
     const char = text[index];
     if (quoted) {
@@ -18,12 +21,16 @@ export function extractHloMetadata(text: string): HloMetadata | null {
       else if (char === '"') quoted = false;
     } else if (char === '"') quoted = true;
     else if (char === '{') depth++;
-    else if (char === '}' && --depth === 0) { closing = index; break; }
+    else if (char === '}' && --depth === 0) {
+      closing = index;
+      break;
+    }
   }
   if (closing < 0) return null;
   const contents = text.slice(opening + 1, closing);
   const fields = [...contents.matchAll(/\b([A-Za-z_]\w*)=("(?:\\.|[^"\\])*"|[^\s,}]+)/g)].map(([, name, rawValue]) => ({
-    name, value: rawValue.startsWith('"') ? rawValue.slice(1, -1) : rawValue
+    name,
+    value: rawValue.startsWith('"') ? rawValue.slice(1, -1) : rawValue
   }));
   return { raw: text.slice(match.index, closing + 1), start: match.index, end: closing + 1, fields };
 }

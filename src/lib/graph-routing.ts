@@ -14,9 +14,20 @@ export interface RoutedEdge {
   points: Point[];
   label?: Point;
 }
-export interface RoutedLayout extends GraphLayout { edges: RoutedEdge[] }
-export interface LayoutNode { name: string; width: number; height: number }
-export interface LayoutEdge { source: string; target: string; control?: boolean; label?: string }
+export interface RoutedLayout extends GraphLayout {
+  edges: RoutedEdge[];
+}
+export interface LayoutNode {
+  name: string;
+  width: number;
+  height: number;
+}
+export interface LayoutEdge {
+  source: string;
+  target: string;
+  control?: boolean;
+  label?: string;
+}
 
 // Use internal numeric IDs: HLO names can contain punctuation used by port IDs.
 export async function routeGraph(engine: ELK, nodes: LayoutNode[], edges: LayoutEdge[], direction: LayoutDirection): Promise<RoutedLayout> {
@@ -47,16 +58,24 @@ export async function routeGraph(engine: ELK, nodes: LayoutNode[], edges: Layout
     children: nodes.map(node => {
       const id = ids.get(node.name)!;
       return {
-        id, width: node.width, height: node.height,
+        id,
+        width: node.width,
+        height: node.height,
         layoutOptions: { 'elk.portConstraints': 'FIXED_SIDE' },
         ports: validEdges.flatMap((edge, index) => [
-          ...(edge.target === node.name ? [{ id: `e${index}:in`, width: 0, height: 0, layoutOptions: { 'elk.port.side': vertical ? 'NORTH' : 'WEST' } }] : []),
-          ...(edge.source === node.name ? [{ id: `e${index}:out`, width: 0, height: 0, layoutOptions: { 'elk.port.side': vertical ? 'SOUTH' : 'EAST' } }] : [])
+          ...(edge.target === node.name
+            ? [{ id: `e${index}:in`, width: 0, height: 0, layoutOptions: { 'elk.port.side': vertical ? 'NORTH' : 'WEST' } }]
+            : []),
+          ...(edge.source === node.name
+            ? [{ id: `e${index}:out`, width: 0, height: 0, layoutOptions: { 'elk.port.side': vertical ? 'SOUTH' : 'EAST' } }]
+            : [])
         ])
       };
     }),
     edges: validEdges.map((edge, index) => ({
-      id: `e${index}`, sources: [`e${index}:out`], targets: [`e${index}:in`],
+      id: `e${index}`,
+      sources: [`e${index}:out`],
+      targets: [`e${index}:in`],
       ...(edge.label ? { labels: [{ text: edge.label, width: edge.label.length * 7 + 8, height: 16 }] } : {})
     }))
   };
@@ -64,14 +83,20 @@ export async function routeGraph(engine: ELK, nodes: LayoutNode[], edges: Layout
   const positions = new Map<string, Point>();
   result.children?.forEach(node => positions.set(nodes[Number(node.id.slice(1))].name, { x: node.x ?? 0, y: node.y ?? 0 }));
   return {
-    positions, width: result.width ?? 116, height: result.height ?? 120,
+    positions,
+    width: result.width ?? 116,
+    height: result.height ?? 120,
     edges: (result.edges ?? []).map(edge => {
       const definition = validEdges[Number(edge.id.slice(1))];
       const section = edge.sections?.[0];
       if (!section) throw new Error(`Missing route for ${definition.source} → ${definition.target}`);
       const label = edge.labels?.[0];
       return {
-        id: edge.id, index: definition.index, source: definition.source, target: definition.target, control: !!definition.control,
+        id: edge.id,
+        index: definition.index,
+        source: definition.source,
+        target: definition.target,
+        control: !!definition.control,
         points: [section.startPoint, ...(section.bendPoints ?? []), section.endPoint],
         label: label ? { x: (label.x ?? 0) + (label.width ?? 0) / 2, y: (label.y ?? 0) + 12 } : undefined
       };
@@ -103,7 +128,8 @@ export function curvePoints(points: Point[], direction: LayoutDirection, arrowIn
   if (points.length === 2) points = [points[0], points[0], points[1], points[1]];
   if (points.length < 4 || (points.length - 1) % 3 !== 0) return [];
   const route = points.map(point => ({ ...point }));
-  const first = route[0], last = route.at(-1)!;
+  const first = route[0],
+    last = route.at(-1)!;
   const axis = direction === 'horizontal' ? 'x' : 'y';
   const cross = direction === 'horizontal' ? 'y' : 'x';
   // Ports are on the outgoing and incoming sides of each card. Give the
@@ -124,7 +150,9 @@ export function edgePath(points: Point[], direction: LayoutDirection = 'horizont
   if (!route.length) return points.map((point, index) => `${index ? 'L' : 'M'}${point.x} ${point.y}`).join(' ');
   let path = `M${route[0].x} ${route[0].y}`;
   for (let i = 1; i < route.length; i += 3) {
-    const a = route[i], b = route[i + 1], c = route[i + 2];
+    const a = route[i],
+      b = route[i + 1],
+      c = route[i + 2];
     path += ` C${a.x} ${a.y},${b.x} ${b.y},${c.x} ${c.y}`;
   }
   return path;
@@ -133,10 +161,14 @@ export function edgePath(points: Point[], direction: LayoutDirection = 'horizont
 // Moving endpoints and their adjacent controls keeps curves attached while
 // dragging without adding elbows. Arrange restores the automatic layout.
 export function movedEdgePoints(edge: RoutedEdge, offsets: ReadonlyMap<string, Point>): Point[] {
-  const source = offsets.get(edge.source), target = offsets.get(edge.target);
+  const source = offsets.get(edge.source),
+    target = offsets.get(edge.target);
   if (!source && !target) return edge.points;
   const points = edge.points.map(point => ({ ...point }));
-  for (const [offset, indices] of [[source, [0, 1]], [target, [points.length - 2, points.length - 1]]] as const) {
+  for (const [offset, indices] of [
+    [source, [0, 1]],
+    [target, [points.length - 2, points.length - 1]]
+  ] as const) {
     if (!offset) continue;
     for (const index of indices) {
       points[index].x += offset.x;
@@ -149,14 +181,17 @@ export function movedEdgePoints(edge: RoutedEdge, offsets: ReadonlyMap<string, P
 // A worker failure should still leave dependencies visible and the viewer usable.
 export function fallbackRoutes(layout: GraphLayout, nodes: LayoutNode[], edges: LayoutEdge[], direction: LayoutDirection): RoutedLayout {
   const byName = new Map(nodes.map(node => [node.name, node]));
-  const valid = edges.map((edge, index) => ({ ...edge, index })).filter(edge => layout.positions.has(edge.source) && layout.positions.has(edge.target));
+  const valid = edges
+    .map((edge, index) => ({ ...edge, index }))
+    .filter(edge => layout.positions.has(edge.source) && layout.positions.has(edge.target));
   const counts = new Map<string, number>();
   const order = new Map<string, number>();
   for (const edge of valid) {
     for (const key of [edge.source + ':out', edge.target + ':in']) counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   const port = (name: string, side: 'in' | 'out') => {
-    const node = byName.get(name)!, point = layout.positions.get(name)!;
+    const node = byName.get(name)!,
+      point = layout.positions.get(name)!;
     const key = name + ':' + side;
     const index = order.get(key) ?? 0;
     order.set(key, index + 1);
@@ -165,15 +200,24 @@ export function fallbackRoutes(layout: GraphLayout, nodes: LayoutNode[], edges: 
       ? { x: point.x + (side === 'out' ? node.width : 0), y: point.y + node.height * fraction }
       : { x: point.x + node.width * fraction, y: point.y + (side === 'out' ? node.height : 0) };
   };
-  return { ...layout, edges: valid.map((edge, index) => {
-    const start = port(edge.source, 'out'), end = port(edge.target, 'in');
-    const mid = direction === 'horizontal' ? (start.x + end.x) / 2 : (start.y + end.y) / 2;
-    return {
-      id: `e${index}`, index: edge.index, source: edge.source, target: edge.target, control: !!edge.control,
-      points: direction === 'horizontal'
-        ? [start, { x: mid, y: start.y }, { x: mid, y: end.y }, end]
-        : [start, { x: start.x, y: mid }, { x: end.x, y: mid }, end],
-      label: edge.label ? { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 - 8 } : undefined
-    };
-  }) };
+  return {
+    ...layout,
+    edges: valid.map((edge, index) => {
+      const start = port(edge.source, 'out'),
+        end = port(edge.target, 'in');
+      const mid = direction === 'horizontal' ? (start.x + end.x) / 2 : (start.y + end.y) / 2;
+      return {
+        id: `e${index}`,
+        index: edge.index,
+        source: edge.source,
+        target: edge.target,
+        control: !!edge.control,
+        points:
+          direction === 'horizontal'
+            ? [start, { x: mid, y: start.y }, { x: mid, y: end.y }, end]
+            : [start, { x: start.x, y: mid }, { x: end.x, y: mid }, end],
+        label: edge.label ? { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 - 8 } : undefined
+      };
+    })
+  };
 }

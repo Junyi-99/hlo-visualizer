@@ -11,7 +11,10 @@ export interface MemoryLocation {
 
 function tupleItems(type: string): string[] {
   const items: string[] = [];
-  let start = 1, parens = 0, brackets = 0, braces = 0;
+  let start = 1,
+    parens = 0,
+    brackets = 0,
+    braces = 0;
   for (let index = 1; index < type.length - 1; index++) {
     const char = type[index];
     if (char === '(') parens++;
@@ -38,17 +41,32 @@ export function memoryLocations(type: string): MemoryLocation[] {
     if (!/^[a-z][\w]*\[[^\]]*\]/.test(trimmed) || trimmed.startsWith('token[')) return []; // tokens hold no data
     const match = /\bS\((\d+)\)/.exec(trimmed);
     const space = match ? Number(match[1]) : 0;
-    return [{
-      path, space, explicit: !!match,
-      label: memorySpaceLabel(space)
-    }];
+    return [
+      {
+        path,
+        space,
+        explicit: !!match,
+        label: memorySpaceLabel(space)
+      }
+    ];
   };
   return visit(type, null);
 }
 
 // Calls whose callee runs inside the caller's kernel or per element, so its values never get buffers of their own:
 // fusion bodies, and reducers / comparators / scatter combiners (XLA assigns those thread-local storage).
-const INLINE_CALLERS = new Set(['fusion', 'reduce', 'reduce-window', 'scatter', 'sort', 'select-and-scatter', 'map', 'all-reduce', 'reduce-scatter', 'custom-call']);
+const INLINE_CALLERS = new Set([
+  'fusion',
+  'reduce',
+  'reduce-window',
+  'scatter',
+  'sort',
+  'select-and-scatter',
+  'map',
+  'all-reduce',
+  'reduce-scatter',
+  'custom-call'
+]);
 
 // Whether a node's result lives in a buffer of its own:
 //   buffer       its layout's S(n) is where XLA placed it

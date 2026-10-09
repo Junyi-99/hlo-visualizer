@@ -13,7 +13,8 @@ export function useGraphLayouts(module: HloModule, computation: Computation | nu
   const input = useMemo(() => {
     const measured = new Map((computation?.nodes ?? []).map(node => [node.name, heights[node.id] ?? NODE_HEIGHT]));
     const graph = computation ? instructionGraph(computation, measured) : overviewGraph(module);
-    const place = (direction: LayoutDirection) => computation ? layoutInstructions(computation, measured, direction) : layoutOverview(module, direction);
+    const place = (direction: LayoutDirection) =>
+      computation ? layoutInstructions(computation, measured, direction) : layoutOverview(module, direction);
     // Simple routes keep dependencies visible while the worker runs, and after it fails.
     const fallback: Record<LayoutDirection, RoutedLayout> = {
       horizontal: fallbackRoutes(place('horizontal'), graph.nodes, graph.edges, 'horizontal'),
@@ -25,22 +26,44 @@ export function useGraphLayouts(module: HloModule, computation: Computation | nu
   const [failure, setFailure] = useState<typeof input | null>(null);
   useEffect(() => {
     let cancelled = false;
-    const createEngine = () => new ELK({ workerFactory: () => {
-      const worker = new Worker(workerUrl);
-      worker.addEventListener('error', () => { if (!cancelled) setFailure(input); });
-      return worker;
-    } });
+    const createEngine = () =>
+      new ELK({
+        workerFactory: () => {
+          const worker = new Worker(workerUrl);
+          worker.addEventListener('error', () => {
+            if (!cancelled) setFailure(input);
+          });
+          return worker;
+        }
+      });
     let engine: ReturnType<typeof createEngine>;
-    try { engine = createEngine(); } catch (error) { console.error('Graph worker failed', error); setFailure(input); return; }
+    try {
+      engine = createEngine();
+    } catch (error) {
+      console.error('Graph worker failed', error);
+      setFailure(input);
+      return;
+    }
     Promise.all([
       routeGraph(engine, input.graph.nodes, input.graph.edges, 'horizontal'),
       routeGraph(engine, input.graph.nodes, input.graph.edges, 'vertical')
-    ]).then(([horizontal, vertical]) => {
-      if (!cancelled) { setResult({ input, layouts: { horizontal, vertical } }); setFailure(null); }
-    }).catch(error => {
-      if (!cancelled) { console.error('Graph layout failed', error); setFailure(input); }
-    });
-    return () => { cancelled = true; engine.terminateWorker(); };
+    ])
+      .then(([horizontal, vertical]) => {
+        if (!cancelled) {
+          setResult({ input, layouts: { horizontal, vertical } });
+          setFailure(null);
+        }
+      })
+      .catch(error => {
+        if (!cancelled) {
+          console.error('Graph layout failed', error);
+          setFailure(input);
+        }
+      });
+    return () => {
+      cancelled = true;
+      engine.terminateWorker();
+    };
   }, [input]);
   const ready = result?.input === input;
   return {

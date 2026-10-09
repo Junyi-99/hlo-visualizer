@@ -30,7 +30,8 @@ export function groupCopyPairs(computation: Computation, enabled: boolean): Copy
   }
   for (const [name, matches] of dones) {
     if (matches.length !== 1) continue;
-    const start = computation.byName.get(name)!, done = matches[0];
+    const start = computation.byName.get(name)!,
+      done = matches[0];
     const direction = copyDirection(start) ?? 'Unknown transfer';
     groups.set(done.name, { start, done, direction, shape: done.type.match(/^[a-z][\w]*\[[^\]]*\]/)?.[0] ?? done.type });
     aliases.set(start.name, done.name);
@@ -38,20 +39,22 @@ export function groupCopyPairs(computation: Computation, enabled: boolean): Copy
   }
   if (!groups.size) return { computation, groups, aliases };
   const alias = (name: string) => aliases.get(name) ?? name;
-  const nodes = computation.nodes.filter(node => !aliases.has(node.name) || groups.has(node.name)).map(node => {
-    const group = groups.get(node.name);
-    const members = group ? [group.start, group.done] : [node];
-    const remap = (names: string[]) => names.map(alias).filter(name => !group || name !== node.name);
-    return {
-      ...node,
-      op: group ? 'copy' : node.op,
-      root: members.some(member => member.root),
-      operands: remap(members.flatMap(member => member.operands)),
-      controlPredecessors: [...new Set(remap(members.flatMap(member => member.controlPredecessors)))],
-      users: [] as string[],
-      controlSuccessors: [] as string[]
-    };
-  });
+  const nodes = computation.nodes
+    .filter(node => !aliases.has(node.name) || groups.has(node.name))
+    .map(node => {
+      const group = groups.get(node.name);
+      const members = group ? [group.start, group.done] : [node];
+      const remap = (names: string[]) => names.map(alias).filter(name => !group || name !== node.name);
+      return {
+        ...node,
+        op: group ? 'copy' : node.op,
+        root: members.some(member => member.root),
+        operands: remap(members.flatMap(member => member.operands)),
+        controlPredecessors: [...new Set(remap(members.flatMap(member => member.controlPredecessors)))],
+        users: [] as string[],
+        controlSuccessors: [] as string[]
+      };
+    });
   const byName = new Map(nodes.map(node => [node.name, node]));
   for (const node of nodes) {
     for (const name of node.operands) {

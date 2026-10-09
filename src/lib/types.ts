@@ -73,9 +73,7 @@ export interface TypeSlot {
   details: TypeDetail[];
 }
 
-export type ResultGroup =
-  | { kind: 'tuple'; rawType: string; slots: TypeSlot[] }
-  | { kind: 'array'; rawType: string; details: TypeDetail[] };
+export type ResultGroup = { kind: 'tuple'; rawType: string; slots: TypeSlot[] } | { kind: 'array'; rawType: string; details: TypeDetail[] };
 
 export interface InstructionGuide {
   html: string;
