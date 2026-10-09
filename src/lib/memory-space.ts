@@ -6,29 +6,46 @@
 //   S(6) SMEM  - a Pallas operand with memory_space=SMEM is copied to S(6) before the kernel
 //                (scripts/probe_memory_spaces.py); scalar loop counters and predicates also land there
 const SPACES: Record<number, { label: string; text: string }> = {
-  0: { label: 'HBM', text: 'high-bandwidth memory, the TPU main memory and the largest.' },
-  1: { label: 'VMEM', text: 'on-chip vector memory next to the TensorCore; compute reads and writes it directly. Small and fast.' },
+  0: {
+    label: 'HBM',
+    text: 'high-bandwidth memory, the TPU main memory and the largest.'
+  },
+  1: {
+    label: 'VMEM',
+    text: 'on-chip vector memory next to the TensorCore; compute reads and writes it directly. Small and fast.'
+  },
   2: {
     label: 'SFLAG',
     text: 'sync flag memory; records whether an asynchronous DMA (copy-start, send, …) has finished, and the matching *-done waits on it.'
   },
-  5: { label: 'HOST', text: 'host (CPU) memory.' },
-  6: { label: 'SMEM', text: 'scalar memory for loop counters, indices, comparison results and other scalars used by the scalar unit.' }
+  5: {
+    label: 'HOST',
+    text: 'host (CPU) memory.'
+  },
+  6: {
+    label: 'SMEM',
+    text: 'scalar memory for loop counters, indices, comparison results and other scalars used by the scalar unit.'
+  }
 };
+
+// The S(n) of a shape such as "f32[8]{0:T(128)S(1)}"; `explicit` is false when the layout omits it.
+export function shapeMemorySpace(shape: string): { space: number; explicit: boolean } {
+  const match = /\bS\((\d+)\)/.exec(shape);
+  return { space: match ? Number(match[1]) : 0, explicit: !!match };
+}
 
 export const memorySpaceLabel = (space: number) => SPACES[space]?.label ?? `S(${space})`;
 
 // e.g. "VMEM (S(1)): on-chip vector memory…" or "HBM (no S(n), so the default space S(0)): …"
 export function memorySpaceText(space: number, explicit = space !== 0) {
-  const marker = explicit ? `S(${space})` : 'no S(n), so the default space S(0)';
   const known = SPACES[space];
-  return known
-    ? `${known.label} (${marker}): ${known.text}`
-    : `S(${space}): a memory space number private to the TPU backend; its meaning is not public.`;
+  if (!known) return `S(${space}): a memory space number private to the TPU backend; its meaning is not public.`;
+
+  const marker = explicit ? `S(${space})` : 'no S(n), so the default space S(0)';
+  return `${known.label} (${marker}): ${known.text}`;
 }
 
-// Memory space of an array shape string such as "f32[8]{0:T(128)S(1)}".
 export function shapeMemoryText(shape: string) {
-  const match = /S\((\d+)\)/.exec(shape);
-  return memorySpaceText(Number(match?.[1] ?? 0), !!match);
+  const { space, explicit } = shapeMemorySpace(shape);
+  return memorySpaceText(space, explicit);
 }

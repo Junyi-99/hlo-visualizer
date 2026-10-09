@@ -177,3 +177,9 @@ ENTRY %main.28 (q: bf16[8,2048,128]) -> bf16[8,2048,128] {
     assert.match(guide.html, new RegExp(`data-part="${key}"`));
   }
 });
+
+test('a call attribute that names no computation is explained instead of throwing', async () => {
+  const { explainAttribute } = await import('./src/lib/hlo-reference.ts');
+  const node = module.computations[0].nodes[0];
+  for (const name of ['to_apply', 'calls', 'scatter']) assert.match(explainAttribute(name, '{}', { node, module }).text, /\{\}/);
+});

@@ -1,4 +1,4 @@
-import { copyDirection } from './parser.ts';
+import { copyDirection, leadingShape, nodeSummary } from './parser.ts';
 import type { Computation, HloNode } from './types';
 
 export interface CopyGroup {
@@ -7,18 +7,15 @@ export interface CopyGroup {
   direction: string;
   shape: string;
 }
+
 export interface CopyGrouping {
   computation: Computation;
   groups: Map<string, CopyGroup>;
   aliases: Map<string, string>;
 }
 
-// This is a display projection. The original instructions remain available for
-// search, source inspection, and switching grouping off.
-export function groupCopyPairs(computation: Computation, enabled: boolean): CopyGrouping {
-  const groups = new Map<string, CopyGroup>();
-  const aliases = new Map<string, string>();
-  if (!enabled) return { computation, groups, aliases };
+// [copy-start, copy-done] for every copy-start with exactly one copy-done.
+function copyPairs(computation: Computation): [HloNode, HloNode][] {
   const dones = new Map<string, HloNode[]>();
   for (const node of computation.nodes) {
     if (node.op !== 'copy-done' || node.operands.length !== 1) continue;
@@ -28,16 +25,25 @@ export function groupCopyPairs(computation: Computation, enabled: boolean): Copy
     matches.push(node);
     dones.set(start.name, matches);
   }
-  for (const [name, matches] of dones) {
-    if (matches.length !== 1) continue;
-    const start = computation.byName.get(name)!,
-      done = matches[0];
+
+  return [...dones].filter(([, matches]) => matches.length === 1).map(([name, [done]]) => [computation.byName.get(name)!, done]);
+}
+
+// A display projection that merges each copy-start/copy-done pair into one "copy" node. The original
+// instructions remain available for search, source inspection, and switching grouping off.
+export function groupCopyPairs(computation: Computation, enabled: boolean): CopyGrouping {
+  const groups = new Map<string, CopyGroup>();
+  const aliases = new Map<string, string>();
+  if (!enabled) return { computation, groups, aliases };
+
+  for (const [start, done] of copyPairs(computation)) {
     const direction = copyDirection(start) ?? 'Unknown transfer';
-    groups.set(done.name, { start, done, direction, shape: done.type.match(/^[a-z][\w]*\[[^\]]*\]/)?.[0] ?? done.type });
+    groups.set(done.name, { start, done, direction, shape: leadingShape(done.type) ?? done.type });
     aliases.set(start.name, done.name);
     aliases.set(done.name, done.name);
   }
   if (!groups.size) return { computation, groups, aliases };
+
   const alias = (name: string) => aliases.get(name) ?? name;
   const nodes = computation.nodes
     .filter(node => !aliases.has(node.name) || groups.has(node.name))
@@ -55,6 +61,8 @@ export function groupCopyPairs(computation: Computation, enabled: boolean): Copy
         controlSuccessors: [] as string[]
       };
     });
+
+  // Rebuild the reverse edges for the merged nodes.
   const byName = new Map(nodes.map(node => [node.name, node]));
   for (const node of nodes) {
     for (const name of node.operands) {
@@ -64,4 +72,12 @@ export function groupCopyPairs(computation: Computation, enabled: boolean): Copy
     for (const name of node.controlPredecessors) byName.get(name)?.controlSuccessors.push(node.name);
   }
   return { computation: { ...computation, nodes, byName }, groups, aliases };
+}
+
+// A grouped copy pair shows its transfer direction and shape instead of the instruction name.
+export function copyGroupCaption(node: HloNode, group: CopyGroup | null | undefined) {
+  return {
+    label: group ? group.direction : `%${node.name}`,
+    detail: group ? group.shape : nodeSummary(node)
+  };
 }

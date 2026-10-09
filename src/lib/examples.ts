@@ -16,6 +16,7 @@ export const examples: HloExample[] = Object.entries(files)
       .pop()!
       .replace(/\.hlo$/, '');
     const [program, stage] = id.split('.');
-    return { id, program, stage: stage === 'before' ? 'before' : 'after', load } as HloExample;
+    const example: HloExample = { id, program, stage: stage === 'before' ? 'before' : 'after', load };
+    return example;
   })
   .sort((a, b) => a.program.localeCompare(b.program));

@@ -1,5 +1,6 @@
 // Plain-language reference for HLO opcodes and instruction attributes.
 // Semantics follow the XLA operation semantics doc: https://openxla.org/xla/operation_semantics
+
 import type { Computation, HloModule, HloNode } from './types';
 import { sourceStack } from './parser.ts';
 
@@ -16,9 +17,11 @@ const OPS: Record<string, string> = {
   'copy-start': 'starts an asynchronous copy (for example between HBM and VMEM); its tuple result goes to the matching copy-done.',
   'copy-done': 'waits for the asynchronous copy started by copy-start and yields the copied array.',
   'opt-barrier': 'optimization barrier: returns its input unchanged but stops the compiler from moving or merging work across it.',
+  'optimization-barrier': 'optimization barrier: returns its input unchanged and stops the compiler from moving work across it.',
   'after-all': 'joins tokens into a new token, used to order side-effecting operations such as send/recv.',
   'add-dependency': 'returns the first operand unchanged and adds a dependency on the second (usually a token) for ordering.',
   domain: 'marks a boundary for properties such as sharding; the data is unchanged.',
+
   // Elementwise arithmetic
   add: 'elementwise addition.',
   subtract: 'elementwise subtraction (first minus second).',
@@ -59,6 +62,7 @@ const OPS: Record<string, string> = {
   'reduce-precision':
     'rounds floating-point values to fewer exponent and mantissa bits to emulate lower precision; the result type is unchanged.',
   'stochastic-convert': 'converts floating point to a lower-precision type with stochastic rounding.',
+
   // Bitwise and logical
   and: 'elementwise bitwise AND (logical AND for pred).',
   or: 'elementwise bitwise OR (logical OR for pred).',
@@ -71,6 +75,7 @@ const OPS: Record<string, string> = {
   'count-leading-zeros': 'elementwise count of leading 0 bits.',
   compare: 'compares two operands elementwise; the result is a pred (boolean) array and direction says how to compare.',
   select: 'elementwise choice: where the first operand (pred) is true take the second operand, otherwise the third.',
+
   // Shape manipulation
   broadcast: 'expands the input to the result shape; dimensions says where the input axes go in the output.',
   transpose: 'reorders dimensions in the order given by dimensions.',
@@ -83,6 +88,7 @@ const OPS: Record<string, string> = {
   gather:
     'collects slices from the input by index (like x[idx]); the *_dims attributes map indices and slices to input and output dimensions.',
   scatter: 'writes updates into the input at indices, or combines them with to_apply, for example x.at[idx].add(u).',
+
   // Reductions, windows, sorting
   reduce:
     'reduces along the dimensions in dimensions with the binary function to_apply (sum, max, …); those dimensions are removed from the result.',
@@ -92,12 +98,14 @@ const OPS: Record<string, string> = {
   sort: 'sorts along the dimension in dimensions; with several operands they are permuted together, ordered by the to_apply comparator.',
   topk: 'takes the k largest (or smallest) values along the last dimension, with their indices.',
   map: 'applies the scalar function to_apply at every element position.',
+
   // Linear algebra
   dot: 'matrix multiplication / tensor contraction: multiplies and sums over the contracting dimensions, pairing batch dimensions.',
   convolution: 'convolution; on TPU, matrix multiplications are often written as convolutions too. See window and dim_labels.',
   fft: 'fast Fourier transform; see fft_type and fft_length.',
   cholesky: 'Cholesky decomposition: factors a symmetric positive-definite matrix into a triangular matrix times its transpose.',
   'triangular-solve': 'solves a triangular linear system (a is triangular); the options give the side and transposition.',
+
   // Control flow and calls
   while: "loop: runs body repeatedly until condition returns false; the loop state is this instruction's operand and result.",
   conditional: 'branch: the first operand (pred or branch index) selects one branch computation, which receives the remaining operands.',
@@ -105,10 +113,12 @@ const OPS: Record<string, string> = {
   fusion: 'runs several instructions as one kernel; the computation in calls holds them.',
   'custom-call':
     'hands this step to an implementation registered with the backend (a Pallas kernel, a library call, …); the HLO text only shows the call boundary.',
+
   // Random numbers
   'rng-bit-generator': 'generates random bits from a state with the given algorithm; the result is (new state, random bits).',
   rng: 'generates random numbers from the given distribution.',
   'rng-get-and-update-state': 'reads and advances the global random number generator state.',
+
   // Collectives and communication
   'all-reduce': 'reduces values at the same position across a device group (sum, …); every device gets the result.',
   'all-reduce-start': 'start of an asynchronous all-reduce.',
@@ -130,22 +140,25 @@ const OPS: Record<string, string> = {
   'recv-done': 'waits for the matching recv and yields the received data.',
   infeed: 'reads data from the host input queue.',
   outfeed: 'writes data to the host output queue.',
+
+  // Async wrappers, dynamic shapes
   'async-start': 'starts a computation (in calls) asynchronously.',
   'async-update': 'advances an asynchronous computation.',
   'async-done': 'waits for an asynchronous computation and takes its result.',
   'get-dimension-size': 'returns the run-time size of a dimension (dynamic shapes).',
-  'set-dimension-size': 'sets the run-time size of a dimension (dynamic shapes).',
-  'optimization-barrier': 'optimization barrier: returns its input unchanged and stops the compiler from moving work across it.'
+  'set-dimension-size': 'sets the run-time size of a dimension (dynamic shapes).'
 };
 
 const ASYNC = /^(.*)-(start|done|update)$/;
+const ASYNC_PHASE: Record<string, string> = { start: 'start', done: 'completion', update: 'update' };
 
 export function opDescription(node: HloNode): string {
   const known = OPS[node.op];
   if (known) return `${node.op}: ${known}`;
-  const async = ASYNC.exec(node.op);
-  if (async && OPS[async[1]])
-    return `${node.op}: the ${async[2] === 'start' ? 'start' : async[2] === 'done' ? 'completion' : 'update'} of an asynchronous ${async[1]}. ${async[1]} itself: ${OPS[async[1]]}`;
+
+  const [, base, phase] = ASYNC.exec(node.op) ?? [];
+  if (base && OPS[base]) return `${node.op}: the ${ASYNC_PHASE[phase]} of an asynchronous ${base}. ${base} itself: ${OPS[base]}`;
+
   return `${node.op} is this instruction's HLO operation; see the XLA operation semantics doc.`;
 }
 
@@ -157,83 +170,125 @@ const list = (value: string) =>
     .split(',')
     .map(x => x.trim())
     .filter(Boolean);
+
 const dimsText = (value: string) => {
   const dims = list(value);
   return dims.length ? `dimension${dims.length > 1 ? 's' : ''} ${dims.join(', ')}` : '(none)';
 };
+
 const names = (value: string) => [...value.matchAll(/%?([\w.-]+)/g)].map(m => `%${m[1]}`);
+
+const ROOT_MEANING: Record<string, string> = {
+  add: 'sum',
+  maximum: 'max',
+  minimum: 'min',
+  multiply: 'product',
+  and: 'logical AND',
+  or: 'logical OR',
+  compare: 'comparison',
+  select: 'selection'
+};
 
 function rootSummary(name: string, module?: HloModule): string {
   const callee = module?.byName.get(name.replace(/^%/, ''));
   const root = callee?.nodes.find(node => node.root);
   if (!root) return '';
-  const meaning: Record<string, string> = {
-    add: 'sum',
-    maximum: 'max',
-    minimum: 'min',
-    multiply: 'product',
-    and: 'logical AND',
-    or: 'logical OR',
-    compare: 'comparison',
-    select: 'selection'
-  };
-  return ` Its ROOT is ${root.op}${meaning[root.op] ? ` (${meaning[root.op]})` : ''}.`;
+
+  const meaning = ROOT_MEANING[root.op];
+  return ` Its ROOT is ${root.op}${meaning ? ` (${meaning})` : ''}.`;
 }
 
-const dimRoles = (labels: string, kind: 'lhs' | 'rhs') =>
-  [...labels]
-    .map((ch, index) => {
-      const role =
-        kind === 'rhs'
-          ? ch === 'o'
-            ? 'output feature'
-            : ch === 'i'
-              ? 'input feature'
-              : `spatial ${ch}`
-          : ch === 'b'
-            ? 'batch'
-            : ch === 'f'
-              ? 'feature'
-              : `spatial ${ch}`;
-      return `dim ${index} = ${role}`;
-    })
-    .join(', ');
+// Letters in a convolution's dim_labels; any other character is a spatial dimension.
+const ACTIVATION_ROLES: Record<string, string> = { b: 'batch', f: 'feature' };
+const KERNEL_ROLES: Record<string, string> = { o: 'output feature', i: 'input feature' };
+
+const dimRoles = (labels: string, kind: 'lhs' | 'rhs') => {
+  const roles = kind === 'rhs' ? KERNEL_ROLES : ACTIVATION_ROLES;
+  return [...labels].map((ch, index) => `dim ${index} = ${roles[ch] ?? `spatial ${ch}`}`).join(', ');
+};
 
 function dimLabels(value: string): string {
   const [inputs, output] = value.split('->');
   const [lhs, rhs] = (inputs || '').split('_');
-  return `dim_labels=${value} gives the role of each dimension by position (b = batch, f = feature, o/i = kernel output/input feature, digits = spatial). Input ${lhs}: ${dimRoles(lhs || '', 'lhs')}; kernel ${rhs}: ${dimRoles(rhs || '', 'rhs')}; output ${output}: ${dimRoles(output || '', 'lhs')}.`;
+  const legend = 'b = batch, f = feature, o/i = kernel output/input feature, digits = spatial';
+  return (
+    `dim_labels=${value} gives the role of each dimension by position (${legend}). ` +
+    `Input ${lhs}: ${dimRoles(lhs || '', 'lhs')}; kernel ${rhs}: ${dimRoles(rhs || '', 'rhs')}; output ${output}: ${dimRoles(output || '', 'lhs')}.`
+  );
 }
 
+const WINDOW_FIELDS: Record<string, string> = {
+  size: 'window size',
+  stride: 'stride',
+  pad: 'edge padding (low_high)',
+  lhs_dilate: 'input dilation (gaps between elements, used for transposed convolution)',
+  rhs_dilate: 'window dilation (atrous convolution)',
+  rhs_reversal: 'window reversal'
+};
+
 function windowText(value: string): string {
-  const fields: Record<string, string> = {
-    size: 'window size',
-    stride: 'stride',
-    pad: 'edge padding (low_high)',
-    lhs_dilate: 'input dilation (gaps between elements, used for transposed convolution)',
-    rhs_dilate: 'window dilation (atrous convolution)',
-    rhs_reversal: 'window reversal'
-  };
   const parts = [...value.replace(/^\{|\}$/g, '').matchAll(/(\w+)=(\S+)/g)].map(
-    ([, key, v]) => `${fields[key] || key} ${v.split('x').join(' × ')}`
+    ([, key, v]) => `${WINDOW_FIELDS[key] || key} ${v.split('x').join(' × ')}`
   );
   return `window describes the sliding window, one value per spatial dimension separated by x: ${parts.join('; ')}.`;
 }
 
 function sliceText(value: string): string {
-  const ranges = [...value.matchAll(/\[(-?\d+):(-?\d+)(?::(-?\d+))?\]/g)].map(
-    ([, start, limit, stride], index) =>
-      `dim ${index} takes [${start}, ${limit})${stride && stride !== '1' ? ` with stride ${stride}` : ''}`
-  );
+  const ranges = [...value.matchAll(/\[(-?\d+):(-?\d+)(?::(-?\d+))?\]/g)].map(([, start, limit, stride], index) => {
+    const step = stride && stride !== '1' ? ` with stride ${stride}` : '';
+    return `dim ${index} takes [${start}, ${limit})${step}`;
+  });
   return `slice gives [start:limit:stride] per dimension, limit exclusive: ${ranges.join('; ')}.`;
 }
 
 function paddingText(value: string): string {
   const dims = value.split('x').map((dim, index) => {
     const [low, high, interior] = dim.split('_');
-    return `dim ${index}: ${low} before, ${high} after${interior && interior !== '0' ? `, ${interior} between elements` : ''}`;
+    const between = interior && interior !== '0' ? `, ${interior} between elements` : '';
+    return `dim ${index}: ${low} before, ${high} after${between}`;
   });
   return `padding is low_high[_interior] per dimension, dimensions separated by x; negative values remove elements: ${dims.join('; ')}.`;
+}
+
+function metadataText(value: string, module?: HloModule): string {
+  const opName = /\bop_name="([^"]+)"/.exec(value)?.[1];
+  const opType = /\bop_type="([^"]+)"/.exec(value)?.[1];
+  const file = /\bsource_file="([^"]+)"/.exec(value)?.[1];
+  const line = /\bsource_line=(\d+)/.exec(value)?.[1];
+  const frame = /\bstack_frame_id=(\d+)/.exec(value)?.[1];
+
+  let source = '';
+  if (file) source = ` Source file ${file}${line ? `, line ${line}` : ''}.`;
+  else if (line) source = ` Source line ${line}.`;
+
+  let frameText = '';
+  if (frame) {
+    const stack = module ? sourceStack(module, Number(frame)) : [];
+    const chain = stack.map(f => `${f.func}:${f.line}`).join(' ← ');
+    const where = stack.length ? ` Source: ${stack[0].file}:${stack[0].line} (${stack[0].func}); call chain ${chain}.` : '';
+    frameText = ` stack_frame_id=${frame} points into the StackFrames table at the top of the module.${where}`;
+  }
+
+  return (
+    'metadata records which front-end operation produced this instruction; it does not affect the computation.' +
+    (opName ? ` op_name=${opName} (the operation path in JAX).` : '') +
+    (opType ? ` op_type=${opType}.` : '') +
+    source +
+    frameText
+  );
+}
+
+const BACKEND_FIELD_LIMIT = 8;
+
+function backendConfigText(value: string, node: HloNode): string {
+  const fields = [...new Set([...value.matchAll(/"(\w+)":/g)].map(m => m[1]))].slice(0, BACKEND_FIELD_LIMIT);
+  const more = fields.length === BACKEND_FIELD_LIMIT ? ', …' : '';
+  const fieldList = fields.length ? ` Fields: ${fields.join(', ')}${more}.` : '';
+  const encodedBody =
+    node.op === 'custom-call' && /"body"\s*:/.test(value)
+      ? ' The encoded body is the serialized backend kernel; its internal dependencies cannot be read from the outer HLO.'
+      : '';
+  return `backend_config is backend-specific configuration (JSON) where the compiler records kernel, memory and scheduling decisions; it does not change what the data means.${fieldList}${encodedBody}`;
 }
 
 const COMPARE: Record<string, string> = {
@@ -244,12 +299,14 @@ const COMPARE: Record<string, string> = {
   GT: 'greater than',
   GE: 'greater than or equal to'
 };
+
 const FFT: Record<string, string> = {
   FFT: 'forward complex-to-complex FFT',
   IFFT: 'inverse complex-to-complex FFT',
   RFFT: 'forward real-to-complex FFT (keeps the non-negative frequencies; the last dimension becomes n/2+1)',
   IRFFT: 'inverse complex-to-real FFT'
 };
+
 const FUSION_KIND: Record<string, string> = {
   kLoop: 'Loop fusion: elementwise work fused into one loop; each output element is computed independently.',
   kInput: 'Input fusion: built around a reduction, with the elementwise work feeding it fused in.',
@@ -263,6 +320,7 @@ export interface AttributeContext {
   module?: HloModule;
   computation?: Computation;
 }
+
 export interface AttributeExplanation {
   key: string;
   label: string;
@@ -283,64 +341,83 @@ const KEY: Record<string, string> = {
 };
 export const attributeKey = (name: string) => KEY[name] || `attr-${name.replace(/[^\w-]/g, '').replace(/_/g, '-')}`;
 
+const CUSTOM_CALL_TARGETS: Record<string, string> = {
+  tpu_custom_call: 'a Pallas / Mosaic kernel on TPU',
+  AssumeGatherIndicesInBound:
+    'tells the compiler the gather indices are in range so bounds handling can be skipped; the data passes through unchanged',
+  Sharding: 'a sharding annotation; the data passes through unchanged',
+  SPMDFullToShardShape: 'converts a full shape to a per-shard shape for SPMD',
+  SPMDShardToFullShape: 'converts a per-shard shape back to the full shape for SPMD',
+  TopK: 'the k largest values and their indices',
+  xla_python_cpu_callback: 'a callback into a Python function on the host',
+  xla_ffi_python_cpu_callback: 'a callback into a Python function on the host',
+  MoveToHost: 'moves data to host memory',
+  MoveToDevice: 'moves data back to device memory'
+};
+
+// What `to_apply` means for each op that takes one.
+const TO_APPLY_ROLES: Record<string, string> = {
+  reduce: 'the reducer: combines two scalars into one',
+  'reduce-window': 'the reducer applied within each window',
+  'all-reduce': 'the reducer applied across devices',
+  'reduce-scatter': 'the reducer applied across devices',
+  scatter: 'the combiner: decides how the old value and the update combine (for example add; returning the update overwrites)',
+  sort: 'the comparator: returns pred, true when the first element goes first',
+  call: "the called computation; its parameters are this instruction's operands",
+  map: 'the scalar function applied to every element'
+};
+
+const TRANSPOSE_A: Record<string, string> = {
+  NO_TRANSPOSE: 'a',
+  TRANSPOSE: 'the transpose of a'
+};
+
 const yes = (plain: string) => plain === 'true';
+
+function dimensionsText(value: string, node: HloNode): string {
+  const dims = dimsText(value);
+  const byOp: Record<string, string> = {
+    broadcast: `dimensions=${value} maps the input dimensions, in order, to output ${dims}; the other output dimensions are broadcast.`,
+    reduce: `Reduces over input ${dims}; they are removed from the result.`,
+    transpose: `Result dimension i is input dimension dimensions[i], i.e. input ${dims} in that order.`,
+    reverse: `Reverses element order along ${dims}.`,
+    concatenate: `Joins the inputs end to end along ${dims}.`,
+    sort: `Sorts along ${dims}.`,
+    'all-gather': `Concatenates the devices' data along ${dims}.`,
+    'reduce-scatter': `After reducing, splits the result along ${dims} across devices.`,
+    map: `Applies the function elementwise over ${dims}.`
+  };
+  return byOp[node.op] || `dimensions=${value} gives the dimensions this instruction works on: ${dims}.`;
+}
+
+function fusionCallsText(callee: string, node: HloNode, module?: HloModule): string {
+  const mapping = node.operands.map((operand, index) => `parameter ${index} ← %${operand}`).join('; ');
+  const root = module?.byName.get(callee.slice(1))?.nodes.find(instruction => instruction.root);
+  const rootText = root ? ` Its ROOT %${root.name} defines the fusion's result.` : " Its ROOT defines the fusion's result.";
+  return `calls=${callee} is the computation inside this fusion.${mapping ? ` ${mapping}.` : ''}${rootText}`;
+}
 
 export function explainAttribute(name: string, value: string, { node, module }: AttributeContext): AttributeExplanation {
   const key = attributeKey(name);
   const at = (label: string, text: string) => ({ key, label, text });
   const plain = value.replace(/^"|"$/g, '');
+  const callee = names(value)[0] ?? plain;
+
   switch (name) {
-    case 'metadata': {
-      const opName = /\bop_name="([^"]+)"/.exec(value)?.[1];
-      const opType = /\bop_type="([^"]+)"/.exec(value)?.[1];
-      const file = /\bsource_file="([^"]+)"/.exec(value)?.[1];
-      const line = /\bsource_line=(\d+)/.exec(value)?.[1];
-      const frame = /\bstack_frame_id=(\d+)/.exec(value)?.[1];
-      const stack = frame && module ? sourceStack(module, Number(frame)) : [];
-      const where = stack.length
-        ? ` Source: ${stack[0].file}:${stack[0].line} (${stack[0].func}); call chain ${stack.map(f => `${f.func}:${f.line}`).join(' ← ')}.`
-        : '';
-      return at(
-        'Source',
-        `metadata records which front-end operation produced this instruction; it does not affect the computation.${opName ? ` op_name=${opName} (the operation path in JAX).` : ''}${opType ? ` op_type=${opType}.` : ''}${file ? ` Source file ${file}${line ? `, line ${line}` : ''}.` : line ? ` Source line ${line}.` : ''}${frame ? ` stack_frame_id=${frame} points into the StackFrames table at the top of the module.${where}` : ''}`
-      );
-    }
-    case 'backend_config': {
-      const fields = [...value.matchAll(/"(\w+)":/g)]
-        .map(m => m[1])
-        .filter((v, i, a) => a.indexOf(v) === i)
-        .slice(0, 8);
-      const custom =
-        node.op === 'custom-call' && /"body"\s*:/.test(value)
-          ? ' The encoded body is the serialized backend kernel; its internal dependencies cannot be read from the outer HLO.'
-          : '';
-      return at(
-        'Backend config',
-        `backend_config is backend-specific configuration (JSON) where the compiler records kernel, memory and scheduling decisions; it does not change what the data means.${fields.length ? ` Fields: ${fields.join(', ')}${fields.length === 8 ? ', …' : ''}.` : ''}${custom}`
-      );
-    }
+    case 'metadata':
+      return at('Source', metadataText(value, module));
+    case 'backend_config':
+      return at('Backend config', backendConfigText(value, node));
     case 'dma_priority':
       return at(
         'DMA priority',
         `dma_priority=${plain} is the priority of this DMA (asynchronous copy); how it affects scheduling is up to the backend.`
       );
     case 'custom_call_target': {
-      const targets: Record<string, string> = {
-        tpu_custom_call: 'a Pallas / Mosaic kernel on TPU',
-        AssumeGatherIndicesInBound:
-          'tells the compiler the gather indices are in range so bounds handling can be skipped; the data passes through unchanged',
-        Sharding: 'a sharding annotation; the data passes through unchanged',
-        SPMDFullToShardShape: 'converts a full shape to a per-shard shape for SPMD',
-        SPMDShardToFullShape: 'converts a per-shard shape back to the full shape for SPMD',
-        TopK: 'the k largest values and their indices',
-        xla_python_cpu_callback: 'a callback into a Python function on the host',
-        xla_ffi_python_cpu_callback: 'a callback into a Python function on the host',
-        MoveToHost: 'moves data to host memory',
-        MoveToDevice: 'moves data back to device memory'
-      };
+      const target = CUSTOM_CALL_TARGETS[plain];
       return at(
         'Backend target',
-        `custom_call_target=${value} is the registered backend target${targets[plain] ? `: ${targets[plain]}` : ''}; its internals are not shown as a graph.`
+        `custom_call_target=${value} is the registered backend target${target ? `: ${target}` : ''}; its internals are not shown as a graph.`
       );
     }
     case 'operand_layout_constraints':
@@ -348,24 +425,8 @@ export function explainAttribute(name: string, value: string, { node, module }: 
         'Operand layouts',
         'operand_layout_constraints lists, in operand order, the layout the backend requires for each operand; the compiler converts the data before the call.'
       );
-    case 'dimensions': {
-      const dims = dimsText(value);
-      const text: Record<string, string> = {
-        broadcast: `dimensions=${value} maps the input dimensions, in order, to output ${dims}; the other output dimensions are broadcast.`,
-        reduce: `Reduces over input ${dims}; they are removed from the result.`,
-        transpose: `Result dimension i is input dimension dimensions[i], i.e. input ${dims} in that order.`,
-        reverse: `Reverses element order along ${dims}.`,
-        concatenate: `Joins the inputs end to end along ${dims}.`,
-        sort: `Sorts along ${dims}.`,
-        'all-gather': `Concatenates the devices' data along ${dims}.`,
-        'reduce-scatter': `After reducing, splits the result along ${dims} across devices.`,
-        map: `Applies the function elementwise over ${dims}.`
-      };
-      return at(
-        node.op === 'broadcast' ? 'Broadcast dimensions' : 'Dimensions',
-        text[node.op] || `dimensions=${value} gives the dimensions this instruction works on: ${dims}.`
-      );
-    }
+    case 'dimensions':
+      return at(node.op === 'broadcast' ? 'Broadcast dimensions' : 'Dimensions', dimensionsText(value, node));
     case 'index':
       return at(
         'Tuple index',
@@ -376,41 +437,17 @@ export function explainAttribute(name: string, value: string, { node, module }: 
         'Fusion kind',
         `kind=${plain}. ${FUSION_KIND[plain] || 'The kind of this fusion, which guides how the backend implements it.'}`
       );
-    case 'calls': {
-      const callee = names(value)[0];
-      if (node.op !== 'fusion')
-        return at('Called computation', `calls=${callee} is the computation this instruction runs.${rootSummary(callee, module)}`);
-      const mapping = node.operands.map((operand, index) => `parameter ${index} ← %${operand}`).join('; ');
-      const root = module?.byName.get(callee.slice(1))?.nodes.find(instruction => instruction.root);
-      return at(
-        'Called computation',
-        `calls=${callee} is the computation inside this fusion.${mapping ? ` ${mapping}.` : ''}${root ? ` Its ROOT %${root.name} defines the fusion's result.` : " Its ROOT defines the fusion's result."}`
-      );
-    }
+    case 'calls':
+      if (node.op === 'fusion') return at('Called computation', fusionCallsText(callee, node, module));
+      return at('Called computation', `calls=${callee} is the computation this instruction runs.${rootSummary(callee, module)}`);
     case 'to_apply': {
-      const callee = names(value)[0];
-      const role: Record<string, string> = {
-        reduce: 'the reducer: combines two scalars into one',
-        'reduce-window': 'the reducer applied within each window',
-        'all-reduce': 'the reducer applied across devices',
-        'reduce-scatter': 'the reducer applied across devices',
-        scatter: 'the combiner: decides how the old value and the update combine (for example add; returning the update overwrites)',
-        sort: 'the comparator: returns pred, true when the first element goes first',
-        call: "the called computation; its parameters are this instruction's operands",
-        map: 'the scalar function applied to every element'
-      };
-      return at(
-        'Applied function',
-        `to_apply=${callee} is ${role[node.op] || 'the sub-computation this instruction uses'}.${rootSummary(callee, module)}`
-      );
+      const role = TO_APPLY_ROLES[node.op] || 'the sub-computation this instruction uses';
+      return at('Applied function', `to_apply=${callee} is ${role}.${rootSummary(callee, module)}`);
     }
     case 'condition':
-      return at(
-        'Loop condition',
-        `condition=${names(value)[0]} takes the current loop state and returns pred; the loop stops when it is false.`
-      );
+      return at('Loop condition', `condition=${callee} takes the current loop state and returns pred; the loop stops when it is false.`);
     case 'body':
-      return at('Loop body', `body=${names(value)[0]} takes the current loop state and returns the next one (same type as the state).`);
+      return at('Loop body', `body=${callee} takes the current loop state and returns the next one (same type as the state).`);
     case 'branch_computations': {
       const branches = names(value);
       return at(
@@ -419,15 +456,15 @@ export function explainAttribute(name: string, value: string, { node, module }: 
       );
     }
     case 'true_computation':
-      return at('True branch', `Runs ${names(value)[0]} when the condition is true.`);
+      return at('True branch', `Runs ${callee} when the condition is true.`);
     case 'false_computation':
-      return at('False branch', `Runs ${names(value)[0]} when the condition is false.`);
+      return at('False branch', `Runs ${callee} when the condition is false.`);
     case 'select':
-      return at('Select function', `select=${names(value)[0]} compares elements within each window to pick one position (returns pred).`);
+      return at('Select function', `select=${callee} compares elements within each window to pick one position (returns pred).`);
     case 'scatter':
       return at(
         'Scatter function',
-        `scatter=${names(value)[0]} combines the source value into the selected position.${rootSummary(names(value)[0], module)}`
+        `scatter=${callee} combines the source value into the selected position.${rootSummary(callee, module)}`
       );
     case 'called_computations':
       return at(
@@ -441,11 +478,13 @@ export function explainAttribute(name: string, value: string, { node, module }: 
       );
     case 'direction':
       return at('Comparison', `direction=${plain}: tests elementwise whether the first operand is ${COMPARE[plain] || plain} the second.`);
-    case 'order':
-      return at(
-        'Comparison order',
-        `order=${plain}: ${plain === 'TOTAL' ? 'compares floats with a total order, so NaN and -0/+0 also have a fixed place (-NaN < -inf < … < -0 < +0 < … < +inf < +NaN) and sorting is reproducible' : 'compares floats with the usual IEEE partial order; any comparison with NaN is false'}.`
-      );
+    case 'order': {
+      const meaning =
+        plain === 'TOTAL'
+          ? 'compares floats with a total order, so NaN and -0/+0 also have a fixed place (-NaN < -inf < … < -0 < +0 < … < +inf < +NaN) and sorting is reproducible'
+          : 'compares floats with the usual IEEE partial order; any comparison with NaN is false';
+      return at('Comparison order', `order=${plain}: ${meaning}.`);
+    }
     case 'type':
       return at(
         'Comparison type',
@@ -566,10 +605,7 @@ export function explainAttribute(name: string, value: string, { node, module }: 
         `unit_diagonal=${plain}: ${yes(plain) ? 'assumes the diagonal of a is 1 and does not read it' : 'uses the diagonal of a'}.`
       );
     case 'transpose_a':
-      return at(
-        'Transpose a',
-        `transpose_a=${plain}: op(a) is ${plain === 'NO_TRANSPOSE' ? 'a' : plain === 'TRANSPOSE' ? 'the transpose of a' : 'the conjugate transpose of a'}.`
-      );
+      return at('Transpose a', `transpose_a=${plain}: op(a) is ${TRANSPOSE_A[plain] ?? 'the conjugate transpose of a'}.`);
     case 'algorithm':
       return at(
         'RNG algorithm',
@@ -649,10 +685,9 @@ export function explainAttribute(name: string, value: string, { node, module }: 
       return at('Statistics', 'statistics records compiler statistics; it does not affect the computation.');
     case 'origin':
       return at('Origin', 'origin records which compiler step produced this instruction.');
-    default:
-      return at(
-        name,
-        `${name}=${value.length > 60 ? `${value.slice(0, 57)}…` : value} is an attribute of this ${node.op} instruction; see the XLA operation semantics doc.`
-      );
+    default: {
+      const shown = value.length > 60 ? `${value.slice(0, 57)}…` : value;
+      return at(name, `${name}=${shown} is an attribute of this ${node.op} instruction; see the XLA operation semantics doc.`);
+    }
   }
 }

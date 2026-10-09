@@ -1,6 +1,6 @@
-import { computationLinks } from './parser.ts';
+import { computationLinks, splitTopLevel } from './parser.ts';
 import type { Computation, HloModule, HloNode } from './types';
-import { memorySpaceLabel } from './memory-space.ts';
+import { memorySpaceLabel, shapeMemorySpace } from './memory-space.ts';
 
 export interface MemoryLocation {
   path: string | null;
@@ -9,45 +9,27 @@ export interface MemoryLocation {
   explicit: boolean;
 }
 
-function tupleItems(type: string): string[] {
-  const items: string[] = [];
-  let start = 1,
-    parens = 0,
-    brackets = 0,
-    braces = 0;
-  for (let index = 1; index < type.length - 1; index++) {
-    const char = type[index];
-    if (char === '(') parens++;
-    else if (char === ')') parens--;
-    else if (char === '[') brackets++;
-    else if (char === ']') brackets--;
-    else if (char === '{') braces++;
-    else if (char === '}') braces--;
-    else if (char === ',' && !parens && !brackets && !braces) {
-      items.push(type.slice(start, index).trim());
-      start = index + 1;
-    }
-  }
-  items.push(type.slice(start, -1).trim());
-  return items;
+// The untrimmed top-level elements of a tuple type "(a, b, …)".
+export function tupleElements(type: string): string[] {
+  return splitTopLevel(type.slice(1, -1));
 }
 
 function shapeLocations(shape: string, path: string | null): MemoryLocation[] {
-  const trimmed = shape.replace(/\/\*[^*]*\*\//g, '').trim(); // long tuples carry /*index=N*/ comments
+  // Long tuples carry /*index=N*/ printer comments.
+  const trimmed = shape.replace(/\/\*[^*]*\*\//g, '').trim();
+
   if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
-    return tupleItems(trimmed).flatMap((item, index) => shapeLocations(item, path === null ? String(index) : `${path}.${index}`));
+    return tupleElements(trimmed).flatMap((item, index) => {
+      const itemPath = path === null ? String(index) : `${path}.${index}`;
+      return shapeLocations(item.trim(), itemPath);
+    });
   }
-  if (!/^[a-z][\w]*\[[^\]]*\]/.test(trimmed) || trimmed.startsWith('token[')) return []; // tokens hold no data
-  const match = /\bS\((\d+)\)/.exec(trimmed);
-  const space = match ? Number(match[1]) : 0;
-  return [
-    {
-      path,
-      space,
-      explicit: !!match,
-      label: memorySpaceLabel(space)
-    }
-  ];
+
+  const isArray = /^[a-z][\w]*\[[^\]]*\]/.test(trimmed);
+  if (!isArray || trimmed.startsWith('token[')) return []; // tokens hold no data
+
+  const { space, explicit } = shapeMemorySpace(trimmed);
+  return [{ path, space, explicit, label: memorySpaceLabel(space) }];
 }
 
 export function memoryLocations(type: string): MemoryLocation[] {
@@ -78,9 +60,11 @@ export type BufferStatus = 'buffer' | 'fusion' | 'thread-local' | 'unassigned';
 
 export function bufferStatus(module: HloModule, computation: Computation, node: HloNode): BufferStatus {
   if (!module.scheduled) return 'unassigned';
+
   const callers = computationLinks(module).filter(link => link.to === computation.name && INLINE_CALLERS.has(link.op));
   if (!callers.length) return 'buffer';
   if (callers.some(link => link.op === 'fusion')) return 'fusion';
+
   return node.op === 'constant' ? 'buffer' : 'thread-local'; // constants get a global buffer even inside reducers
 }
 

@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { linkLabel } from '../lib/graph-layout';
-import { nodeCategory, nodeSummary } from '../lib/parser';
+import { calledComputations, nodeCategory } from '../lib/parser';
 import type { HloModule, HloNode } from '../lib/types';
-import { groupCopyPairs } from '../lib/copy-grouping';
+import { copyGroupCaption, groupCopyPairs } from '../lib/copy-grouping';
 import { useGraphLayouts } from '../hooks/useGraphLayouts';
 import { edgePath } from '../lib/graph-routing';
 import { Icon } from './Icon';
 
-const emptyHeights = {};
+const NESTED_SCALE = 0.72;
+const emptyHeights: Record<string, number> = {};
 
 interface Step {
   name: string;
@@ -23,33 +24,31 @@ interface ComputationExplorerProps {
 }
 
 export function ComputationExplorer({ autoGroup, module, rootNode, onClose, onOpenFull }: ComputationExplorerProps) {
-  const entries = Object.entries(rootNode.calls)
-    .filter(([, name]) => module.byName.has(name))
-    .sort(([left], [right]) => Number(right === 'body') - Number(left === 'body'));
+  const entries = calledComputations(module, rootNode).sort(([left], [right]) => Number(right === 'body') - Number(left === 'body'));
+
   const [steps, setSteps] = useState<Step[]>(() => (entries.length ? [{ role: entries[0][0], name: entries[0][1] }] : []));
   const [selected, setSelected] = useState<string | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+
   const active = steps.at(-1);
   const original = active ? module.byName.get(active.name) : null;
   const grouping = useMemo(() => (original ? groupCopyPairs(original, autoGroup) : null), [original, autoGroup]);
   const computation = grouping?.computation;
-  const { layouts } = useGraphLayouts(module, computation, emptyHeights);
-  const layout = layouts.horizontal;
+  const layout = useGraphLayouts(module, computation, emptyHeights).layouts.horizontal;
+  const selectedGroup = selected ? grouping?.groups.get(selected) : null;
+  const selectedNode = selected && computation?.byName.get(selected);
+
   useEffect(() => {
     if (computation) scrollerRef.current?.scrollTo(0, 0);
   }, [computation]);
-  const selectedGroup = selected ? grouping?.groups.get(selected) : null;
-  const selectedNode = selected && computation?.byName.get(selected);
-  const scale = 0.72;
 
-  const chooseRoot = (role: string, name: string) => {
-    setSteps([{ role, name }]);
+  const showSteps = (next: Step[]) => {
+    setSteps(next);
     setSelected(null);
   };
+
   const drill = (role: string, name: string) => {
-    if (steps.some(step => step.name === name)) return;
-    setSteps(prior => [...prior, { role, name }]);
-    setSelected(null);
+    if (!steps.some(step => step.name === name)) showSteps([...steps, { role, name }]);
   };
 
   return (
@@ -63,14 +62,9 @@ export function ComputationExplorer({ autoGroup, module, rootNode, onClose, onOp
           <Icon name="close" />
         </button>
       </header>
+
       <div className="explorer-breadcrumb">
-        <button
-          type="button"
-          onClick={() => {
-            setSteps([]);
-            setSelected(null);
-          }}
-        >
+        <button type="button" onClick={() => showSteps([])}>
           %{rootNode.name}
         </button>
         {steps.map((step, index) => (
@@ -79,45 +73,49 @@ export function ComputationExplorer({ autoGroup, module, rootNode, onClose, onOp
             <button
               type="button"
               aria-current={index === steps.length - 1 ? 'page' : undefined}
-              onClick={() => {
-                setSteps(prior => prior.slice(0, index + 1));
-                setSelected(null);
-              }}
+              onClick={() => showSteps(steps.slice(0, index + 1))}
             >
               %{step.name}
             </button>
           </span>
         ))}
       </div>
+
       <div className="explorer-tabs">
         {entries.map(([role, name]) => (
-          <button type="button" key={role} className={steps[0]?.role === role ? 'active' : ''} onClick={() => chooseRoot(role, name)}>
+          <button type="button" key={role} className={steps[0]?.role === role ? 'active' : ''} onClick={() => showSteps([{ role, name }])}>
             {linkLabel(role)}
           </button>
         ))}
       </div>
-      {computation && layout ? (
+
+      {computation ? (
         <>
           <div ref={scrollerRef} className="nested-scroller">
-            <div className="nested-content" style={{ width: layout.width * scale, height: layout.height * scale }}>
-              <div className="nested-stage" style={{ width: layout.width, height: layout.height, transform: `scale(${scale})` }}>
+            <div className="nested-content" style={{ width: layout.width * NESTED_SCALE, height: layout.height * NESTED_SCALE }}>
+              <div className="nested-stage" style={{ width: layout.width, height: layout.height, transform: `scale(${NESTED_SCALE})` }}>
                 <svg width={layout.width} height={layout.height} aria-hidden="true">
                   {layout.edges.map(edge => (
                     <path
                       key={edge.id}
                       d={edgePath(edge.points, 'horizontal', 0)}
-                      className={`nested-edge${edge.control ? ' control-edge' : ''}`}
+                      className={edge.control ? 'nested-edge control-edge' : 'nested-edge'}
                     />
                   ))}
                 </svg>
                 {computation.nodes.map(node => {
                   const group = grouping?.groups.get(node.name);
                   const point = layout.positions.get(node.name)!;
+                  const { label, detail } = copyGroupCaption(node, group);
+                  const className = ['nested-node', nodeCategory(node), group && 'copy-group', selected === node.name && 'selected']
+                    .filter(Boolean)
+                    .join(' ');
+
                   return (
                     <button
                       type="button"
                       key={node.name}
-                      className={`nested-node ${nodeCategory(node)}${group ? ' copy-group' : ''}${selected === node.name ? ' selected' : ''}`}
+                      className={className}
                       style={{ left: point.x, top: point.y }}
                       onClick={() => setSelected(node.name)}
                     >
@@ -125,27 +123,27 @@ export function ComputationExplorer({ autoGroup, module, rootNode, onClose, onOp
                         {node.op}
                         {node.root ? ' · ROOT' : ''}
                       </small>
-                      <strong title={`%${node.name}`}>{group ? group.direction : `%${node.name}`}</strong>
-                      <span>{group ? group.shape : nodeSummary(node)}</span>
+                      <strong title={`%${node.name}`}>{label}</strong>
+                      <span>{detail}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
           </div>
+
           {selectedNode && (
             <div className="explorer-detail">
               <strong>%{selectedNode.name}</strong>
               <pre>{selectedGroup ? `${selectedGroup.start.raw}\n${selectedGroup.done.raw}` : selectedNode.raw}</pre>
-              {Object.entries(selectedNode.calls)
-                .filter(([, name]) => module.byName.has(name))
-                .map(([role, name]) => (
-                  <button type="button" key={role} onClick={() => drill(role, name)}>
-                    Expand {role} → %{name}
-                  </button>
-                ))}
+              {calledComputations(module, selectedNode).map(([role, name]) => (
+                <button type="button" key={role} onClick={() => drill(role, name)}>
+                  Expand {role} → %{name}
+                </button>
+              ))}
             </div>
           )}
+
           <button type="button" className="explorer-full" onClick={() => onOpenFull(computation.name)}>
             Open %{computation.name} as full graph ↗
           </button>

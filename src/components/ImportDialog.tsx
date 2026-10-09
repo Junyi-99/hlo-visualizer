@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type MouseEvent, type SyntheticEvent } from 'react';
 import { Icon } from './Icon';
 
 interface ImportDialogProps {
@@ -10,11 +10,13 @@ export function ImportDialog({ onClose, onLoad }: ImportDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [source, setSource] = useState('');
   const [error, setError] = useState('');
+
   useEffect(() => {
     const dialog = dialogRef.current;
     dialog?.showModal();
     return () => dialog?.close();
   }, []);
+
   const load = () => {
     try {
       onLoad(source);
@@ -23,17 +25,24 @@ export function ImportDialog({ onClose, onLoad }: ImportDialogProps) {
       setError(cause instanceof Error ? cause.message : String(cause));
     }
   };
+
+  const readFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) setSource(await file.text());
+  };
+
+  // Escape fires `cancel`; let the parent unmount the dialog instead of the browser closing it.
+  const cancel = (event: SyntheticEvent<HTMLDialogElement>) => {
+    event.preventDefault();
+    onClose();
+  };
+
+  const closeOnBackdrop = (event: MouseEvent<HTMLDialogElement>) => {
+    if (event.target === event.currentTarget) onClose();
+  };
+
   return (
-    <dialog
-      ref={dialogRef}
-      onCancel={event => {
-        event.preventDefault();
-        onClose();
-      }}
-      onClick={event => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
+    <dialog ref={dialogRef} onCancel={cancel} onClick={closeOnBackdrop}>
       <div className="dialog-head">
         <div>
           <div className="eyebrow">IMPORT MODULE</div>
@@ -43,6 +52,7 @@ export function ImportDialog({ onClose, onLoad }: ImportDialogProps) {
           <Icon name="close" />
         </button>
       </div>
+
       <p>
         Paste XLA <code>HloModule</code> text or choose a local <code>.hlo</code> / <code>.txt</code> file. Processing stays in your
         browser.
@@ -55,17 +65,11 @@ export function ImportDialog({ onClose, onLoad }: ImportDialogProps) {
         value={source}
         onChange={event => setSource(event.target.value)}
       />
+
       <div className="dialog-actions">
         <label className="subtle-button file-label">
           Choose file
-          <input
-            type="file"
-            accept=".hlo,.txt,.log,text/plain"
-            onChange={async event => {
-              const file = event.target.files?.[0];
-              if (file) setSource(await file.text());
-            }}
-          />
+          <input type="file" accept=".hlo,.txt,.log,text/plain" onChange={readFile} />
         </label>
         <span id="import-error" role="alert">
           {error}

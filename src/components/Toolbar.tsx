@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { computationLinks } from '../lib/parser';
-import { computationRole, type LayoutMode } from '../lib/graph-layout';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ZOOM_STEP, type LayoutMode } from '../lib/graph-layout';
 import { examples } from '../lib/examples';
-import type { HloModule } from '../lib/types';
-import { Icon } from './Icon';
+import type { Computation, HloModule } from '../lib/types';
+import { Icon, type IconName } from './Icon';
+import { useComputationRoles } from '../hooks/useComputationRoles';
+import { useDismiss } from '../hooks/useDismiss';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStoredState } from '../hooks/useStoredState';
 
 interface ToolbarProps {
@@ -32,26 +34,33 @@ interface ToolbarProps {
   onExample: (id: string) => void;
 }
 
+const MEMORY_LOCATION_UNAVAILABLE =
+  'XLA decides whether each value lives in HBM or VMEM while compiling. This is lowered HLO (no is_scheduled=true in the module header), so that information does not exist yet; load compiled HLO instead.';
+
 type Theme = 'system' | 'light' | 'dark';
 const themeOrder: Theme[] = ['system', 'light', 'dark'];
-const themeLabel = { system: 'Theme: follow system', light: 'Theme: light', dark: 'Theme: dark' };
+const themeLabel: Record<Theme, string> = { system: 'Theme: follow system', light: 'Theme: light', dark: 'Theme: dark' };
+const themeIcon: Record<Theme, IconName> = { system: 'system', light: 'sun', dark: 'moon' };
 
 const readTheme = (saved: string | null): Theme => (saved === 'light' || saved === 'dark' ? saved : 'system');
 const writeTheme = (theme: Theme) => (theme === 'system' ? null : theme);
 
+const exampleStages = [
+  { stage: 'after', label: 'TPU v6e · compiled (after optimizations)' },
+  { stage: 'before', label: 'TPU v6e · before optimizations' }
+] as const;
+
 function ThemeButton() {
   const [theme, setTheme] = useStoredState('theme', readTheme, writeTheme);
+  const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+
   useEffect(() => {
-    const media = matchMedia('(prefers-color-scheme: dark)');
-    const apply = () => {
-      document.documentElement.dataset.theme = theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
-    };
-    apply();
-    if (theme !== 'system') return;
-    media.addEventListener('change', apply);
-    return () => media.removeEventListener('change', apply);
-  }, [theme]);
+    const systemTheme = prefersDark ? 'dark' : 'light';
+    document.documentElement.dataset.theme = theme === 'system' ? systemTheme : theme;
+  }, [theme, prefersDark]);
+
   const next = themeOrder[(themeOrder.indexOf(theme) + 1) % themeOrder.length];
+
   return (
     <button
       className="icon-button theme-button"
@@ -60,64 +69,196 @@ function ThemeButton() {
       aria-label={`${themeLabel[theme]}. Switch to ${next}`}
       onClick={() => setTheme(next)}
     >
-      <Icon name={theme === 'system' ? 'system' : theme === 'light' ? 'sun' : 'moon'} />
+      <Icon name={themeIcon[theme]} />
     </button>
   );
 }
 
-export function Toolbar({
-  autoGroup,
-  onAutoGroup,
-  layoutMode,
-  onLayoutMode,
+function ExampleSelect({ exampleId, onExample }: Pick<ToolbarProps, 'exampleId' | 'onExample'>) {
+  return (
+    <select
+      className="example-select"
+      aria-label="Load an HLO example"
+      title="Load an HLO example"
+      value={exampleId ?? ''}
+      onChange={event => event.target.value && onExample(event.target.value)}
+    >
+      <option value="" disabled>
+        Examples
+      </option>
+      {exampleStages.map(({ stage, label }) => (
+        <optgroup key={stage} label={label}>
+          {examples
+            .filter(example => example.stage === stage)
+            .map(example => (
+              <option key={example.id} value={example.id}>
+                {example.program}
+              </option>
+            ))}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+
+type DisplayMenuProps = Pick<
+  ToolbarProps,
+  'module' | 'useOpName' | 'showLastNameOnly' | 'showMemoryLocation' | 'onUseOpName' | 'onShowLastNameOnly' | 'onShowMemoryLocation'
+>;
+
+function DisplayMenu({
   module,
-  current,
-  canGoBack,
-  zoom,
   useOpName,
   showLastNameOnly,
   showMemoryLocation,
   onUseOpName,
   onShowLastNameOnly,
-  onShowMemoryLocation,
+  onShowMemoryLocation
+}: DisplayMenuProps) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+
+  useDismiss(menuRef, open, close);
+
+  const triggerClass = `subtle-button display-trigger${open ? ' active' : ''}`;
+
+  return (
+    <div className="display-menu" ref={menuRef}>
+      <button
+        className={triggerClass}
+        type="button"
+        aria-expanded={open}
+        aria-controls="display-options"
+        onClick={() => setOpen(value => !value)}
+      >
+        Display <Icon name="down" size={14} />
+      </button>
+
+      {open && (
+        <div className="display-popover" id="display-options" role="group" aria-label="Node display options">
+          <strong>Node labels</strong>
+          <label className="display-option">
+            <input type="checkbox" checked={useOpName} onChange={event => onUseOpName(event.target.checked)} />
+            Use op_name in metadata
+          </label>
+          <label className="display-option">
+            <input
+              type="checkbox"
+              checked={showLastNameOnly}
+              disabled={!useOpName}
+              onChange={event => onShowLastNameOnly(event.target.checked)}
+            />
+            Show last name only
+          </label>
+          <label className="display-option" title={module.scheduled ? undefined : MEMORY_LOCATION_UNAVAILABLE}>
+            <input
+              type="checkbox"
+              checked={showMemoryLocation && module.scheduled}
+              disabled={!module.scheduled}
+              onChange={event => onShowMemoryLocation(event.target.checked)}
+            />
+            Show memory location
+            {!module.scheduled && <small className="display-note">Lowered HLO: XLA picks HBM or VMEM only when compiling</small>}
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type ViewActionsProps = DisplayMenuProps &
+  Pick<
+    ToolbarProps,
+    'canGoBack' | 'onBack' | 'autoGroup' | 'onAutoGroup' | 'layoutMode' | 'onLayoutMode' | 'onArrange' | 'onFit' | 'zoom' | 'onZoom'
+  >;
+
+function ViewActions({
+  canGoBack,
   onBack,
-  onComputation,
-  onFit,
+  autoGroup,
+  onAutoGroup,
+  layoutMode,
+  onLayoutMode,
   onArrange,
+  onFit,
+  zoom,
   onZoom,
-  onSearch,
-  onImport,
-  exampleId,
-  onExample
-}: ToolbarProps) {
-  const [displayOpen, setDisplayOpen] = useState(false);
-  const displayRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!displayOpen) return;
-    const dismiss = (event: PointerEvent) => {
-      if (!displayRef.current?.contains(event.target as Node)) setDisplayOpen(false);
-    };
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setDisplayOpen(false);
-    };
-    document.addEventListener('pointerdown', dismiss);
-    document.addEventListener('keydown', onEscape);
-    return () => {
-      document.removeEventListener('pointerdown', dismiss);
-      document.removeEventListener('keydown', onEscape);
-    };
-  }, [displayOpen]);
+  ...displayProps
+}: ViewActionsProps) {
+  return (
+    <div className="view-actions">
+      {canGoBack && (
+        <button className="subtle-button" type="button" onClick={onBack}>
+          <Icon name="back" />
+          Back
+        </button>
+      )}
+
+      <DisplayMenu {...displayProps} />
+
+      <label className="auto-group-toggle" title="Combine matching copy-start and copy-done instructions">
+        <input type="checkbox" checked={autoGroup} onChange={event => onAutoGroup(event.target.checked)} />
+        Auto Group
+      </label>
+
+      <select
+        className="layout-select"
+        aria-label="Graph layout"
+        title="Graph direction: automatic, left to right, or top to bottom"
+        value={layoutMode}
+        onChange={event => onLayoutMode(event.target.value as LayoutMode)}
+      >
+        <option value="auto">Auto layout</option>
+        <option value="horizontal">Horizontal →</option>
+        <option value="vertical">Vertical ↓</option>
+      </select>
+
+      <button className="subtle-button" type="button" title="Restore automatic node positions and tidy routes" onClick={onArrange}>
+        Arrange
+      </button>
+      <button className="subtle-button" type="button" onClick={onFit}>
+        Fit view
+      </button>
+
+      <div className="zoom-controls">
+        <button className="icon-button" type="button" aria-label="Zoom out" onClick={() => onZoom(-ZOOM_STEP)}>
+          <Icon name="minus" />
+        </button>
+        <span className="zoom-value">{Math.round(zoom * 100)}%</span>
+        <button className="icon-button" type="button" aria-label="Zoom in" onClick={() => onZoom(ZOOM_STEP)}>
+          <Icon name="plus" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function crumbLabel(computation: Computation | null | undefined) {
+  if (!computation) return 'Overview';
+  return computation.entry ? 'Entry' : computation.name;
+}
+
+function eyebrowLabel(computation: Computation | null | undefined, role: string | undefined) {
+  if (!computation) return 'MODULE MAP';
+  return computation.entry ? 'ENTRY COMPUTATION' : role;
+}
+
+export function Toolbar({ module, current, onComputation, onSearch, onImport, exampleId, onExample, ...viewActionProps }: ToolbarProps) {
+  const roles = useComputationRoles(module);
+
   const computation = current ? module.byName.get(current) : null;
-  const links = computationLinks(module);
-  const role = computation && computationRole(computation, links);
+  const role = computation ? roles.get(computation.name) : undefined;
+
   return (
     <>
       <header className="topbar">
         <div className="crumb">
           <span>Workspace</span>
           <span className="slash">/</span>
-          <strong>{!computation ? 'Overview' : computation.entry ? 'Entry' : computation.name}</strong>
+          <strong>{crumbLabel(computation)}</strong>
         </div>
+
         <div className="top-actions">
           <a
             className="icon-button repo-link"
@@ -130,31 +271,7 @@ export function Toolbar({
             <Icon name="github" />
           </a>
           <ThemeButton />
-          <select
-            className="example-select"
-            aria-label="Load an HLO example"
-            title="Load an HLO example"
-            value={exampleId ?? ''}
-            onChange={event => event.target.value && onExample(event.target.value)}
-          >
-            <option value="" disabled>
-              Examples
-            </option>
-            {(['after', 'before'] as const).map(stage => (
-              <optgroup
-                key={stage}
-                label={stage === 'after' ? 'TPU v6e · compiled (after optimizations)' : 'TPU v6e · before optimizations'}
-              >
-                {examples
-                  .filter(example => example.stage === stage)
-                  .map(example => (
-                    <option key={example.id} value={example.id}>
-                      {example.program}
-                    </option>
-                  ))}
-              </optgroup>
-            ))}
-          </select>
+          <ExampleSelect exampleId={exampleId} onExample={onExample} />
           <button className="search-button" type="button" title="Search nodes (/)" onClick={onSearch}>
             <Icon name="search" />
             <span className="search-label">Search nodes</span>
@@ -166,9 +283,10 @@ export function Toolbar({
           </button>
         </div>
       </header>
+
       <section className="heading">
         <div>
-          <div className="eyebrow">{!computation ? 'MODULE MAP' : computation.entry ? 'ENTRY COMPUTATION' : role}</div>
+          <div className="eyebrow">{eyebrowLabel(computation, role)}</div>
           <h2>{computation ? `%${computation.name}` : 'Computation overview'}</h2>
           <select
             id="mobile-computations"
@@ -185,91 +303,9 @@ export function Toolbar({
             ))}
           </select>
         </div>
+
         <div className="heading-controls">
-          <div className="view-actions">
-            {canGoBack && (
-              <button className="subtle-button" type="button" onClick={onBack}>
-                <Icon name="back" />
-                Back
-              </button>
-            )}
-            <div className="display-menu" ref={displayRef}>
-              <button
-                className={`subtle-button display-trigger${displayOpen ? ' active' : ''}`}
-                type="button"
-                aria-expanded={displayOpen}
-                aria-controls="display-options"
-                onClick={() => setDisplayOpen(value => !value)}
-              >
-                Display <Icon name="down" size={14} />
-              </button>
-              {displayOpen && (
-                <div className="display-popover" id="display-options" role="group" aria-label="Node display options">
-                  <strong>Node labels</strong>
-                  <label className="display-option">
-                    <input type="checkbox" checked={useOpName} onChange={event => onUseOpName(event.target.checked)} />
-                    Use op_name in metadata
-                  </label>
-                  <label className="display-option">
-                    <input
-                      type="checkbox"
-                      checked={showLastNameOnly}
-                      disabled={!useOpName}
-                      onChange={event => onShowLastNameOnly(event.target.checked)}
-                    />
-                    Show last name only
-                  </label>
-                  <label
-                    className="display-option"
-                    title={
-                      module.scheduled
-                        ? undefined
-                        : 'XLA decides whether each value lives in HBM or VMEM while compiling. This is lowered HLO (no is_scheduled=true in the module header), so that information does not exist yet; load compiled HLO instead.'
-                    }
-                  >
-                    <input
-                      type="checkbox"
-                      checked={showMemoryLocation && module.scheduled}
-                      disabled={!module.scheduled}
-                      onChange={event => onShowMemoryLocation(event.target.checked)}
-                    />
-                    Show memory location
-                    {!module.scheduled && <small className="display-note">Lowered HLO: XLA picks HBM or VMEM only when compiling</small>}
-                  </label>
-                </div>
-              )}
-            </div>
-            <label className="auto-group-toggle" title="Combine matching copy-start and copy-done instructions">
-              <input type="checkbox" checked={autoGroup} onChange={event => onAutoGroup(event.target.checked)} />
-              Auto Group
-            </label>
-            <select
-              className="layout-select"
-              aria-label="Graph layout"
-              title="Graph direction: automatic, left to right, or top to bottom"
-              value={layoutMode}
-              onChange={event => onLayoutMode(event.target.value as LayoutMode)}
-            >
-              <option value="auto">Auto layout</option>
-              <option value="horizontal">Horizontal →</option>
-              <option value="vertical">Vertical ↓</option>
-            </select>
-            <button className="subtle-button" type="button" title="Restore automatic node positions and tidy routes" onClick={onArrange}>
-              Arrange
-            </button>
-            <button className="subtle-button" type="button" onClick={onFit}>
-              Fit view
-            </button>
-            <div className="zoom-controls">
-              <button className="icon-button" type="button" aria-label="Zoom out" onClick={() => onZoom(-0.15)}>
-                <Icon name="minus" />
-              </button>
-              <span className="zoom-value">{Math.round(zoom * 100)}%</span>
-              <button className="icon-button" type="button" aria-label="Zoom in" onClick={() => onZoom(0.15)}>
-                <Icon name="plus" />
-              </button>
-            </div>
-          </div>
+          <ViewActions module={module} {...viewActionProps} />
         </div>
       </section>
     </>

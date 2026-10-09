@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import sampleHlo from '../sample.hlo?raw';
 import { GraphCanvas, type GraphHandle } from './components/GraphCanvas';
+import { Icon } from './components/Icon';
 import { ImportDialog } from './components/ImportDialog';
 import { Inspector } from './components/Inspector';
 import { SearchOverlay } from './components/SearchOverlay';
 import { Sidebar } from './components/Sidebar';
-import { Icon } from './components/Icon';
 import { Toolbar } from './components/Toolbar';
+import { useStoredState } from './hooks/useStoredState';
 import { groupCopyPairs } from './lib/copy-grouping';
 import { examples } from './lib/examples';
-import { parseHlo, reachable } from './lib/parser';
 import { clampZoom, type LayoutMode } from './lib/graph-layout';
-import { useStoredState } from './hooks/useStoredState';
+import { parseHlo, reachable } from './lib/parser';
 import type { HloModule } from './lib/types';
 
 interface HistoryEntry {
@@ -22,22 +22,45 @@ interface HistoryEntry {
 const readAutoGroup = (saved: string | null) => saved === 'true';
 const readLayoutMode = (saved: string | null): LayoutMode => (saved === 'horizontal' || saved === 'vertical' ? saved : 'auto');
 
+const isTextField = (element: Element | null) => element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement;
+
+// Mirrors the loaded example into ?example=<id> so a reviewed module can be linked directly.
+function syncExampleParam(example: string | null) {
+  const url = new URL(location.href);
+  if (example) url.searchParams.set('example', example);
+  else url.searchParams.delete('example');
+  window.history.replaceState(null, '', url);
+}
+
 export default function App() {
   const [module, setModule] = useState<HloModule>(() => parseHlo(sampleHlo));
+  const [exampleId, setExampleId] = useState<string | null>(null);
+
   const [current, setCurrent] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+
   const [autoGroup, setAutoGroup] = useStoredState('auto-group', readAutoGroup);
   const [layoutMode, setLayoutMode] = useStoredState('graph-layout', readLayoutMode);
   const [zoom, setZoom] = useState(1);
   const [useOpName, setUseOpName] = useState(false);
   const [showLastNameOnly, setShowLastNameOnly] = useState(false);
   const [showMemoryLocation, setShowMemoryLocation] = useState(false);
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
-  const [exampleId, setExampleId] = useState<string | null>(null);
+
   const graphRef = useRef<GraphHandle>(null);
+
+  const computation = current ? module.byName.get(current) || null : null;
+  const node = selected && computation ? computation.byName.get(selected) || null : null;
+  const copyGrouping = useMemo(() => (computation ? groupCopyPairs(computation, autoGroup) : null), [computation, autoGroup]);
+  const graphComputation = copyGrouping?.computation;
+  const graphSelected = selected ? (copyGrouping?.aliases.get(selected) ?? selected) : null;
+  const selectedCopyGroup = graphSelected ? (copyGrouping?.groups.get(graphSelected) ?? null) : null;
+  const upstreamCount = graphSelected && graphComputation ? reachable(graphComputation, graphSelected, 'up').size : 0;
+  const downstreamCount = graphSelected && graphComputation ? reachable(graphComputation, graphSelected, 'down').size : 0;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -45,13 +68,7 @@ export default function App() {
         setSearchOpen(false);
         return;
       }
-      if (
-        event.key === '/' &&
-        !searchOpen &&
-        !importOpen &&
-        !(document.activeElement instanceof HTMLInputElement) &&
-        !(document.activeElement instanceof HTMLTextAreaElement)
-      ) {
+      if (event.key === '/' && !searchOpen && !importOpen && !isTextField(document.activeElement)) {
         event.preventDefault();
         setSearchOpen(true);
       }
@@ -60,24 +77,10 @@ export default function App() {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [searchOpen, importOpen]);
 
-  const openComputation = (name: string | null, focus: string | null = null) => {
-    if (name && !module.byName.has(name)) return;
-    if (current !== name) setHistory(prior => [...prior, { current, selected }]);
-    setCurrent(name);
-    setSelected(focus);
-    setZoom(1);
-    if (focus) requestAnimationFrame(() => graphRef.current?.centerNode(focus));
-  };
-  const goBack = () => {
-    const previous = history.at(-1);
-    if (!previous) return;
-    setHistory(prior => prior.slice(0, -1));
-    setCurrent(previous.current);
-    setSelected(previous.selected);
-  };
   const loadText = useCallback((source: string, example: string | null = null) => {
     const parsed = parseHlo(source);
     if (!parsed.computations.length) throw new Error('No computations found. Paste a textual HLO module with %computation { … } blocks.');
+
     setModule(parsed);
     setCurrent(parsed.computations.length === 1 ? parsed.computations[0].name : null);
     setSelected(null);
@@ -86,11 +89,9 @@ export default function App() {
     setNotesOpen(false);
     setZoom(1);
     setExampleId(example);
-    const url = new URL(location.href);
-    if (example) url.searchParams.set('example', example);
-    else url.searchParams.delete('example');
-    window.history.replaceState(null, '', url);
+    syncExampleParam(example);
   }, []);
+
   const loadExample = useCallback(
     (id: string) =>
       examples
@@ -99,83 +100,86 @@ export default function App() {
         .then(source => loadText(source, id)),
     [loadText]
   );
-  // ?example=<id> loads a bundled example, so a reviewed module can be linked directly.
+
   useEffect(() => {
     const id = new URLSearchParams(location.search).get('example');
     if (id) void loadExample(id);
   }, [loadExample]);
-  const openReference = (name: string) => {
-    setSelected(name);
-    requestAnimationFrame(() => graphRef.current?.centerNode(name));
+
+  // Wait a frame so the graph has rendered the node before centering on it.
+  const centerSoon = (name: string) => requestAnimationFrame(() => graphRef.current?.centerNode(name));
+
+  const openComputation = (name: string | null, focus: string | null = null) => {
+    if (name && !module.byName.has(name)) return;
+    if (current !== name) setHistory(prior => [...prior, { current, selected }]);
+    setCurrent(name);
+    setSelected(focus);
+    setZoom(1);
+    if (focus) centerSoon(focus);
   };
 
-  const computation = current ? module.byName.get(current) || null : null;
-  const copyGrouping = useMemo(() => (computation ? groupCopyPairs(computation, autoGroup) : null), [computation, autoGroup]);
-  const selectedCopyGroup =
-    selected && copyGrouping ? (copyGrouping.groups.get(copyGrouping.aliases.get(selected) ?? selected) ?? null) : null;
-  const node = selected && computation ? computation.byName.get(selected) || null : null;
-  const graphComputation = copyGrouping?.computation;
-  const graphSelected = selected ? (copyGrouping?.aliases.get(selected) ?? selected) : null;
-  const upstream = graphSelected && graphComputation ? reachable(graphComputation, graphSelected, 'up') : new Set<string>();
-  const downstream = graphSelected && graphComputation ? reachable(graphComputation, graphSelected, 'down') : new Set<string>();
+  // One-argument form for callbacks, so no extra argument is taken as a focus node.
+  const showComputation = (name: string | null) => openComputation(name);
+
+  const goBack = () => {
+    const previous = history.at(-1);
+    if (!previous) return;
+    setHistory(prior => prior.slice(0, -1));
+    setCurrent(previous.current);
+    setSelected(previous.selected);
+  };
+
+  const openReference = (name: string) => {
+    setSelected(name);
+    centerSoon(name);
+  };
+
+  const onUseOpName = (value: boolean) => {
+    setUseOpName(value);
+    if (!value) setShowLastNameOnly(false);
+  };
+
+  const viewProps = { module, current, zoom, autoGroup, layoutMode, useOpName, showLastNameOnly, showMemoryLocation };
+
+  const toolbarActions = {
+    onAutoGroup: setAutoGroup,
+    onLayoutMode: setLayoutMode,
+    onUseOpName,
+    onShowLastNameOnly: setShowLastNameOnly,
+    onShowMemoryLocation: setShowMemoryLocation,
+    onBack: goBack,
+    onComputation: showComputation,
+    onFit: () => graphRef.current?.fit(),
+    onArrange: () => graphRef.current?.arrange(),
+    onZoom: (delta: number) => setZoom(value => clampZoom(value + delta)),
+    onSearch: () => setSearchOpen(true),
+    onImport: () => setImportOpen(true),
+    onExample: (id: string) => void loadExample(id)
+  };
+
+  const status = node
+    ? `%${node.name} · ${upstreamCount} upstream · ${downstreamCount} downstream`
+    : computation
+      ? ''
+      : 'Computation links · instruction data edges are inside each computation';
 
   return (
     <>
       <div className={`app antialiased${node ? ' inspector-open' : ''}`}>
-        <Sidebar module={module} current={current} onOverview={() => openComputation(null)} onComputation={name => openComputation(name)} />
+        <Sidebar module={module} current={current} onOverview={() => showComputation(null)} onComputation={showComputation} />
         <main className="main min-w-0">
-          <Toolbar
-            autoGroup={autoGroup}
-            onAutoGroup={setAutoGroup}
-            layoutMode={layoutMode}
-            onLayoutMode={setLayoutMode}
-            module={module}
-            current={current}
-            canGoBack={history.length > 0}
-            zoom={zoom}
-            useOpName={useOpName}
-            showLastNameOnly={showLastNameOnly}
-            showMemoryLocation={showMemoryLocation}
-            onUseOpName={value => {
-              setUseOpName(value);
-              if (!value) setShowLastNameOnly(false);
-            }}
-            onShowLastNameOnly={setShowLastNameOnly}
-            onShowMemoryLocation={setShowMemoryLocation}
-            onBack={goBack}
-            onComputation={name => openComputation(name)}
-            onFit={() => graphRef.current?.fit()}
-            onArrange={() => graphRef.current?.arrange()}
-            onZoom={delta => setZoom(value => clampZoom(value + delta))}
-            onSearch={() => setSearchOpen(true)}
-            onImport={() => setImportOpen(true)}
-            exampleId={exampleId}
-            onExample={id => void loadExample(id)}
-          />
+          <Toolbar {...viewProps} {...toolbarActions} canGoBack={history.length > 0} exampleId={exampleId} />
           <GraphCanvas
-            copyGrouping={copyGrouping}
-            autoGroup={autoGroup}
-            layoutMode={layoutMode}
+            {...viewProps}
             ref={graphRef}
-            module={module}
-            current={current}
+            copyGrouping={copyGrouping}
             selected={selected}
-            zoom={zoom}
-            useOpName={useOpName}
-            showLastNameOnly={showLastNameOnly}
-            showMemoryLocation={showMemoryLocation}
             onZoom={setZoom}
             onSelect={setSelected}
-            onComputation={name => openComputation(name)}
+            onComputation={showComputation}
           />
           <div className="bottom-bar">
-            <div>
-              {node
-                ? `%${node.name} · ${upstream.size} upstream · ${downstream.size} downstream`
-                : computation
-                  ? ''
-                  : 'Computation links · instruction data edges are inside each computation'}
-            </div>
+            <div>{status}</div>
             <div>
               {module.warnings.length ? (
                 <button type="button" className="parse-notes-button" onClick={() => setNotesOpen(true)}>
@@ -190,13 +194,14 @@ export default function App() {
           module={module}
           computation={computation}
           node={node}
-          upstreamCount={upstream.size}
-          downstreamCount={downstream.size}
+          upstreamCount={upstreamCount}
+          downstreamCount={downstreamCount}
           onClose={() => setSelected(null)}
           onNode={openReference}
-          onComputation={name => openComputation(name)}
+          onComputation={showComputation}
         />
       </div>
+
       {searchOpen && (
         <SearchOverlay
           module={module}
@@ -210,30 +215,34 @@ export default function App() {
         />
       )}
       {importOpen && <ImportDialog onClose={() => setImportOpen(false)} onLoad={source => loadText(source)} />}
-      {notesOpen && (
-        <div
-          className="notes-overlay"
-          role="presentation"
-          onMouseDown={event => {
-            if (event.target === event.currentTarget) setNotesOpen(false);
-          }}
-        >
-          <div className="notes-panel" role="dialog" aria-modal="true" aria-label="Parse notes">
-            <header>
-              <strong>Parse notes</strong>
-              <button className="icon-button" type="button" aria-label="Close parse notes" onClick={() => setNotesOpen(false)}>
-                <Icon name="close" />
-              </button>
-            </header>
-            <p>Some input could not be represented exactly. Check these lines before relying on the graph.</p>
-            <ul>
-              {module.warnings.map((warning, index) => (
-                <li key={index}>{warning}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
+      {notesOpen && <ParseNotesDialog warnings={module.warnings} onClose={() => setNotesOpen(false)} />}
     </>
+  );
+}
+
+function ParseNotesDialog({ warnings, onClose }: { warnings: string[]; onClose: () => void }) {
+  return (
+    <div
+      className="notes-overlay"
+      role="presentation"
+      onMouseDown={event => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="notes-panel" role="dialog" aria-modal="true" aria-label="Parse notes">
+        <header>
+          <strong>Parse notes</strong>
+          <button className="icon-button" type="button" aria-label="Close parse notes" onClick={onClose}>
+            <Icon name="close" />
+          </button>
+        </header>
+        <p>Some input could not be represented exactly. Check these lines before relying on the graph.</p>
+        <ul>
+          {warnings.map((warning, index) => (
+            <li key={index}>{warning}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
-import { computationLinks } from '../lib/parser';
-import { computationRole } from '../lib/graph-layout';
 import type { HloModule } from '../lib/types';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
+import { useComputationRoles } from '../hooks/useComputationRoles';
 
 interface SidebarProps {
   module: HloModule | null;
@@ -12,10 +11,49 @@ interface SidebarProps {
 
 const legend = ['Input', 'Compute', 'Transfer', 'Control', 'Fusion', 'Tuple'];
 
+function roleIcon(role: string): IconName {
+  if (role === 'ENTRY') return 'entry';
+  if (role === 'FUSION') return 'fusion';
+  if (role.startsWith('WHILE')) return 'loop';
+  return 'computation';
+}
+
+interface ComputationItemProps {
+  active: boolean;
+  overview?: boolean;
+  icon: IconName;
+  title: string;
+  detail: string;
+  onClick: () => void;
+}
+
+function ComputationItem({ active, overview = false, icon, title, detail, onClick }: ComputationItemProps) {
+  const className = ['computation-item', overview && 'overview-item', active && 'active'].filter(Boolean).join(' ');
+
+  return (
+    <button type="button" className={className} onClick={onClick}>
+      <span className="comp-icon">
+        <Icon name={icon} />
+      </span>
+      <span className="comp-copy">
+        <strong title={overview ? undefined : title}>{title}</strong>
+        <small>{detail}</small>
+      </span>
+      <span className="comp-arrow">
+        <Icon name="chevron" size={14} />
+      </span>
+    </button>
+  );
+}
+
 export function Sidebar({ module, current, onOverview, onComputation }: SidebarProps) {
-  const links = module ? computationLinks(module) : [];
-  const ordered = module ? [...module.computations].sort((a, b) => Number(b.entry) - Number(a.entry)) : [];
-  const count = module?.computations.reduce((total, c) => total + c.nodes.length, 0) || 0;
+  const roles = useComputationRoles(module);
+
+  const computations = module?.computations ?? [];
+  const entryFirst = [...computations].sort((a, b) => Number(b.entry) - Number(a.entry));
+  const instructionCount = computations.reduce((total, c) => total + c.nodes.length, 0);
+  const summary =
+    module && `${computations.length} ${computations.length === 1 ? 'computation' : 'computations'} · ${instructionCount} instructions`;
 
   return (
     <aside className="sidebar">
@@ -28,59 +66,44 @@ export function Sidebar({ module, current, onOverview, onComputation }: SidebarP
           <span>Explore and understand XLA HLO</span>
         </div>
       </div>
+
       <div className="sidebar-section module-section">
         <div className="eyebrow">MODULE</div>
         <h1>{module?.name || 'Loading…'}</h1>
-        <div className="muted">
-          {module &&
-            `${module.computations.length} ${module.computations.length === 1 ? 'computation' : 'computations'} · ${count} instructions`}
-        </div>
+        <div className="muted">{summary}</div>
       </div>
+
       <div className="sidebar-section">
         <div className="section-title">
           <span>Computations</span>
-          <span className="counter">{module?.computations.length || 0}</span>
+          <span className="counter">{computations.length}</span>
         </div>
         <nav aria-label="Computations" id="computation-list">
-          <button type="button" className={`computation-item overview-item${current === null ? ' active' : ''}`} onClick={onOverview}>
-            <span className="comp-icon">
-              <Icon name="overview" />
-            </span>
-            <span className="comp-copy">
-              <strong>Overview</strong>
-              <small>COMPUTATION LINKS</small>
-            </span>
-            <span className="comp-arrow">
-              <Icon name="chevron" size={14} />
-            </span>
-          </button>
-          {ordered.map(c => {
-            const role = computationRole(c, links);
-            const icon = c.entry ? 'entry' : role === 'FUSION' ? 'fusion' : role.startsWith('WHILE') ? 'loop' : 'computation';
+          <ComputationItem
+            active={current === null}
+            overview
+            icon="overview"
+            title="Overview"
+            detail="COMPUTATION LINKS"
+            onClick={onOverview}
+          />
+
+          {entryFirst.map(c => {
+            const role = roles.get(c.name) ?? '';
             return (
-              <button
-                type="button"
+              <ComputationItem
                 key={c.name}
-                className={`computation-item${current === c.name ? ' active' : ''}`}
+                active={current === c.name}
+                icon={roleIcon(role)}
+                title={`%${c.name}`}
+                detail={`${role} · ${c.nodes.length} nodes`}
                 onClick={() => onComputation(c.name)}
-              >
-                <span className="comp-icon">
-                  <Icon name={icon} />
-                </span>
-                <span className="comp-copy">
-                  <strong title={`%${c.name}`}>%{c.name}</strong>
-                  <small>
-                    {role} · {c.nodes.length} nodes
-                  </small>
-                </span>
-                <span className="comp-arrow">
-                  <Icon name="chevron" size={14} />
-                </span>
-              </button>
+              />
             );
           })}
         </nav>
       </div>
+
       <div className="sidebar-footer">
         <div className="legend-title">NODE TYPES</div>
         <div className="legend">
