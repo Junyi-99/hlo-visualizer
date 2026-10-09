@@ -105,7 +105,16 @@ button, input, select, textarea { font: inherit; color: inherit; touch-action: m
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 :where(button, input, select, textarea, summary, a, [tabindex]):focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-button, [role="button"], .display-option, .file-label { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+button, select, select option, select optgroup, [role="button"], .display-option, .file-label { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.sidebar, .topbar, .heading, .bottom-bar,
+.graph-controls, .graph-hint, .layout-status,
+.graph-edges, .graph-edges text, .nested-stage svg, .nested-stage svg text,
+.inspector-header, .empty-inspector,
+.explorer-header, .explorer-breadcrumb, .explorer-tabs, .explorer-empty {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
 code, pre, kbd { font-family: var(--font-mono); }
 .icon { flex: none; display: block; }
 
@@ -223,9 +232,8 @@ code, pre, kbd { font-family: var(--font-mono); }
 .edge.dimmed { opacity: .25; }
 .edge.control-edge { stroke-dasharray: 5 4; }
 .edge.path-edge { stroke: var(--c-path); stroke-width: 3; opacity: 1; }
-marker path { fill: var(--edge); }
+marker path { fill: context-stroke; }
 .call-edge { fill: none; stroke: var(--text-3); stroke-width: 1.75; }
-#call-arrow path { fill: var(--text-3); }
 .call-label { font: 600 10px var(--font-ui); letter-spacing: .06em; fill: var(--text-2); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
 .call-edge + text { pointer-events: none; }
 
@@ -249,9 +257,7 @@ marker path { fill: var(--edge); }
 .node-card strong { display: block; font: 600 13px/1.35 var(--font-mono); letter-spacing: -.01em; overflow-wrap: anywhere; word-break: break-word; }
 .node-card strong.op-name { white-space: pre-line; font-size: 11px; }
 .node-detail { display: block; margin-top: 6px; font: 11px var(--font-mono); color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.node-port { position: absolute; top: calc(50% - 4px); width: 8px; height: 8px; border: 1.5px solid var(--edge); background: var(--surface); border-radius: 50%; }
-.node-port.left { left: -5px; }
-.node-port.right { right: -5px; }
+.node-port { position: absolute; width: 8px; height: 8px; border: 1.5px solid var(--edge); background: var(--surface); border-radius: 50%; }
 .node-expand { position: absolute; z-index: 5; width: 67px; padding: 3px 5px; border: 1px solid color-mix(in srgb, var(--c-fusion) 45%, transparent); border-radius: 6px;
   background: color-mix(in srgb, var(--c-fusion) 12%, var(--surface)); color: var(--c-fusion); font: 600 11px/1.2 var(--font-ui); touch-action: manipulation; }
 .node-expand.active, .node-expand:active { background: color-mix(in srgb, var(--c-fusion) 24%, var(--surface)); border-color: var(--c-fusion); }
@@ -517,8 +523,8 @@ dialog textarea:focus { outline: 3px solid var(--focus); outline-offset: 0; bord
 /* ───────────── Responsive ───────────── */
 /* Inspector docks as a column once there is room for it */
 @media (min-width: 1101px) {
-  .app.inspector-open { grid-template-columns: var(--sidebar-w) minmax(0, 1fr) clamp(350px, 30vw, 430px); grid-template-rows: minmax(0, 1fr); }
-  .app.inspector-open .inspector { position: relative; grid-column: 3; grid-row: 1; inset: auto; width: 100%; height: 100%; min-height: 0; transform: none; box-shadow: none; overflow: hidden; }
+  .app.inspector-open { grid-template-columns: var(--sidebar-w) minmax(0, 1fr) max(300px, min(var(--inspector-w, clamp(350px, 30vw, 430px)), calc(100vw - var(--sidebar-w) - 360px))); grid-template-rows: minmax(0, 1fr); }
+  .app.inspector-open .inspector { position: relative; grid-column: 3; grid-row: 1; inset: auto; width: 100%; height: 100%; min-height: 0; transform: none; box-shadow: none; overflow: visible; }
 }
 @media (max-width: 1150px) {
   .graph-shell.explorer-open { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(100px, 28%) minmax(0, 72%); }
@@ -535,8 +541,8 @@ dialog textarea:focus { outline: 3px solid var(--focus); outline-offset: 0; bord
   .inspector-content { padding-right: calc(20px + env(safe-area-inset-right, 0px)); }
 }
 @media (min-width: 701px) and (max-width: 1100px) {
-  .app.inspector-open { grid-template-columns: minmax(0, 1fr) clamp(310px, 38vw, 390px); grid-template-rows: minmax(0, 1fr); }
-  .app.inspector-open .inspector { position: relative; grid-column: 2; grid-row: 1; inset: auto; width: 100%; height: 100%; min-height: 0; transform: none; box-shadow: none; overflow: hidden; }
+  .app.inspector-open { grid-template-columns: minmax(0, 1fr) max(300px, min(var(--inspector-w, clamp(310px, 38vw, 390px)), calc(100vw - 360px))); grid-template-rows: minmax(0, 1fr); }
+  .app.inspector-open .inspector { position: relative; grid-column: 2; grid-row: 1; inset: auto; width: 100%; height: 100%; min-height: 0; transform: none; box-shadow: none; overflow: visible; }
   .app.inspector-open .heading { flex-direction: column; align-items: stretch; }
   .app.inspector-open .heading-controls { align-items: flex-end; }
   .app.inspector-open .view-actions { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
@@ -593,3 +599,27 @@ dialog textarea:focus { outline: 3px solid var(--focus); outline-offset: 0; bord
   :root[data-theme="dark"] { --border: rgba(255, 255, 255, .5); --border-soft: rgba(255, 255, 255, .32); --text-2: #d8d8dc; --text-3: #c2c2c7; }
   .topbar, .sidebar, .display-popover, .graph-controls, .graph-hint, .search-panel { backdrop-filter: none; }
 }
+
+.layout-select { max-width: 145px; height: 32px; padding: 0 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font: 12px var(--font-ui); }
+.heading { flex-wrap: wrap; }
+.view-actions { flex-wrap: wrap; }
+@media (max-width: 700px) { .layout-select { height: 36px; } }
+
+.edge, .call-edge, .nested-edge { stroke-linejoin: round; stroke-linecap: round; }
+.layout-status { position: absolute; z-index: 7; top: 12px; left: 12px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text-2); font-size: 12px; }
+
+.auto-group-toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 4px; white-space: nowrap; color: var(--text-2); font-size: 12px; cursor: pointer; }
+.auto-group-toggle input { accent-color: var(--accent); }
+.node-card.copy-group, .nested-node.copy-group { border: 1.5px dashed var(--cat, var(--text-3)); }
+.copy-group .node-detail { white-space: normal; overflow-wrap: anywhere; }
+.copy-group-members { display: block; margin-top: 6px; color: var(--text-3); font-size: 10px; }
+.copy-group-summary { border: 1px dashed var(--border); border-radius: 8px; padding: 12px; }
+.copy-group-summary > strong, .copy-group-summary > code { display: block; margin: 6px 0; overflow-wrap: anywhere; }
+.copy-group-summary > p { color: var(--text-3); font-size: 12px; }
+
+/* Drag the inspector's left edge to resize it; the hit area straddles the border. */
+.inspector-resize { position: absolute; z-index: 2; top: 0; bottom: 0; left: -5px; width: 10px; cursor: col-resize; touch-action: none; }
+.inspector-resize::after { content: ""; position: absolute; top: 0; bottom: 0; left: 4px; width: 2px; background: var(--accent); opacity: 0; transition: opacity .15s; }
+.inspector-resize:hover::after, .inspector-resize:focus-visible::after, .resizing-inspector .inspector-resize::after { opacity: 1; }
+.inspector-resize:focus-visible { outline: none; }
+.resizing-inspector, .resizing-inspector * { cursor: col-resize !important; -webkit-user-select: none !important; user-select: none !important; }

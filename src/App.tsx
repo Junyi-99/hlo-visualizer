@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import sampleHlo from '../sample.hlo?raw';
 import { GraphCanvas, type GraphHandle } from './components/GraphCanvas';
 import { ImportDialog } from './components/ImportDialog';
@@ -7,8 +7,10 @@ import { SearchOverlay } from './components/SearchOverlay';
 import { Sidebar } from './components/Sidebar';
 import { Icon } from './components/Icon';
 import { Toolbar } from './components/Toolbar';
+import { groupCopyPairs } from './lib/copy-grouping';
 import { examples } from './lib/examples';
 import { parseHlo, reachable } from './lib/parser';
+import type { LayoutMode } from './lib/graph-layout';
 import type { HloModule } from './lib/types';
 
 interface HistoryEntry { current: string | null; selected: string | null }
@@ -18,6 +20,15 @@ export default function App() {
   const [current, setCurrent] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [autoGroup, setAutoGroup] = useState(() => {
+    try { return localStorage.getItem('auto-group') === 'true'; } catch { return false; }
+  });
+  useEffect(() => { try { localStorage.setItem('auto-group', String(autoGroup)); } catch { /* storage blocked */ } }, [autoGroup]);
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(() => {
+    try { const saved = localStorage.getItem('graph-layout'); if (saved === 'horizontal' || saved === 'vertical') return saved; } catch { /* storage blocked */ }
+    return 'auto';
+  });
+  useEffect(() => { try { localStorage.setItem('graph-layout', layoutMode); } catch { /* storage blocked */ } }, [layoutMode]);
   const [zoom, setZoom] = useState(1);
   const [useOpName, setUseOpName] = useState(false);
   const [showLastNameOnly, setShowLastNameOnly] = useState(false);
@@ -86,24 +97,28 @@ export default function App() {
   };
 
   const computation = current ? module.byName.get(current) || null : null;
+  const copyGrouping = useMemo(() => computation ? groupCopyPairs(computation, autoGroup) : null, [computation, autoGroup]);
+  const selectedCopyGroup = selected && copyGrouping ? copyGrouping.groups.get(copyGrouping.aliases.get(selected) ?? selected) ?? null : null;
   const node = selected && computation ? computation.byName.get(selected) || null : null;
-  const upstream = node && computation ? reachable(computation, node.name, 'up') : new Set<string>();
-  const downstream = node && computation ? reachable(computation, node.name, 'down') : new Set<string>();
+  const graphComputation = copyGrouping?.computation;
+  const graphSelected = selected ? copyGrouping?.aliases.get(selected) ?? selected : null;
+  const upstream = graphSelected && graphComputation ? reachable(graphComputation, graphSelected, 'up') : new Set<string>();
+  const downstream = graphSelected && graphComputation ? reachable(graphComputation, graphSelected, 'down') : new Set<string>();
 
   return <>
     <div className={`app antialiased${node ? ' inspector-open' : ''}`}>
       <Sidebar module={module} current={current} onOverview={() => openComputation(null)} onComputation={name => openComputation(name)} />
       <main className="main min-w-0">
-        <Toolbar module={module} current={current} canGoBack={history.length > 0} zoom={zoom} useOpName={useOpName} showLastNameOnly={showLastNameOnly} showMemoryLocation={showMemoryLocation}
+        <Toolbar autoGroup={autoGroup} onAutoGroup={setAutoGroup} layoutMode={layoutMode} onLayoutMode={setLayoutMode} module={module} current={current} canGoBack={history.length > 0} zoom={zoom} useOpName={useOpName} showLastNameOnly={showLastNameOnly} showMemoryLocation={showMemoryLocation}
           onUseOpName={value => { setUseOpName(value); if (!value) setShowLastNameOnly(false); }} onShowLastNameOnly={setShowLastNameOnly}
           onShowMemoryLocation={setShowMemoryLocation}
-          onBack={goBack} onComputation={name => openComputation(name)} onFit={() => graphRef.current?.fit()}
+          onBack={goBack} onComputation={name => openComputation(name)} onFit={() => graphRef.current?.fit()} onArrange={() => graphRef.current?.arrange()}
           onZoom={delta => setZoom(value => Math.min(1.5, Math.max(0.45, value + delta)))} onSearch={() => setSearchOpen(true)} onImport={() => setImportOpen(true)} exampleId={exampleId} onExample={id => void loadExample(id)} />
-        <GraphCanvas ref={graphRef} module={module} current={current} selected={selected} zoom={zoom} useOpName={useOpName} showLastNameOnly={showLastNameOnly} showMemoryLocation={showMemoryLocation} onZoom={setZoom} onSelect={setSelected} onComputation={name => openComputation(name)} />
+        <GraphCanvas copyGrouping={copyGrouping} autoGroup={autoGroup} layoutMode={layoutMode} ref={graphRef} module={module} current={current} selected={selected} zoom={zoom} useOpName={useOpName} showLastNameOnly={showLastNameOnly} showMemoryLocation={showMemoryLocation} onZoom={setZoom} onSelect={setSelected} onComputation={name => openComputation(name)} />
         <div className="bottom-bar"><div>{node ? `%${node.name} · ${upstream.size} upstream · ${downstream.size} downstream` : computation ? '' : 'Computation links · instruction data edges are inside each computation'}</div>
           <div>{module.warnings.length ? <button type="button" className="parse-notes-button" onClick={() => setNotesOpen(true)}>{module.warnings.length} parse notes ↗</button> : null}</div></div>
       </main>
-      <Inspector module={module} computation={computation} node={node} upstreamCount={upstream.size} downstreamCount={downstream.size} onClose={() => setSelected(null)} onNode={openReference} onComputation={name => openComputation(name)} />
+      <Inspector copyGroup={selectedCopyGroup} module={module} computation={computation} node={node} upstreamCount={upstream.size} downstreamCount={downstream.size} onClose={() => setSelected(null)} onNode={openReference} onComputation={name => openComputation(name)} />
     </div>
     {searchOpen && <SearchOverlay module={module} useOpName={useOpName} showLastNameOnly={showLastNameOnly} onClose={() => setSearchOpen(false)} onSelect={(computationName, nodeName) => { setSearchOpen(false); openComputation(computationName, nodeName); }} />}
     {importOpen && <ImportDialog onClose={() => setImportOpen(false)} onLoad={source => loadText(source)} />}

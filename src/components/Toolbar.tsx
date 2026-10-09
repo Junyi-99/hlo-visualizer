@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { computationLinks } from '../lib/parser';
-import { computationRole } from '../lib/graph-layout';
+import { computationRole, type LayoutMode } from '../lib/graph-layout';
 import { examples } from '../lib/examples';
 import type { HloModule } from '../lib/types';
 import { Icon } from './Icon';
 
 interface ToolbarProps {
+  autoGroup: boolean;
+  onAutoGroup: (enabled: boolean) => void;
+  layoutMode: LayoutMode;
+  onLayoutMode: (mode: LayoutMode) => void;
   module: HloModule;
   current: string | null;
   canGoBack: boolean;
@@ -19,6 +23,7 @@ interface ToolbarProps {
   onBack: () => void;
   onComputation: (name: string | null) => void;
   onFit: () => void;
+  onArrange: () => void;
   onZoom: (delta: number) => void;
   onSearch: () => void;
   onImport: () => void;
@@ -50,7 +55,7 @@ function ThemeButton() {
   </button>;
 }
 
-export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastNameOnly, showMemoryLocation, onUseOpName, onShowLastNameOnly, onShowMemoryLocation, onBack, onComputation, onFit, onZoom, onSearch, onImport, exampleId, onExample }: ToolbarProps) {
+export function Toolbar({ autoGroup, onAutoGroup, layoutMode, onLayoutMode, module, current, canGoBack, zoom, useOpName, showLastNameOnly, showMemoryLocation, onUseOpName, onShowLastNameOnly, onShowMemoryLocation, onBack, onComputation, onFit, onArrange, onZoom, onSearch, onImport, exampleId, onExample }: ToolbarProps) {
   const [displayOpen, setDisplayOpen] = useState(false);
   const displayRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -100,6 +105,13 @@ export function Toolbar({ module, current, canGoBack, zoom, useOpName, showLastN
           <label className="display-option" title={module.scheduled ? undefined : 'XLA decides whether each value lives in HBM or VMEM while compiling. This is lowered HLO (no is_scheduled=true in the module header), so that information does not exist yet; load compiled HLO instead.'}><input type="checkbox" checked={showMemoryLocation && module.scheduled} disabled={!module.scheduled} onChange={event => onShowMemoryLocation(event.target.checked)} />Show memory location{!module.scheduled && <small className="display-note">Lowered HLO: XLA picks HBM or VMEM only when compiling</small>}</label>
         </div>}
       </div>
+      <label className="auto-group-toggle" title="Combine matching copy-start and copy-done instructions"><input type="checkbox" checked={autoGroup} onChange={event => onAutoGroup(event.target.checked)} />Auto Group</label>
+      <select className="layout-select" aria-label="Graph layout" title="Graph direction: automatic, left to right, or top to bottom" value={layoutMode} onChange={event => onLayoutMode(event.target.value as LayoutMode)}>
+        <option value="auto">Auto layout</option>
+        <option value="horizontal">Horizontal →</option>
+        <option value="vertical">Vertical ↓</option>
+      </select>
+      <button className="subtle-button" type="button" title="Restore automatic node positions and tidy routes" onClick={onArrange}>Arrange</button>
       <button className="subtle-button" type="button" onClick={onFit}>Fit view</button>
       <div className="zoom-controls">
         <button className="icon-button" type="button" aria-label="Zoom out" onClick={() => onZoom(-0.15)}><Icon name="minus" /></button>
