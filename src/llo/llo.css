@@ -1,7 +1,6 @@
 .llo-app {
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr) 310px;
-  transition: grid-template-columns 240ms var(--spring);
+  grid-template-columns: auto minmax(0, 1fr) 310px;
   height: 100dvh;
   min-height: 500px;
   background: var(--bg);
@@ -22,17 +21,6 @@
   -webkit-user-select: none;
   user-select: none;
 }
-.llo-app.sidebar-collapsed {
-  grid-template-columns: 0px minmax(0, 1fr) 310px;
-}
-.llo-app.sidebar-collapsed .llo-sidebar {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 180ms ease,
-    visibility 0s linear 240ms;
-}
 .llo-app button {
   font: inherit;
 }
@@ -40,45 +28,6 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.075em;
-  color: var(--text-3);
-}
-.llo-sidebar {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-  transition: opacity 180ms ease;
-  background: var(--sidebar);
-  border-right: 1px solid var(--border-soft);
-}
-.llo-brand {
-  height: 70px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 0 18px;
-  border-bottom: 1px solid var(--border-soft);
-}
-.llo-logo {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--accent);
-  color: white;
-  font-size: 25px;
-  font-weight: 600;
-}
-.llo-brand strong,
-.llo-brand span {
-  display: block;
-}
-.llo-brand strong {
-  font-size: 14px;
-}
-.llo-brand span {
-  font-size: 11px;
   color: var(--text-3);
 }
 .llo-side-section {
@@ -149,12 +98,7 @@
   border-top: 1px solid var(--border-soft);
 }
 .llo-side-bottom p {
-  margin: 7px 0 12px;
-}
-.llo-side-bottom a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 600;
+  margin: 7px 0;
 }
 .llo-main {
   display: flex;
@@ -178,9 +122,6 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
-}
-.llo-sidebar-toggle {
-  flex: none;
 }
 .llo-crumb {
   overflow: hidden;
@@ -688,22 +629,18 @@
   pointer-events: none;
 }
 @media (max-width: 1250px) {
-  .llo-app.sidebar-collapsed {
-    grid-template-columns: 0px minmax(0, 1fr) 270px;
-  }
   .llo-app {
-    grid-template-columns: 205px minmax(0, 1fr) 270px;
+    --sidebar-w: 205px;
+    grid-template-columns: auto minmax(0, 1fr) 270px;
   }
   .llo-summary {
     gap: 10px;
   }
 }
 @media (max-width: 980px) {
-  .llo-app.sidebar-collapsed {
-    grid-template-columns: 0px minmax(0, 1fr);
-  }
   .llo-app {
-    grid-template-columns: 190px minmax(0, 1fr);
+    --sidebar-w: 190px;
+    grid-template-columns: auto minmax(0, 1fr);
   }
   .llo-inspector {
     position: fixed;
@@ -719,15 +656,13 @@
   }
 }
 @media (max-width: 650px) {
-  .llo-app .llo-sidebar-toggle {
+  .llo-app .sidebar-toggle,
+  .llo-app .sidebar {
     display: none;
   }
   .llo-app {
     display: block;
     height: 100dvh;
-  }
-  .llo-sidebar {
-    display: none;
   }
   .llo-main {
     height: 100%;

@@ -7,6 +7,7 @@ import { useComputationRoles } from '../hooks/useComputationRoles';
 import { useDismiss } from '../hooks/useDismiss';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStoredState } from '../hooks/useStoredState';
+import { SidebarToggle } from './AppSidebar';
 
 interface ToolbarProps {
   autoGroup: boolean;
@@ -34,6 +35,7 @@ interface ToolbarProps {
   onExample: (id: string) => void;
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
+  lloHref: string;
 }
 
 const MEMORY_LOCATION_UNAVAILABLE =
@@ -256,6 +258,7 @@ export function Toolbar({
   onExample,
   sidebarCollapsed,
   onToggleSidebar,
+  lloHref,
   ...viewActionProps
 }: ToolbarProps) {
   const roles = useComputationRoles(module);
@@ -267,17 +270,7 @@ export function Toolbar({
     <>
       <header className="topbar">
         <div className="topbar-leading">
-          <button
-            className="icon-button sidebar-toggle"
-            type="button"
-            title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-            aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-            aria-controls="hlo-sidebar"
-            aria-expanded={!sidebarCollapsed}
-            onClick={onToggleSidebar}
-          >
-            <Icon name="sidebar" />
-          </button>
+          <SidebarToggle controls="hlo-sidebar" collapsed={sidebarCollapsed} onToggle={onToggleSidebar} />
           <div className="crumb">
             <span>Workspace</span>
             <span className="slash">/</span>
@@ -286,9 +279,6 @@ export function Toolbar({
         </div>
 
         <div className="top-actions">
-          <a className="subtle-button" href="?view=llo" title="Explore TPU LLO instruction dumps">
-            LLO Visualizer →
-          </a>
           <a
             className="icon-button repo-link"
             href="https://github.com/Junyi-99/hlo-visualizer"
@@ -317,20 +307,23 @@ export function Toolbar({
         <div>
           <div className="eyebrow">{eyebrowLabel(computation, role)}</div>
           <h2>{computation ? `%${computation.name}` : 'Computation overview'}</h2>
-          <select
-            id="mobile-computations"
-            aria-label="Choose computation"
-            value={current || ''}
-            onChange={event => onComputation(event.target.value || null)}
-          >
-            <option value="">Overview · all computations</option>
-            {module.computations.map(c => (
-              <option key={c.name} value={c.name}>
-                %{c.name}
-                {c.entry ? ' · entry' : ''}
-              </option>
-            ))}
-          </select>
+          <div className="mobile-navigation">
+            <select
+              id="mobile-computations"
+              aria-label="Choose computation"
+              value={current || ''}
+              onChange={event => onComputation(event.target.value || null)}
+            >
+              <option value="">Overview · all computations</option>
+              {module.computations.map(c => (
+                <option key={c.name} value={c.name}>
+                  %{c.name}
+                  {c.entry ? ' · entry' : ''}
+                </option>
+              ))}
+            </select>
+            <a href={lloHref}>LLO Visualizer →</a>
+          </div>
         </div>
 
         <div className="heading-controls">

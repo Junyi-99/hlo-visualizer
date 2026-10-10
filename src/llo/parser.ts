@@ -13,27 +13,23 @@ export interface LloInstruction {
   region: string;
 }
 
-export interface LloBundle {
+interface LloBundle {
   address: string;
-  line: number;
   instructions: LloInstruction[];
   region: string;
 }
 
-export interface LloAllocation {
+interface LloAllocation {
   name: string;
-  raw: string;
   space: string;
   shape: string;
   size: string;
-  line: number;
   region: string;
 }
 
-export interface LloRegion {
+interface LloRegion {
   name: string;
   label: string;
-  line: number;
   instructions: LloInstruction[];
   bundles: LloBundle[];
   allocations: LloAllocation[];
@@ -47,7 +43,7 @@ export interface LloProgram {
 
 export const units: Unit[] = ['MXU', 'XLU', 'DMA', 'VLOAD', 'VSTORE', 'VPU', 'SCALAR', 'OTHER'];
 
-export function instructionUnit(opcode: string): Unit {
+function instructionUnit(opcode: string): Unit {
   const op = opcode.toLowerCase();
   if (/^(vmat|mxu)/.test(op) || /\.mxu\d*/.test(op)) return 'MXU';
   if (/^(vxpose|vpop\.trf|xlu)/.test(op) || /\.xlu\d*/.test(op)) return 'XLU';
@@ -109,9 +105,9 @@ export function parseLlo(source: string): LloProgram {
   let bundle: LloBundle | null = null;
   let pendingBundle: { body: string; depth: number; comment: boolean; line: number } | null = null;
 
-  const ensureRegion = (line: number) => {
+  const ensureRegion = () => {
     if (!region) {
-      region = { name: 'program', label: 'Program', line, instructions: [], bundles: [], allocations: [] };
+      region = { name: 'program', label: 'Program', instructions: [], bundles: [], allocations: [] };
       program.regions.push(region);
     }
     return region;
@@ -122,7 +118,7 @@ export function parseLlo(source: string): LloProgram {
     const code = withoutComments(trimmed).trim();
     const match = /^(?:(%[\w.$-]+)\s*=\s*)?([a-zA-Z][\w.-]*)(?=\s|\[|$)/.exec(code);
     if (!match) return false;
-    const current = ensureRegion(line);
+    const current = ensureRegion();
     const references = unique(code.slice(match[0].length).matchAll(/%[\w.$-]+/g)).filter(ref => ref !== match[1]);
     const instruction: LloInstruction = {
       id: `i${program.instructions.length}`,
@@ -184,7 +180,6 @@ export function parseLlo(source: string): LloProgram {
       region = {
         name: regionMatch[1],
         label: regionMatch[2] || regionMatch[1],
-        line: index + 1,
         instructions: [],
         bundles: [],
         allocations: []
@@ -195,10 +190,8 @@ export function parseLlo(source: string): LloProgram {
     }
     const allocationMatch = /^(#allocation[\w.-]*)\s+\[(.*)\]$/.exec(line);
     if (allocationMatch) {
-      ensureRegion(index + 1).allocations.push({
+      ensureRegion().allocations.push({
         name: allocationMatch[1],
-        raw: line,
-        line: index + 1,
         region: region!.name,
         shape: /\bshape\s*=\s*'([^']*)'/.exec(allocationMatch[2])?.[1] ?? '',
         space: /\bspace\s*=\s*([\w.-]+)/.exec(allocationMatch[2])?.[1] ?? '',
@@ -208,8 +201,8 @@ export function parseLlo(source: string): LloProgram {
     }
     const bundleMatch = /^(0x[\da-fA-F]+|\d+)\s*:\s*\{(.*)$/.exec(line);
     if (bundleMatch) {
-      const current = ensureRegion(index + 1);
-      bundle = { address: bundleMatch[1], line: index + 1, region: current.name, instructions: [] };
+      const current = ensureRegion();
+      bundle = { address: bundleMatch[1], region: current.name, instructions: [] };
       current.bundles.push(bundle);
       pendingBundle = { body: '', depth: 1, comment: false, line: index + 1 };
       consumeBundle(bundleMatch[2]);

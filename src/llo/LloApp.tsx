@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import { Drawer } from 'vaul';
 import sample from './sample.llo?raw';
-import { Icon } from '../components/Icon';
+import { AppSidebar, SidebarToggle } from '../components/AppSidebar';
+import { examples as hloExamples } from '../lib/examples';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStoredState } from '../hooks/useStoredState';
 import { lloExamples, type LloExample } from './examples';
@@ -238,6 +239,9 @@ export default function LloApp() {
   const searchRef = useRef<HTMLInputElement>(null);
 
   const region = program.regions.find(item => item.name === regionName) ?? program.regions[0];
+  // Same program in the HLO view when the loaded dump is a bundled example.
+  const hloId = exampleId && `${exampleId.split('/')[1]}.after`;
+  const hloHref = hloId && hloExamples.some(item => item.id === hloId) ? `?example=${hloId}` : '?';
   const selected = program.instructions.find(item => item.id === selectedId) ?? null;
   const scheduled = !!region?.bundles.length;
   const normalizedQuery = query.trim().toLowerCase();
@@ -359,14 +363,14 @@ export default function LloApp() {
       }}
       onDrop={onDrop}
     >
-      <aside className="llo-sidebar" id="llo-sidebar" inert={sidebarCollapsed}>
-        <div className="llo-brand">
-          <div className="llo-logo">⌁</div>
-          <div>
-            <strong>LLO Visualizer</strong>
-            <span>Explore the TPU instruction stream</span>
-          </div>
-        </div>
+      <AppSidebar
+        id="llo-sidebar"
+        collapsed={sidebarCollapsed}
+        icon="graph"
+        title="LLO Visualizer"
+        subtitle="Explore the TPU instruction stream"
+        switchTo={{ href: hloHref, label: '← HLO Visualizer' }}
+      >
         <div className="llo-side-section">
           <div className="eyebrow">PROGRAM</div>
           <h1 title={fileName}>{fileName}</h1>
@@ -399,23 +403,12 @@ export default function LloApp() {
             LLO is the TPU backend’s lower-level instruction representation. Final bundle dumps show operations issued together; earlier
             pass dumps show unscheduled instructions.
           </p>
-          <a href="?">← HLO Visualizer</a>
         </div>
-      </aside>
+      </AppSidebar>
       <main className="llo-main">
         <header className="llo-topbar">
           <div className="llo-topbar-leading">
-            <button
-              type="button"
-              className="icon-button llo-sidebar-toggle"
-              title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-              aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-              aria-controls="llo-sidebar"
-              aria-expanded={!sidebarCollapsed}
-              onClick={() => setSidebarCollapsed(value => !value)}
-            >
-              <Icon name="sidebar" />
-            </button>
+            <SidebarToggle controls="llo-sidebar" collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(value => !value)} />
             <div className="llo-crumb">
               Workspace <span>/</span> <strong>LLO</strong> <span>/</span> {region?.label}
             </div>
@@ -487,7 +480,7 @@ export default function LloApp() {
                   ))}
                 </select>
               )}
-              <a href="?">← HLO Visualizer</a>
+              <a href={hloHref}>← HLO Visualizer</a>
             </div>
           </div>
           <div className="llo-summary">

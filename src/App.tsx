@@ -10,6 +10,7 @@ import { Toolbar } from './components/Toolbar';
 import { useStoredState } from './hooks/useStoredState';
 import { groupCopyPairs } from './lib/copy-grouping';
 import { examples } from './lib/examples';
+import { lloExamples } from './llo/examples';
 import { clampZoom, type LayoutMode } from './lib/graph-layout';
 import { parseHlo, reachable } from './lib/parser';
 import type { HloModule } from './lib/types';
@@ -158,6 +159,10 @@ export default function App() {
     onExample: (id: string) => void loadExample(id)
   };
 
+  // Same program in the LLO view when the loaded module is a bundled example.
+  const lloId = exampleId && `v6e-1/${exampleId.split('.')[0]}`;
+  const lloHref = lloId && lloExamples.some(item => item.id === lloId) ? `?view=llo&example=${lloId}` : '?view=llo';
+
   const status = node
     ? `%${node.name} · ${upstreamCount} upstream · ${downstreamCount} downstream`
     : computation
@@ -171,6 +176,7 @@ export default function App() {
           module={module}
           current={current}
           collapsed={sidebarCollapsed}
+          lloHref={lloHref}
           onOverview={() => showComputation(null)}
           onComputation={showComputation}
         />
@@ -182,6 +188,7 @@ export default function App() {
             exampleId={exampleId}
             sidebarCollapsed={sidebarCollapsed}
             onToggleSidebar={() => setSidebarCollapsed(value => !value)}
+            lloHref={lloHref}
           />
           <GraphCanvas
             {...viewProps}

@@ -289,21 +289,20 @@ kbd {
 
 .app {
   display: grid;
-  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-  transition: grid-template-columns 240ms var(--spring);
+  /* The sidebar track is auto so it follows the sidebar's margin-left slide; animating the track itself reflows the content every frame and does not animate in Safari. */
+  grid-template-columns: auto minmax(0, 1fr);
   height: 100vh;
   height: 100dvh;
   min-height: 560px;
   overflow: hidden;
 }
-.app.sidebar-collapsed {
-  grid-template-columns: 0px minmax(0, 1fr);
-}
-.app.sidebar-collapsed .sidebar {
+.sidebar-collapsed .sidebar {
+  margin-left: calc(-1 * var(--sidebar-w));
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
   transition:
+    margin-left 240ms var(--spring),
     opacity 180ms ease,
     visibility 0s linear 240ms;
 }
@@ -319,10 +318,12 @@ kbd {
 .sidebar {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  width: var(--sidebar-w);
   min-height: 0;
   overflow: hidden;
-  transition: opacity 180ms ease;
+  transition:
+    margin-left 240ms var(--spring),
+    opacity 180ms ease;
   background: var(--sidebar);
   backdrop-filter: blur(24px) saturate(1.6);
   border-right: 1px solid var(--border-soft);
@@ -507,6 +508,18 @@ kbd {
   line-height: 1.5;
   color: var(--text-3);
 }
+.sidebar-switch {
+  flex: none;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.sidebar-switch:hover {
+  background: var(--fill);
+}
 .dot {
   width: 8px;
   height: 8px;
@@ -626,7 +639,7 @@ kbd {
   gap: 8px;
   flex: none;
 }
-#mobile-computations {
+.mobile-navigation {
   display: none;
 }
 
@@ -2530,10 +2543,10 @@ dialog textarea:focus {
 
 @media (min-width: 1101px) {
   .app.sidebar-collapsed.inspector-open {
-    grid-template-columns: 0px minmax(0, 1fr) max(300px, min(var(--inspector-w, clamp(350px, 30vw, 430px)), calc(100vw - 360px)));
+    grid-template-columns: auto minmax(0, 1fr) max(300px, min(var(--inspector-w, clamp(350px, 30vw, 430px)), calc(100vw - 360px)));
   }
   .app.inspector-open {
-    grid-template-columns: var(--sidebar-w) minmax(0, 1fr) max(
+    grid-template-columns: auto minmax(0, 1fr) max(
         300px,
         min(var(--inspector-w, clamp(350px, 30vw, 430px)), calc(100vw - var(--sidebar-w) - 360px))
       );
@@ -2560,7 +2573,7 @@ dialog textarea:focus {
 
 /* Sidebar collapses into the heading's computation picker */
 @media (max-width: 1100px) {
-  .sidebar-toggle {
+  .app .sidebar-toggle {
     display: none;
   }
   :root {
@@ -2569,17 +2582,25 @@ dialog textarea:focus {
   .app {
     grid-template-columns: minmax(0, 1fr);
   }
-  .app.sidebar-collapsed {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .sidebar {
+  .app .sidebar {
     display: none;
   }
-  #mobile-computations {
-    display: block;
-    width: min(100%, 360px);
-    height: 36px;
+  .mobile-navigation {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
     margin-top: 12px;
+  }
+  .mobile-navigation a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  #mobile-computations {
+    width: 100%;
+    max-width: 360px;
+    height: 36px;
     padding: 0 10px;
     border: 1px solid var(--border);
     border-radius: 8px;

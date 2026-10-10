@@ -1,11 +1,13 @@
 import type { HloModule } from '../lib/types';
 import { Icon, type IconName } from './Icon';
 import { useComputationRoles } from '../hooks/useComputationRoles';
+import { AppSidebar } from './AppSidebar';
 
 interface SidebarProps {
   module: HloModule;
   current: string | null;
   collapsed: boolean;
+  lloHref: string;
   onOverview: () => void;
   onComputation: (name: string) => void;
 }
@@ -47,7 +49,7 @@ function ComputationItem({ active, overview = false, icon, title, detail, onClic
   );
 }
 
-export function Sidebar({ module, current, collapsed, onOverview, onComputation }: SidebarProps) {
+export function Sidebar({ module, current, collapsed, lloHref, onOverview, onComputation }: SidebarProps) {
   const roles = useComputationRoles(module);
 
   const computations = module.computations;
@@ -56,17 +58,14 @@ export function Sidebar({ module, current, collapsed, onOverview, onComputation 
   const summary = `${computations.length} ${computations.length === 1 ? 'computation' : 'computations'} · ${instructionCount} instructions`;
 
   return (
-    <aside className="sidebar" id="hlo-sidebar" inert={collapsed}>
-      <div className="brand">
-        <div className="brand-mark">
-          <Icon name="graph" size={18} />
-        </div>
-        <div>
-          <strong>HLO Visualizer</strong>
-          <span>Explore and understand XLA HLO</span>
-        </div>
-      </div>
-
+    <AppSidebar
+      id="hlo-sidebar"
+      collapsed={collapsed}
+      icon="graph"
+      title="HLO Visualizer"
+      subtitle="Explore and understand XLA HLO"
+      switchTo={{ href: lloHref, label: 'LLO Visualizer →' }}
+    >
       <div className="sidebar-section module-section">
         <div className="eyebrow">MODULE</div>
         <h1>{module.name}</h1>
@@ -116,6 +115,6 @@ export function Sidebar({ module, current, collapsed, onOverview, onComputation 
         </div>
         <p>Click a node to trace its dependencies. Double-click empty space to clear.</p>
       </div>
-    </aside>
+    </AppSidebar>
   );
 }
