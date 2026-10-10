@@ -1,0 +1,193 @@
+HloModule jit_elementwise_zoo, entry_computation_layout={(f32[64,64]{1,0}, f32[64,64]{1,0})->(f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, /*index=5*/f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, /*index=10*/f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, pred[64,64]{1,0}, f32[64,64]{1,0}, /*index=15*/f32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, /*index=20*/s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, /*index=25*/s32[64,64]{1,0}, s8[64,64]{1,0}, f16[64,64]{1,0}, pred[64,64]{1,0}, f32[64,64]{1,0}, /*index=30*/s32[64,64]{1,0})}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "elementwise_zoo"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=58 end_column=88}
+3 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=49 end_column=56}
+4 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=40 end_column=47}
+5 {file_name_id=1 function_name_id=2 line=140 end_line=140 column=10 end_column=17}
+6 {file_name_id=1 function_name_id=2 line=140 end_line=140 column=9 end_column=36}
+7 {file_name_id=1 function_name_id=2 line=141 end_line=141 column=10 end_column=17}
+8 {file_name_id=1 function_name_id=2 line=141 end_line=141 column=9 end_column=36}
+9 {file_name_id=1 function_name_id=2 line=143 end_line=143 column=8 end_column=18}
+10 {file_name_id=1 function_name_id=2 line=143 end_line=143 column=30 end_column=40}
+11 {file_name_id=1 function_name_id=2 line=143 end_line=143 column=20 end_column=41}
+12 {file_name_id=1 function_name_id=2 line=143 end_line=143 column=43 end_column=55}
+13 {file_name_id=1 function_name_id=2 line=143 end_line=143 column=57 end_column=67}
+14 {file_name_id=1 function_name_id=2 line=143 end_line=143 column=69 end_column=86}
+15 {file_name_id=1 function_name_id=2 line=143 end_line=143 column=88 end_column=105}
+16 {file_name_id=1 function_name_id=2 line=144 end_line=144 column=18 end_column=28}
+17 {file_name_id=1 function_name_id=2 line=144 end_line=144 column=8 end_column=32}
+18 {file_name_id=1 function_name_id=2 line=144 end_line=144 column=34 end_column=55}
+19 {file_name_id=1 function_name_id=2 line=144 end_line=144 column=57 end_column=69}
+20 {file_name_id=1 function_name_id=2 line=144 end_line=144 column=71 end_column=82}
+21 {file_name_id=1 function_name_id=2 line=144 end_line=144 column=84 end_column=96}
+22 {file_name_id=1 function_name_id=2 line=144 end_line=144 column=98 end_column=109}
+23 {file_name_id=1 function_name_id=2 line=145 end_line=145 column=8 end_column=30}
+24 {file_name_id=1 function_name_id=2 line=145 end_line=145 column=45 end_column=50}
+25 {file_name_id=1 function_name_id=2 line=145 end_line=145 column=32 end_column=51}
+26 {file_name_id=1 function_name_id=2 line=145 end_line=145 column=53 end_column=64}
+27 {file_name_id=1 function_name_id=2 line=145 end_line=145 column=66 end_column=96}
+28 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=8 end_column=15}
+29 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=17 end_column=24}
+30 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=26 end_column=33}
+31 {file_name_id=1 function_name_id=2 line=146 end_line=146 column=35 end_column=38}
+32 {file_name_id=1 function_name_id=2 line=147 end_line=147 column=8 end_column=32}
+33 {file_name_id=1 function_name_id=2 line=147 end_line=147 column=34 end_column=45}
+34 {file_name_id=1 function_name_id=2 line=147 end_line=147 column=47 end_column=85}
+35 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=8 end_column=26}
+36 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=28 end_column=49}
+37 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=52 end_column=57}
+38 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=62 end_column=67}
+39 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=51 end_column=68}
+40 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=70 end_column=87}
+41 {file_name_id=1 function_name_id=2 line=148 end_line=148 column=89 end_column=108}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+8 {file_location_id=8 parent_frame_id=2}
+9 {file_location_id=9 parent_frame_id=2}
+10 {file_location_id=10 parent_frame_id=2}
+11 {file_location_id=11 parent_frame_id=2}
+12 {file_location_id=12 parent_frame_id=2}
+13 {file_location_id=13 parent_frame_id=2}
+14 {file_location_id=14 parent_frame_id=2}
+15 {file_location_id=14 parent_frame_id=15}
+16 {file_location_id=15 parent_frame_id=2}
+17 {file_location_id=16 parent_frame_id=2}
+18 {file_location_id=17 parent_frame_id=2}
+19 {file_location_id=18 parent_frame_id=2}
+20 {file_location_id=19 parent_frame_id=2}
+21 {file_location_id=20 parent_frame_id=2}
+22 {file_location_id=21 parent_frame_id=2}
+23 {file_location_id=22 parent_frame_id=2}
+24 {file_location_id=23 parent_frame_id=2}
+25 {file_location_id=24 parent_frame_id=2}
+26 {file_location_id=25 parent_frame_id=2}
+27 {file_location_id=26 parent_frame_id=2}
+28 {file_location_id=27 parent_frame_id=2}
+29 {file_location_id=28 parent_frame_id=2}
+30 {file_location_id=29 parent_frame_id=2}
+31 {file_location_id=30 parent_frame_id=2}
+32 {file_location_id=31 parent_frame_id=2}
+33 {file_location_id=32 parent_frame_id=2}
+34 {file_location_id=33 parent_frame_id=2}
+35 {file_location_id=34 parent_frame_id=2}
+36 {file_location_id=35 parent_frame_id=2}
+37 {file_location_id=36 parent_frame_id=2}
+38 {file_location_id=37 parent_frame_id=2}
+39 {file_location_id=38 parent_frame_id=2}
+40 {file_location_id=39 parent_frame_id=2}
+41 {file_location_id=40 parent_frame_id=2}
+42 {file_location_id=41 parent_frame_id=2}
+
+
+remainder.1 {
+  Arg_0.1 = f32[64,64]{1,0} parameter(0)
+  Arg_1.1 = f32[] parameter(1)
+  rem.2 = f32[64,64]{1,0} broadcast(Arg_1.1), dimensions={}, metadata={op_name="rem"}
+  rem.3 = f32[64,64]{1,0} remainder(Arg_0.1, rem.2), metadata={op_name="rem"}
+  constant.10 = f32[] constant(0)
+  broadcast.3 = f32[64,64]{1,0} broadcast(constant.10), dimensions={}
+  lt.2 = pred[64,64]{1,0} compare(rem.3, broadcast.3), direction=LT, metadata={op_name="lt"}
+  constant.11 = f32[] constant(0)
+  lt.3 = pred[] compare(Arg_1.1, constant.11), direction=LT, metadata={op_name="lt"}
+  ne.4 = pred[64,64]{1,0} broadcast(lt.3), dimensions={}, metadata={op_name="ne"}
+  ne.5 = pred[64,64]{1,0} compare(lt.2, ne.4), direction=NE, metadata={op_name="ne"}
+  ne.3 = pred[64,64]{1,0} compare(rem.3, broadcast.3), direction=NE, metadata={op_name="ne"}
+  and.1 = pred[64,64]{1,0} and(ne.5, ne.3), metadata={op_name="and"}
+  add.3 = f32[64,64]{1,0} broadcast(Arg_1.1), dimensions={}, metadata={op_name="add"}
+  add.4 = f32[64,64]{1,0} add(rem.3, add.3), metadata={op_name="add"}
+  ROOT select_n.1 = f32[64,64]{1,0} select(and.1, add.4, rem.3), metadata={op_name="select_n"}
+}
+
+round.2 {
+  Arg_0.3 = f32[64,64]{1,0} parameter(0)
+  ROOT round.1 = f32[64,64]{1,0} round-nearest-even(Arg_0.3), metadata={op_name="round"}
+}
+
+clip.3 {
+  Arg_2.1 = f32[] parameter(2)
+  min.2 = f32[64,64]{1,0} broadcast(Arg_2.1), dimensions={}, metadata={op_name="min"}
+  Arg_1.3 = f32[] parameter(1)
+  max.2 = f32[64,64]{1,0} broadcast(Arg_1.3), dimensions={}, metadata={op_name="max"}
+  Arg_0.5 = f32[64,64]{1,0} parameter(0)
+  max.3 = f32[64,64]{1,0} maximum(max.2, Arg_0.5), metadata={op_name="max"}
+  ROOT min.3 = f32[64,64]{1,0} minimum(min.2, max.3), metadata={op_name="min"}
+}
+
+ENTRY main.4 {
+  x.1 = f32[64,64]{1,0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="x"}
+  exp.2 = f32[64,64]{1,0} exponential(x.1), metadata={op_name="jit(elementwise_zoo)/exp" stack_frame_id=9}
+  abs.2 = f32[64,64]{1,0} abs(x.1), metadata={op_name="jit(elementwise_zoo)/abs" stack_frame_id=10}
+  log1p.1 = f32[64,64]{1,0} log-plus-one(abs.2), metadata={op_name="jit(elementwise_zoo)/log1p" stack_frame_id=11}
+  expm1.1 = f32[64,64]{1,0} exponential-minus-one(x.1), metadata={op_name="jit(elementwise_zoo)/expm1" stack_frame_id=12}
+  erf.1 = f32[64,64]{1,0} erf(x.1), metadata={op_name="jit(elementwise_zoo)/erf" stack_frame_id=13}
+  constant.15 = f32[] constant(1)
+  broadcast.4 = f32[64,64]{1,0} broadcast(constant.15), dimensions={}
+  neg.1 = f32[64,64]{1,0} negate(x.1), metadata={op_name="jit(elementwise_zoo)/neg" stack_frame_id=15}
+  exp.3 = f32[64,64]{1,0} exponential(neg.1), metadata={op_name="jit(elementwise_zoo)/exp" stack_frame_id=15}
+  add.5 = f32[64,64]{1,0} add(exp.3, broadcast.4), metadata={op_name="jit(elementwise_zoo)/add" stack_frame_id=15}
+  div.2 = f32[64,64]{1,0} divide(broadcast.4, add.5), metadata={op_name="jit(elementwise_zoo)/div" stack_frame_id=15}
+  y.1 = f32[64,64]{1,0} parameter(1), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="y"}
+  atan2.1 = f32[64,64]{1,0} atan2(x.1, y.1), metadata={op_name="jit(elementwise_zoo)/atan2" stack_frame_id=16}
+  abs.3 = f32[64,64]{1,0} abs(x.1), metadata={op_name="jit(elementwise_zoo)/abs" stack_frame_id=17}
+  pow.1 = f32[64,64]{1,0} power(abs.3, y.1), metadata={op_name="jit(elementwise_zoo)/pow" stack_frame_id=18}
+  constant.18 = f32[] constant(1.5)
+  jit_remainder_.1 = f32[64,64]{1,0} call(x.1, constant.18), to_apply=remainder.1, metadata={op_name="jit(elementwise_zoo)/jit(remainder)" stack_frame_id=19}
+  floor.1 = f32[64,64]{1,0} floor(x.1), metadata={op_name="jit(elementwise_zoo)/floor" stack_frame_id=20}
+  ceil.1 = f32[64,64]{1,0} ceil(x.1), metadata={op_name="jit(elementwise_zoo)/ceil" stack_frame_id=21}
+  jit_round_.1 = f32[64,64]{1,0} call(x.1), to_apply=round.2, metadata={op_name="jit(elementwise_zoo)/jit(round)" stack_frame_id=22}
+  sign.1 = f32[64,64]{1,0} sign(x.1), metadata={op_name="jit(elementwise_zoo)/sign" stack_frame_id=23}
+  constant.17 = f32[] constant(-0.5)
+  constant.16 = f32[] constant(0.5)
+  jit_clip_.1 = f32[64,64]{1,0} call(x.1, constant.17, constant.16), to_apply=clip.3, metadata={op_name="jit(elementwise_zoo)/jit(clip)" stack_frame_id=24}
+  div.3 = f32[64,64]{1,0} divide(x.1, y.1), metadata={op_name="jit(elementwise_zoo)/div" stack_frame_id=25}
+  is_finite.1 = pred[64,64]{1,0} is-finite(div.3), metadata={op_name="jit(elementwise_zoo)/is_finite" stack_frame_id=26}
+  cbrt.1 = f32[64,64]{1,0} cbrt(x.1), metadata={op_name="jit(elementwise_zoo)/cbrt" stack_frame_id=27}
+  reduce_precision.1 = f32[64,64]{1,0} reduce-precision(x.1), exponent_bits=5, mantissa_bits=10, metadata={op_name="jit(elementwise_zoo)/reduce_precision" stack_frame_id=28}
+  constant.19 = f32[] constant(100)
+  broadcast.5 = f32[64,64]{1,0} broadcast(constant.19), dimensions={}
+  mul.2 = f32[64,64]{1,0} multiply(x.1, broadcast.5), metadata={op_name="jit(elementwise_zoo)/mul" stack_frame_id=5}
+  convert_element_type.4 = s32[64,64]{1,0} convert(mul.2), metadata={op_name="jit(elementwise_zoo)/convert_element_type" stack_frame_id=6}
+  mul.3 = f32[64,64]{1,0} multiply(y.1, broadcast.5), metadata={op_name="jit(elementwise_zoo)/mul" stack_frame_id=7}
+  convert_element_type.5 = s32[64,64]{1,0} convert(mul.3), metadata={op_name="jit(elementwise_zoo)/convert_element_type" stack_frame_id=8}
+  and.4 = s32[64,64]{1,0} and(convert_element_type.4, convert_element_type.5), metadata={op_name="jit(elementwise_zoo)/and" stack_frame_id=29}
+  or.1 = s32[64,64]{1,0} or(convert_element_type.4, convert_element_type.5), metadata={op_name="jit(elementwise_zoo)/or" stack_frame_id=30}
+  xor.1 = s32[64,64]{1,0} xor(convert_element_type.4, convert_element_type.5), metadata={op_name="jit(elementwise_zoo)/xor" stack_frame_id=31}
+  not.1 = s32[64,64]{1,0} not(convert_element_type.4), metadata={op_name="jit(elementwise_zoo)/not" stack_frame_id=32}
+  constant.14 = s32[] constant(2)
+  shift_left.2 = s32[64,64]{1,0} broadcast(constant.14), dimensions={}, metadata={op_name="jit(elementwise_zoo)/shift_left" stack_frame_id=4}
+  shift_left.3 = s32[64,64]{1,0} shift-left(convert_element_type.4, shift_left.2), metadata={op_name="jit(elementwise_zoo)/shift_left" stack_frame_id=4}
+  constant.13 = s32[] constant(1)
+  shift_right_arithmetic.2 = s32[64,64]{1,0} broadcast(constant.13), dimensions={}, metadata={op_name="jit(elementwise_zoo)/shift_right_arithmetic" stack_frame_id=3}
+  shift_right_arithmetic.3 = s32[64,64]{1,0} shift-right-arithmetic(convert_element_type.4, shift_right_arithmetic.2), metadata={op_name="jit(elementwise_zoo)/shift_right_arithmetic" stack_frame_id=3}
+  constant.12 = s32[] constant(3)
+  shift_right_logical.2 = s32[64,64]{1,0} broadcast(constant.12), dimensions={}, metadata={op_name="jit(elementwise_zoo)/shift_right_logical" stack_frame_id=2}
+  shift_right_logical.3 = s32[64,64]{1,0} shift-right-logical(convert_element_type.4, shift_right_logical.2), metadata={op_name="jit(elementwise_zoo)/shift_right_logical" stack_frame_id=2}
+  population_count.1 = s32[64,64]{1,0} popcnt(convert_element_type.4), metadata={op_name="jit(elementwise_zoo)/population_count" stack_frame_id=33}
+  clz.1 = s32[64,64]{1,0} count-leading-zeros(convert_element_type.4), metadata={op_name="jit(elementwise_zoo)/clz" stack_frame_id=34}
+  bitcast_convert_type.1 = s32[64,64]{1,0} bitcast-convert(x.1), metadata={op_name="jit(elementwise_zoo)/bitcast_convert_type" stack_frame_id=35}
+  convert_element_type.6 = s8[64,64]{1,0} convert(x.1), metadata={op_name="jit(elementwise_zoo)/convert_element_type" stack_frame_id=36}
+  convert_element_type.7 = f16[64,64]{1,0} convert(x.1), metadata={op_name="jit(elementwise_zoo)/convert_element_type" stack_frame_id=37}
+  gt.1 = pred[64,64]{1,0} compare(x.1, y.1), direction=GT, metadata={op_name="jit(elementwise_zoo)/gt" stack_frame_id=38}
+  lt.5 = pred[64,64]{1,0} compare(x.1, broadcast.4), direction=LT, metadata={op_name="jit(elementwise_zoo)/lt" stack_frame_id=39}
+  and.5 = pred[64,64]{1,0} and(gt.1, lt.5), metadata={op_name="jit(elementwise_zoo)/and" stack_frame_id=40}
+  max.5 = f32[64,64]{1,0} maximum(x.1, y.1), metadata={op_name="jit(elementwise_zoo)/max" stack_frame_id=41}
+  min.5 = s32[64,64]{1,0} minimum(convert_element_type.4, convert_element_type.5), metadata={op_name="jit(elementwise_zoo)/min" stack_frame_id=42}
+  ROOT tuple.1 = (f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, /*index=5*/f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, /*index=10*/f32[64,64]{1,0}, f32[64,64]{1,0}, f32[64,64]{1,0}, pred[64,64]{1,0}, f32[64,64]{1,0}, /*index=15*/f32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, /*index=20*/s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, s32[64,64]{1,0}, /*index=25*/s32[64,64]{1,0}, s8[64,64]{1,0}, f16[64,64]{1,0}, pred[64,64]{1,0}, f32[64,64]{1,0}, /*index=30*/s32[64,64]{1,0}) tuple(exp.2, log1p.1, expm1.1, erf.1, div.2, atan2.1, pow.1, jit_remainder_.1, floor.1, ceil.1, jit_round_.1, sign.1, jit_clip_.1, is_finite.1, cbrt.1, reduce_precision.1, and.4, or.1, xor.1, not.1, shift_left.3, shift_right_arithmetic.3, shift_right_logical.3, population_count.1, clz.1, bitcast_convert_type.1, convert_element_type.6, convert_element_type.7, and.5, max.5, min.5)
+}
+

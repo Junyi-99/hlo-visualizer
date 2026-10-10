@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ZOOM_STEP, type LayoutMode } from '../lib/graph-layout';
-import { examples } from '../lib/examples';
+import { examples, hloTopologies } from '../lib/examples';
 import type { Computation, HloModule } from '../lib/types';
 import { Icon, type IconName } from './Icon';
 import { useComputationRoles } from '../hooks/useComputationRoles';
@@ -49,10 +49,10 @@ const themeIcon: Record<Theme, IconName> = { system: 'system', light: 'sun', dar
 const readTheme = (saved: string | null): Theme => (saved === 'light' || saved === 'dark' ? saved : 'system');
 const writeTheme = (theme: Theme) => (theme === 'system' ? null : theme);
 
-const exampleStages = [
-  { stage: 'after', label: 'TPU v6e · compiled (after optimizations)' },
-  { stage: 'before', label: 'TPU v6e · before optimizations' }
-] as const;
+const exampleGroups = hloTopologies.flatMap(topology => [
+  { topology, stage: 'after', label: `TPU ${topology} · compiled (after optimizations)` },
+  { topology, stage: 'before', label: `TPU ${topology} · before optimizations` }
+]);
 
 function ThemeButton() {
   const [theme, setTheme] = useStoredState('theme', readTheme, writeTheme);
@@ -90,10 +90,10 @@ function ExampleSelect({ exampleId, onExample }: Pick<ToolbarProps, 'exampleId' 
       <option value="" disabled>
         Examples
       </option>
-      {exampleStages.map(({ stage, label }) => (
-        <optgroup key={stage} label={label}>
+      {exampleGroups.map(({ topology, stage, label }) => (
+        <optgroup key={label} label={label}>
           {examples
-            .filter(example => example.stage === stage)
+            .filter(example => example.topology === topology && example.stage === stage)
             .map(example => (
               <option key={example.id} value={example.id}>
                 {example.program}

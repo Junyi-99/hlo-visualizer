@@ -1,12 +1,12 @@
 """Extract where XLA actually placed each value, from an --xla_dump_to directory.
 
-Writes examples/tpu-v6e/<program>.after.memory.json:
+Writes examples/v6e-1/<program>.after.memory.json:
   {"<instruction>": {"<shape index>": <memory space> | "thread-local"}}
 Only positions that own or alias a buffer appear; instructions absent from the file have no buffer
 (e.g. values inside fusion bodies). This is the ground truth for the app's memory labels.
 
 Usage: python scripts/dump_hlo.py OUT                      (on the TPU VM; also writes OUT/xla_dump)
-       python scripts/extract_memory_truth.py OUT/xla_dump examples/tpu-v6e
+       python scripts/extract_memory_truth.py OUT/xla_dump examples/v6e-1
 """
 
 import glob

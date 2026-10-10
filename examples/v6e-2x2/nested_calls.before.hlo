@@ -1,0 +1,35 @@
+HloModule jit_nested_calls, entry_computation_layout={(f32[16]{0})->f32[16]{0}}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "nested_calls"
+3 "_middle"
+4 "_inner"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=220 end_line=220 column=11 end_column=21}
+3 {file_name_id=1 function_name_id=3 line=215 end_line=215 column=11 end_column=24}
+4 {file_name_id=1 function_name_id=4 line=211 end_line=211 column=11 end_column=25}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=3}
+4 {file_location_id=4 parent_frame_id=4}
+
+
+ENTRY main.1 {
+  x.1 = f32[16]{0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}]>"}, metadata={op_name="x"}
+  sin.1 = f32[16]{0} sine(x.1), metadata={op_name="jit(nested_calls)/sin" stack_frame_id=4}
+  constant.3 = f32[] constant(2)
+  broadcast.3 = f32[16]{0} broadcast(constant.3), dimensions={}
+  mul.1 = f32[16]{0} multiply(sin.1, broadcast.3), metadata={op_name="jit(nested_calls)/mul" stack_frame_id=4}
+  constant.2 = f32[] constant(1)
+  broadcast.2 = f32[16]{0} broadcast(constant.2), dimensions={}
+  ROOT add.1 = f32[16]{0} add(mul.1, broadcast.2), metadata={op_name="jit(nested_calls)/add" stack_frame_id=3}
+}
+

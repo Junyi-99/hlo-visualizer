@@ -1,0 +1,165 @@
+HloModule jit_attention, is_scheduled=true, entry_computation_layout={(bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)}, bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)}, bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)})->bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)}}, allow_spmd_sharding_propagation_to_parameters={false,false,false}, allow_spmd_sharding_propagation_to_output={true}, num_partitions=4, frontend_attributes={arg_layout_modes="default;default;default",arg_memory_spaces="0;0;0",out_layout_modes="default",out_memory_spaces="0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "attention"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=18}
+2 {file_name_id=1 function_name_id=2 line=85 end_line=85 column=8 end_column=8}
+3 {file_name_id=1 function_name_id=2 line=83 end_line=83 column=11 end_column=11}
+4 {file_name_id=1 function_name_id=2 line=86 end_line=86 column=11 end_column=11}
+5 {file_name_id=1 function_name_id=2 line=84 end_line=84 column=8 end_column=8}
+6 {file_name_id=1 function_name_id=2 line=82 end_line=82 column=8 end_column=8}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+
+
+%fused_computation.9 () -> pred[128,128] {
+  %ge.15 = s32[128,128]{0,1:T(8,128)} iota(), iota_dimension=0, metadata={op_name="jit(attention)/ge" stack_frame_id=3}
+  %ge.14 = s32[128,128]{0,1:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(attention)/ge" stack_frame_id=3}
+  ROOT %ge.6 = pred[128,128]{0,1:T(8,128)(4,1)S(1)} compare(%ge.15, %ge.14), direction=GE, metadata={op_name="jit(attention)/ge" stack_frame_id=3}
+}
+
+%bitcast_fusion.3 (bitcast_input.3: bf16[2,4,128,64]) -> bf16[2,4,128,64] {
+  %bitcast_input.3 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(0)
+  ROOT %bitcast.3 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} bitcast(%bitcast_input.3)
+}
+
+%bitcast_fusion.5 (bitcast_input.5: bf16[2,4,128,64]) -> bf16[2,4,128,64] {
+  %bitcast_input.5 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} parameter(0)
+  ROOT %bitcast.5 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} bitcast(%bitcast_input.5)
+}
+
+%fused_computation.5.clone.clone.clone.clone (param_0.32: bf16[2,4,128,64], param_1.38: bf16[2,4,128,64], param_2.26: pred[128,128]) -> f32[2,4,128,128] {
+  %param_2.26 = pred[128,128]{0,1:T(8,128)(4,1)S(1)} parameter(2)
+  %broadcast_in_dim.21 = pred[2,4,128,128]{2,3,1,0:T(8,128)(4,1)} broadcast(%param_2.26), dimensions={2,3}, metadata={op_name="jit(attention)/jit(_where)/broadcast_in_dim" stack_frame_id=5}
+  %param_0.32 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(0)
+  %fusion.14 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} fusion(%param_0.32), kind=kLoop, calls=%bitcast_fusion.3
+  %param_1.38 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} parameter(1)
+  %fusion.16 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} fusion(%param_1.38), kind=kLoop, calls=%bitcast_fusion.5
+  %convolution-base-dilated.12 = bf16[2,4,128,128]{2,3,1,0:T(8,128)(2,1)} convolution(%fusion.14, %fusion.16), window={size=2x4 stride=1x3 lhs_dilate=2x4}, dim_labels=01bf_01oi->01bf, metadata={op_name="jit(attention)/bhqd,bhkd->bhqk/dot_general" stack_frame_id=6}
+  %convert_element_type.16 = f32[2,4,128,128]{2,3,1,0:T(8,128)} convert(%convolution-base-dilated.12), metadata={op_name="jit(attention)/convert_element_type" stack_frame_id=6}
+  %constant.4.clone.7 = f32[]{:T(128)} constant(0.125)
+  %div.31 = f32[2,4,128,128]{2,3,1,0:T(8,128)} broadcast(%constant.4.clone.7), dimensions={}, metadata={op_name="jit(attention)/div" stack_frame_id=6}
+  %div.30 = f32[2,4,128,128]{2,3,1,0:T(8,128)} multiply(%convert_element_type.16, %div.31), metadata={op_name="jit(attention)/div" stack_frame_id=6}
+  %constant.1.clone.7 = f32[]{:T(128)} constant(-1e+09)
+  %broadcast_in_dim.20 = f32[2,4,128,128]{2,3,1,0:T(8,128)} broadcast(%constant.1.clone.7), dimensions={}, metadata={op_name="jit(attention)/jit(_where)/broadcast_in_dim" stack_frame_id=5}
+  ROOT %select_n.8 = f32[2,4,128,128]{2,3,1,0:T(8,128)} select(%broadcast_in_dim.21, %div.30, %broadcast_in_dim.20), metadata={op_name="jit(attention)/jit(_where)/select_n" stack_frame_id=5}
+}
+
+%region_0.1.clone (reduce_max.8: f32[], reduce_max.9: f32[]) -> f32[] {
+  %reduce_max.9 = f32[]{:T(128)} parameter(1), metadata={op_name="jit(attention)/reduce_max"}
+  %reduce_max.8 = f32[]{:T(128)} parameter(0), metadata={op_name="jit(attention)/reduce_max"}
+  ROOT %reduce_max.10 = f32[]{:T(128)} maximum(%reduce_max.8, %reduce_max.9), metadata={op_name="jit(attention)/reduce_max" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%region_1.2 (reduce_sum.0: f32[], reduce_sum.1: f32[]) -> f32[] {
+  %reduce_sum.1 = f32[]{:T(128)} parameter(1), metadata={op_name="jit(attention)/reduce_sum"}
+  %reduce_sum.0 = f32[]{:T(128)} parameter(0), metadata={op_name="jit(attention)/reduce_sum"}
+  ROOT %reduce_sum.2 = f32[]{:T(128)} add(%reduce_sum.0, %reduce_sum.1), metadata={op_name="jit(attention)/reduce_sum" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%fused_computation.13 (param_0.33: bf16[2,4,128,64], param_1.40: bf16[2,4,128,64], param_2.28: pred[128,128]) -> f32[2,4,128] {
+  %param_0.33 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(0)
+  %param_1.40 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} parameter(1)
+  %param_2.28 = pred[128,128]{0,1:T(8,128)(4,1)S(1)} parameter(2)
+  %fusion.4.clone.1.clone.1 = f32[2,4,128,128]{2,3,1,0:T(8,128)} fusion(%param_0.33, %param_1.40, %param_2.28), kind=kOutput, calls=%fused_computation.5.clone.clone.clone.clone, metadata={op_name="jit(attention)/bhqd,bhkd->bhqk/dot_general" stack_frame_id=6}
+  %constant.2.clone.5.clone.1 = f32[]{:T(128)} constant(-inf)
+  %reduce-window.5.clone.1 = f32[2,4,128,128]{2,3,1,0:T(8,128)} reduce-window(%fusion.4.clone.1.clone.1, %constant.2.clone.5.clone.1), window={size=1x1x1x255 pad=0_0x0_0x0_0x127_127}, to_apply=%region_0.1.clone, metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  %sub.10.clone.1 = f32[2,4,128,128]{2,3,1,0:T(8,128)} subtract(%fusion.4.clone.1.clone.1, %reduce-window.5.clone.1), metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  %exp.3.clone.1 = f32[2,4,128,128]{2,3,1,0:T(8,128)} exponential(%sub.10.clone.1), metadata={op_name="jit(attention)/exp" stack_frame_id=2}
+  %constant.3.clone.1 = f32[]{:T(128)} constant(0)
+  ROOT %reduce.2 = f32[2,4,128]{2,1,0:T(4,128)S(1)} reduce(%exp.3.clone.1, %constant.3.clone.1), dimensions={3}, to_apply=%region_1.2, metadata={op_name="jit(attention)/reduce_sum" stack_frame_id=2}
+}
+
+%bitcast_fusion (bitcast_input: bf16[2,4,128,64]) -> bf16[2,4,128,64] {
+  %bitcast_input = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(0)
+  ROOT %bitcast = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} bitcast(%bitcast_input)
+}
+
+%bitcast_fusion.4 (bitcast_input.4: bf16[2,4,128,64]) -> bf16[2,4,128,64] {
+  %bitcast_input.4 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(0)
+  ROOT %bitcast.4 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} bitcast(%bitcast_input.4)
+}
+
+%fused_computation.5 (param_0.19: bf16[2,4,128,64], param_1.22: bf16[2,4,128,64], param_2.22: pred[128,128]) -> f32[2,4,128,128] {
+  %param_2.22 = pred[128,128]{0,1:T(8,128)(4,1)S(1)} parameter(2)
+  %broadcast_in_dim.13 = pred[2,4,128,128]{2,3,1,0:T(8,128)(4,1)} broadcast(%param_2.22), dimensions={2,3}, metadata={op_name="jit(attention)/jit(_where)/broadcast_in_dim" stack_frame_id=5}
+  %param_0.19 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(0)
+  %fusion.11 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} fusion(%param_0.19), kind=kLoop, calls=%bitcast_fusion
+  %param_1.22 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(1)
+  %fusion.15 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} fusion(%param_1.22), kind=kLoop, calls=%bitcast_fusion.4
+  %convolution-base-dilated.7 = bf16[2,4,128,128]{2,3,1,0:T(8,128)(2,1)} convolution(%fusion.11, %fusion.15), window={size=2x4 stride=1x3 lhs_dilate=2x4}, dim_labels=01bf_01oi->01bf, metadata={op_name="jit(attention)/bhqd,bhkd->bhqk/dot_general" stack_frame_id=6}
+  %convert_element_type.10 = f32[2,4,128,128]{2,3,1,0:T(8,128)} convert(%convolution-base-dilated.7), metadata={op_name="jit(attention)/convert_element_type" stack_frame_id=6}
+  %constant.4.clone.5 = f32[]{:T(128)} constant(0.125)
+  %div.23 = f32[2,4,128,128]{2,3,1,0:T(8,128)} broadcast(%constant.4.clone.5), dimensions={}, metadata={op_name="jit(attention)/div" stack_frame_id=6}
+  %div.16 = f32[2,4,128,128]{2,3,1,0:T(8,128)} multiply(%convert_element_type.10, %div.23), metadata={op_name="jit(attention)/div" stack_frame_id=6}
+  %constant.1.clone.5 = f32[]{:T(128)} constant(-1e+09)
+  %broadcast_in_dim.12 = f32[2,4,128,128]{2,3,1,0:T(8,128)} broadcast(%constant.1.clone.5), dimensions={}, metadata={op_name="jit(attention)/jit(_where)/broadcast_in_dim" stack_frame_id=5}
+  ROOT %select_n.4 = f32[2,4,128,128]{2,3,1,0:T(8,128)S(1)} select(%broadcast_in_dim.13, %div.16, %broadcast_in_dim.12), metadata={op_name="jit(attention)/jit(_where)/select_n" stack_frame_id=5}
+}
+
+%bitcast_fusion.1 (bitcast_input.1: bf16[2,4,128,64]) -> bf16[2,4,128,64] {
+  %bitcast_input.1 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(0)
+  ROOT %bitcast.1 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} bitcast(%bitcast_input.1)
+}
+
+%bitcast_fusion.2 (bitcast_input.2: f32[2,4,128,128]) -> f32[2,4,128,128] {
+  %bitcast_input.2 = f32[2,4,128,128]{2,3,1,0:T(8,128)S(1)} parameter(0)
+  ROOT %bitcast.2 = f32[2,4,128,128]{2,3,1,0:T(8,128)} bitcast(%bitcast_input.2)
+}
+
+%region_0.1 (reduce_max.0: f32[], reduce_max.1: f32[]) -> f32[] {
+  %reduce_max.1 = f32[]{:T(128)} parameter(1), metadata={op_name="jit(attention)/reduce_max"}
+  %reduce_max.0 = f32[]{:T(128)} parameter(0), metadata={op_name="jit(attention)/reduce_max"}
+  ROOT %reduce_max.2 = f32[]{:T(128)} maximum(%reduce_max.0, %reduce_max.1), metadata={op_name="jit(attention)/reduce_max" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%fused_computation.6.clone (param_0.24: f32[2,4,128], param_1.29: f32[2,4,128,128]) -> bf16[2,4,128,128] {
+  %param_1.29 = f32[2,4,128,128]{2,3,1,0:T(8,128)S(1)} parameter(1)
+  %fusion.13 = f32[2,4,128,128]{2,3,1,0:T(8,128)} fusion(%param_1.29), kind=kLoop, calls=%bitcast_fusion.2
+  %constant.2.clone.4 = f32[]{:T(128)} constant(-inf)
+  %reduce-window.9 = f32[2,4,128,128]{2,3,1,0:T(8,128)} reduce-window(%fusion.13, %constant.2.clone.4), window={size=1x1x1x255 pad=0_0x0_0x0_0x127_127}, to_apply=%region_0.1, metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  %sub.14 = f32[2,4,128,128]{2,3,1,0:T(8,128)} subtract(%param_1.29, %reduce-window.9), metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  %exp.7 = f32[2,4,128,128]{2,3,1,0:T(8,128)} exponential(%sub.14), metadata={op_name="jit(attention)/exp" stack_frame_id=2}
+  %param_0.24 = f32[2,4,128]{2,1,0:T(4,128)S(1)} parameter(0)
+  %div.22 = f32[2,4,128,128]{2,3,1,0:T(8,128)} broadcast(%param_0.24), dimensions={0,1,2}, metadata={op_name="jit(attention)/div" stack_frame_id=2}
+  %div.18 = f32[2,4,128,128]{2,3,1,0:T(8,128)} divide(%exp.7, %div.22), metadata={op_name="jit(attention)/div" stack_frame_id=2}
+  ROOT %convert_element_type.12 = bf16[2,4,128,128]{2,3,1,0:T(8,128)(2,1)} convert(%div.18), metadata={op_name="jit(attention)/convert_element_type" stack_frame_id=2}
+}
+
+%fused_computation.7 (param_0.15: bf16[2,4,128,64], param_1.26: f32[2,4,128], param_2.10: f32[2,4,128,128]) -> bf16[2,4,128,64] {
+  %param_0.15 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} parameter(0)
+  %fusion.12 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} fusion(%param_0.15), kind=kLoop, calls=%bitcast_fusion.1
+  %param_1.26 = f32[2,4,128]{2,1,0:T(4,128)S(1)} parameter(1)
+  %param_2.10 = f32[2,4,128,128]{2,3,1,0:T(8,128)S(1)} parameter(2)
+  %divide_convert_fusion.1 = bf16[2,4,128,128]{2,3,1,0:T(8,128)(2,1)} fusion(%param_1.26, %param_2.10), kind=kOutput, calls=%fused_computation.6.clone, metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  ROOT %convolution-base-dilated.8 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} convolution(%fusion.12, %divide_convert_fusion.1), window={size=2x4 stride=2x4 pad=1_1x3_3 lhs_dilate=1x3 rhs_reversal=1x1}, dim_labels=01fb_01oi->01fb, metadata={op_name="jit(attention)/bhqk,bhkd->bhqd/dot_general" stack_frame_id=4}
+}
+
+ENTRY %main.3_spmd (param: bf16[2,4,128,64], param.1: bf16[2,4,128,64], param.2: bf16[2,4,128,64]) -> bf16[2,4,128,64] {
+  %param = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} parameter(0), sharding={replicated}, metadata={op_name="q"}
+  %copy-start = (bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)}, bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)}, u32[]{:S(2)}) copy-start(%param), cross_program_prefetch_index=0, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %param.1 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} parameter(1), sharding={replicated}, metadata={op_name="k"}
+  %param.2 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} parameter(2), sharding={replicated}, metadata={op_name="v"}
+  %iota_compare_fusion = pred[128,128]{0,1:T(8,128)(4,1)S(1)} fusion(), kind=kLoop, calls=%fused_computation.9, metadata={op_name="jit(attention)/ge" stack_frame_id=3}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["16","1"],"input_window_bounds":[],"estimated_cycles":"2206","iteration_bounds":["1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %copy-done = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} copy-done(%copy-start), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %copy-start.1 = (bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)}, bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)}, u32[]{:S(2)}) copy-start(%param.1), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %fusion.10 = f32[2,4,128]{2,1,0:T(4,128)S(1)} fusion(%copy-done, %param.1, %iota_compare_fusion), kind=kOutput, calls=%fused_computation.13, metadata={op_name="jit(attention)/sub" stack_frame_id=2}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":["1","1","1","1"],"output_window_bounds":["2","4","16","1"],"input_window_bounds":["2","4","16","1"],"estimated_cycles":"5784","iteration_bounds":["1","1","1","1","1","1","1"],"cost_model_type":"COST_MODEL_TYPE_CLASSIC","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"327680"}],"retry_config":{"retry_count":"0"},"convolution_algorithm_config":{"emitter":"EmitReduceWindowSublane"},"aliasing_operands":{"lists":[]}}
+  %copy-done.1 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} copy-done(%copy-start.1), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %copy-start.2 = (bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)}, bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)}, u32[]{:S(2)}) copy-start(%param.2), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %fusion.4 = f32[2,4,128,128]{2,3,1,0:T(8,128)S(1)} fusion(%copy-done, %copy-done.1, %iota_compare_fusion), kind=kOutput, calls=%fused_computation.5, metadata={op_name="jit(attention)/bhqd,bhkd->bhqk/dot_general" stack_frame_id=6}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":["2","4","8","1"],"output_window_bounds":["2","4","16","1"],"input_window_bounds":["2","4","8","1"],"estimated_cycles":"1280","iteration_bounds":["1","1","1","1","1","1","1"],"cost_model_type":"COST_MODEL_TYPE_CLASSIC","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"convolution_algorithm_config":{"emitter":"EmitInputBatchInLanes"},"aliasing_operands":{"lists":[]}}
+  %copy-done.2 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)S(1)} copy-done(%copy-start.2), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  ROOT %fusion.5 = bf16[2,4,128,64]{2,3,1,0:T(8,128)(2,1)} fusion(%copy-done.2, %fusion.10, %fusion.4), kind=kOutput, calls=%fused_computation.7, metadata={op_name="jit(attention)/bhqk,bhkd->bhqd/dot_general" stack_frame_id=4}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":["2","4","16","1"],"output_window_bounds":["2","4","8","1"],"input_window_bounds":["2","4","8","1"],"estimated_cycles":"6221","iteration_bounds":["1","1","1","1","1","1","1"],"cost_model_type":"COST_MODEL_TYPE_CLASSIC","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"176128"}],"retry_config":{"retry_count":"0"},"convolution_algorithm_config":{"emitter":"EmitAllBatchInSublanes"},"aliasing_operands":{"lists":[]}}
+}
+

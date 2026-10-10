@@ -1,0 +1,144 @@
+HloModule jit_conv_pool, entry_computation_layout={(f32[8,32,32,16]{3,2,1,0}, f32[3,3,16,32]{3,2,1,0})->f32[8,16,16,32]{3,2,1,0}}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "conv_pool"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=63 end_line=63 column=11 end_column=33}
+3 {file_name_id=1 function_name_id=2 line=65 end_line=65 column=9 end_column=85}
+4 {file_name_id=1 function_name_id=2 line=66 end_line=66 column=10 end_column=85}
+5 {file_name_id=1 function_name_id=2 line=64 end_line=64 column=43 end_column=53}
+6 {file_name_id=1 function_name_id=2 line=62 end_line=62 column=8 end_column=98}
+7 {file_name_id=1 function_name_id=2 line=63 end_line=63 column=41 end_column=62}
+8 {file_name_id=1 function_name_id=2 line=64 end_line=64 column=21 end_column=29}
+9 {file_name_id=1 function_name_id=2 line=64 end_line=64 column=33 end_column=54}
+10 {file_name_id=1 function_name_id=2 line=64 end_line=64 column=20 end_column=54}
+11 {file_name_id=1 function_name_id=2 line=64 end_line=64 column=8 end_column=55}
+12 {file_name_id=1 function_name_id=2 line=67 end_line=67 column=11 end_column=19}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+8 {file_location_id=8 parent_frame_id=2}
+9 {file_location_id=9 parent_frame_id=2}
+10 {file_location_id=10 parent_frame_id=2}
+11 {file_location_id=11 parent_frame_id=2}
+12 {file_location_id=12 parent_frame_id=2}
+
+
+region_0.1 {
+  reduce_sum.3 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.4 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.5 = f32[] add(reduce_sum.3, reduce_sum.4), metadata={op_name="jit(conv_pool)/reduce_sum" stack_frame_id=2}
+}
+
+region_1.2 {
+  reduce_sum.10 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.11 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.12 = f32[] add(reduce_sum.10, reduce_sum.11), metadata={op_name="reduce_sum"}
+}
+
+region_2.3 {
+  reduce_sum.17 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.18 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.19 = f32[] add(reduce_sum.17, reduce_sum.18), metadata={op_name="reduce_sum"}
+}
+
+_where.4 {
+  Arg_0.2 = pred[] parameter(0)
+  select_n.2 = pred[32]{0} broadcast(Arg_0.2), dimensions={}, metadata={op_name="select_n"}
+  Arg_1.2 = f32[32]{0} parameter(1)
+  Arg_2.1 = f32[] parameter(2)
+  broadcast_in_dim.2 = f32[32]{0} broadcast(Arg_2.1), dimensions={}, metadata={op_name="broadcast_in_dim"}
+  ROOT select_n.3 = f32[32]{0} select(select_n.2, Arg_1.2, broadcast_in_dim.2), metadata={op_name="select_n"}
+}
+
+_var.5 {
+  constant.12 = f32[] constant(8192)
+  Arg_1.3 = s32[] parameter(1)
+  convert_element_type.1 = f32[] convert(Arg_1.3), metadata={op_name="convert_element_type"}
+  sub.9 = f32[] subtract(constant.12, convert_element_type.1), metadata={op_name="sub"}
+  constant.13 = f32[] constant(0)
+  gt.1 = pred[] compare(sub.9, constant.13), direction=GT, metadata={op_name="gt"}
+  Arg_0.3 = f32[8,32,32,32]{3,2,1,0} parameter(0)
+  reduce_sum.21 = f32[32]{0} reduce(Arg_0.3, constant.13), dimensions={0,1,2}, to_apply=region_1.2, metadata={op_name="reduce_sum"}
+  broadcast_in_dim.3 = f32[1,1,1,32]{3,2,1,0} reshape(reduce_sum.21), metadata={op_name="broadcast_in_dim"}
+  constant.10 = f32[] constant(8192)
+  div.7 = f32[1,1,1,32]{3,2,1,0} broadcast(constant.10), dimensions={}, metadata={op_name="div"}
+  div.8 = f32[1,1,1,32]{3,2,1,0} divide(broadcast_in_dim.3, div.7), metadata={op_name="div"}
+  sub.5 = f32[1,1,1,32]{3,2,1,0} broadcast(div.8), dimensions={0,1,2,3}, metadata={op_name="sub"}
+  sub.6 = f32[32]{0} reshape(sub.5), metadata={op_name="sub"}
+  sub.7 = f32[8,32,32,32]{3,2,1,0} broadcast(sub.6), dimensions={3}, metadata={op_name="sub"}
+  sub.8 = f32[8,32,32,32]{3,2,1,0} subtract(Arg_0.3, sub.7), metadata={op_name="sub"}
+  square.1 = f32[8,32,32,32]{3,2,1,0} multiply(sub.8, sub.8), metadata={op_name="square"}
+  reduce_sum.22 = f32[32]{0} reduce(square.1, constant.13), dimensions={0,1,2}, to_apply=region_2.3, metadata={op_name="reduce_sum"}
+  div.9 = f32[32]{0} broadcast(sub.9), dimensions={}, metadata={op_name="div"}
+  div.10 = f32[32]{0} divide(reduce_sum.22, div.9), metadata={op_name="div"}
+  constant.11 = f32[] constant(nan)
+  ROOT jit__where_.1 = f32[32]{0} call(gt.1, div.10, constant.11), to_apply=_where.4, metadata={op_name="jit(_where)"}
+}
+
+relu.6 {
+  Arg_0.5 = f32[8,32,32,32]{3,2,1,0} parameter(0)
+  constant.15 = f32[] constant(0)
+  max.2 = f32[8,32,32,32]{3,2,1,0} broadcast(constant.15), dimensions={}, metadata={op_name="max"}
+  ROOT max.3 = f32[8,32,32,32]{3,2,1,0} maximum(Arg_0.5, max.2), metadata={op_name="max"}
+}
+
+region_3.7 {
+  reduce_window_max.3 = f32[] parameter(0), metadata={op_name="reduce_window_max"}
+  reduce_window_max.4 = f32[] parameter(1), metadata={op_name="reduce_window_max"}
+  ROOT reduce_window_max.5 = f32[] maximum(reduce_window_max.3, reduce_window_max.4), metadata={op_name="jit(conv_pool)/reduce_window_max" stack_frame_id=3}
+}
+
+region_4.8 {
+  reduce_window_sum.3 = f32[] parameter(0), metadata={op_name="reduce_window_sum"}
+  reduce_window_sum.4 = f32[] parameter(1), metadata={op_name="reduce_window_sum"}
+  ROOT reduce_window_sum.5 = f32[] add(reduce_window_sum.3, reduce_window_sum.4), metadata={op_name="jit(conv_pool)/reduce_window_sum" stack_frame_id=4}
+}
+
+ENTRY main.9 {
+  x.1 = f32[8,32,32,16]{3,2,1,0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}, {}, {}]>"}, metadata={op_name="x"}
+  k.1 = f32[3,3,16,32]{3,2,1,0} parameter(1), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}, {}, {}]>"}, metadata={op_name="k"}
+  conv_general_dilated.1 = f32[8,32,32,32]{3,2,1,0} convolution(x.1, k.1), window={size=3x3 pad=1_1x1_1}, dim_labels=b01f_01io->b01f, metadata={op_name="jit(conv_pool)/conv_general_dilated" stack_frame_id=6}
+  constant.21 = f32[] constant(0)
+  reduce_sum.23 = f32[32]{0} reduce(conv_general_dilated.1, constant.21), dimensions={0,1,2}, to_apply=region_0.1, metadata={op_name="jit(conv_pool)/reduce_sum" stack_frame_id=2}
+  constant.19 = f32[] constant(8192)
+  div.13 = f32[32]{0} broadcast(constant.19), dimensions={}, metadata={op_name="jit(conv_pool)/div" stack_frame_id=2}
+  div.14 = f32[32]{0} divide(reduce_sum.23, div.13), metadata={op_name="jit(conv_pool)/div" stack_frame_id=2}
+  broadcast_in_dim.6 = f32[1,1,1,32]{3,2,1,0} reshape(div.14), metadata={op_name="jit(conv_pool)/broadcast_in_dim" stack_frame_id=8}
+  sub.14 = f32[1,1,1,32]{3,2,1,0} broadcast(broadcast_in_dim.6), dimensions={0,1,2,3}, metadata={op_name="jit(conv_pool)/sub" stack_frame_id=8}
+  sub.15 = f32[32]{0} reshape(sub.14), metadata={op_name="jit(conv_pool)/sub" stack_frame_id=8}
+  sub.16 = f32[8,32,32,32]{3,2,1,0} broadcast(sub.15), dimensions={3}, metadata={op_name="jit(conv_pool)/sub" stack_frame_id=8}
+  sub.17 = f32[8,32,32,32]{3,2,1,0} subtract(conv_general_dilated.1, sub.16), metadata={op_name="jit(conv_pool)/sub" stack_frame_id=8}
+  constant.20 = s32[] constant(0)
+  jit__var_.1 = f32[32]{0} call(conv_general_dilated.1, constant.20), to_apply=_var.5, metadata={op_name="jit(conv_pool)/jit(_var)" stack_frame_id=7}
+  constant.18 = f32[] constant(1e-05)
+  add.3 = f32[32]{0} broadcast(constant.18), dimensions={}, metadata={op_name="jit(conv_pool)/add" stack_frame_id=5}
+  add.4 = f32[32]{0} add(jit__var_.1, add.3), metadata={op_name="jit(conv_pool)/add" stack_frame_id=5}
+  rsqrt.1 = f32[32]{0} rsqrt(add.4), metadata={op_name="jit(conv_pool)/rsqrt" stack_frame_id=9}
+  broadcast_in_dim.7 = f32[1,1,1,32]{3,2,1,0} reshape(rsqrt.1), metadata={op_name="jit(conv_pool)/broadcast_in_dim" stack_frame_id=10}
+  mul.4 = f32[1,1,1,32]{3,2,1,0} broadcast(broadcast_in_dim.7), dimensions={0,1,2,3}, metadata={op_name="jit(conv_pool)/mul" stack_frame_id=10}
+  mul.5 = f32[32]{0} reshape(mul.4), metadata={op_name="jit(conv_pool)/mul" stack_frame_id=10}
+  mul.6 = f32[8,32,32,32]{3,2,1,0} broadcast(mul.5), dimensions={3}, metadata={op_name="jit(conv_pool)/mul" stack_frame_id=10}
+  mul.7 = f32[8,32,32,32]{3,2,1,0} multiply(sub.17, mul.6), metadata={op_name="jit(conv_pool)/mul" stack_frame_id=10}
+  jit_relu_.1 = f32[8,32,32,32]{3,2,1,0} call(mul.7), to_apply=relu.6, metadata={op_name="jit(conv_pool)/jit(relu)" stack_frame_id=11}
+  constant.17 = f32[] constant(-inf)
+  reduce_window_max.7 = f32[8,16,16,32]{3,2,1,0} reduce-window(jit_relu_.1, constant.17), window={size=1x2x2x1 stride=1x2x2x1}, to_apply=region_3.7, metadata={op_name="jit(conv_pool)/reduce_window_max" stack_frame_id=3}
+  reduce_window_sum.7 = f32[8,16,16,32]{3,2,1,0} reduce-window(jit_relu_.1, constant.21), window={size=1x2x2x1 stride=1x2x2x1}, to_apply=region_4.8, metadata={op_name="jit(conv_pool)/reduce_window_sum" stack_frame_id=4}
+  constant.16 = f32[] constant(4)
+  div.12 = f32[8,16,16,32]{3,2,1,0} broadcast(constant.16), dimensions={}, metadata={op_name="jit(conv_pool)/div" stack_frame_id=4}
+  div.15 = f32[8,16,16,32]{3,2,1,0} divide(reduce_window_sum.7, div.12), metadata={op_name="jit(conv_pool)/div" stack_frame_id=4}
+  ROOT add.5 = f32[8,16,16,32]{3,2,1,0} add(reduce_window_max.7, div.15), metadata={op_name="jit(conv_pool)/add" stack_frame_id=12}
+}
+

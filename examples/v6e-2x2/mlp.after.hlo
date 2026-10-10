@@ -1,0 +1,140 @@
+HloModule jit_mlp, is_scheduled=true, entry_computation_layout={(bf16[256,512]{1,0:T(8,128)(2,1)}, bf16[512,1024]{1,0:T(8,128)(2,1)}, bf16[1024]{0:T(1024)(128)(2,1)}, bf16[1024,128]{1,0:T(8,128)(2,1)})->f32[256,128]{1,0:T(8,128)}}, allow_spmd_sharding_propagation_to_parameters={false,false,false,false}, allow_spmd_sharding_propagation_to_output={true}, num_partitions=4, frontend_attributes={arg_layout_modes="default;default;default;default",arg_memory_spaces="0;0;0;0",out_layout_modes="default",out_memory_spaces="0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "mlp"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=18}
+2 {file_name_id=1 function_name_id=2 line=57 end_line=57 column=11 end_column=11}
+3 {file_name_id=1 function_name_id=2 line=57 end_line=57 column=26 end_column=26}
+4 {file_name_id=1 function_name_id=2 line=56 end_line=56 column=20 end_column=20}
+5 {file_name_id=1 function_name_id=2 line=56 end_line=56 column=8 end_column=8}
+6 {file_name_id=1 function_name_id=2 line=57 end_line=57 column=27 end_column=27}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+
+
+%bitcast_fusion (bitcast_input: bf16[256,512]) -> bf16[256,512] {
+  %bitcast_input = bf16[256,512]{1,0:T(8,128)(2,1)} parameter(0)
+  ROOT %bitcast = bf16[256,512]{1,0:T(8,128)(2,1)} bitcast(%bitcast_input)
+}
+
+%bitcast_fusion.2 (bitcast_input.2: bf16[512,1024]) -> bf16[512,1024] {
+  %bitcast_input.2 = bf16[512,1024]{1,0:T(8,128)(2,1)S(1)} parameter(0)
+  ROOT %bitcast.2 = bf16[512,1024]{1,0:T(8,128)(2,1)} bitcast(%bitcast_input.2)
+}
+
+%fused_computation.8.clone.clone.clone.clone (param_0.60: bf16[256,512], param_1.64: bf16[512,1024], param_2.51: bf16[1024]) -> bf16[256,1024] {
+  %param_0.60 = bf16[256,512]{1,0:T(8,128)(2,1)} parameter(0)
+  %fusion.20 = bf16[256,512]{1,0:T(8,128)(2,1)} fusion(%param_0.60), kind=kLoop, calls=%bitcast_fusion
+  %param_1.64 = bf16[512,1024]{1,0:T(8,128)(2,1)S(1)} parameter(1)
+  %fusion.22 = bf16[512,1024]{1,0:T(8,128)(2,1)} fusion(%param_1.64), kind=kLoop, calls=%bitcast_fusion.2
+  %convolution.9 = bf16[256,1024]{1,0:T(8,128)(2,1)} convolution(%fusion.20, %fusion.22), dim_labels=bf_io->bf, metadata={op_name="jit(mlp)/dot_general" stack_frame_id=4}
+  %convert.6 = f32[256,1024]{1,0:T(8,128)} convert(%convolution.9)
+  %param_2.51 = bf16[1024]{0:T(1024)(128)(2,1)} parameter(2)
+  %add.59 = bf16[256,1024]{1,0:T(8,128)(2,1)} broadcast(%param_2.51), dimensions={1}, metadata={op_name="jit(mlp)/add" stack_frame_id=4}
+  %convert.7 = f32[256,1024]{1,0:T(8,128)} convert(%add.59)
+  %add.57 = f32[256,1024]{1,0:T(8,128)} add(%convert.6, %convert.7), metadata={op_name="jit(mlp)/add" stack_frame_id=4}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %integer_pow.43 = f32[256,1024]{1,0:T(8,128)} multiply(%add.57, %add.57), metadata={op_name="jit(mlp)/integer_pow" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %integer_pow.42 = f32[256,1024]{1,0:T(8,128)} multiply(%integer_pow.43, %add.57), metadata={op_name="jit(mlp)/integer_pow" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %constant.6.clone.6 = bf16[]{:T(256)} constant(0.04468)
+  %mul.80 = bf16[256,1024]{1,0:T(8,128)(2,1)} broadcast(%constant.6.clone.6), dimensions={}, metadata={op_name="jit(mlp)/mul" stack_frame_id=5}
+  %convert.8 = f32[256,1024]{1,0:T(8,128)} convert(%mul.80)
+  %mul.77 = f32[256,1024]{1,0:T(8,128)} multiply(%integer_pow.42, %convert.8), metadata={op_name="jit(mlp)/mul" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %add.56 = f32[256,1024]{1,0:T(8,128)} add(%add.57, %mul.77), metadata={op_name="jit(mlp)/add" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %constant.1.clone.6 = bf16[]{:T(256)} constant(0.7969)
+  %mul.79 = bf16[256,1024]{1,0:T(8,128)(2,1)} broadcast(%constant.1.clone.6), dimensions={}, metadata={op_name="jit(mlp)/mul" stack_frame_id=5}
+  %convert.9 = f32[256,1024]{1,0:T(8,128)} convert(%mul.79)
+  %mul.76 = f32[256,1024]{1,0:T(8,128)} multiply(%add.56, %convert.9), metadata={op_name="jit(mlp)/mul" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %tanh.13 = f32[256,1024]{1,0:T(8,128)} tanh(%mul.76), metadata={op_name="jit(mlp)/tanh" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %constant.2.clone.6 = bf16[]{:T(256)} constant(1)
+  %add.58 = bf16[256,1024]{1,0:T(8,128)(2,1)} broadcast(%constant.2.clone.6), dimensions={}, metadata={op_name="jit(mlp)/add" stack_frame_id=5}
+  %convert.10 = f32[256,1024]{1,0:T(8,128)} convert(%add.58)
+  %add.55 = f32[256,1024]{1,0:T(8,128)} add(%tanh.13, %convert.10), metadata={op_name="jit(mlp)/add" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %constant.3.clone.6 = bf16[]{:T(256)} constant(0.5)
+  %mul.78 = bf16[256,1024]{1,0:T(8,128)(2,1)} broadcast(%constant.3.clone.6), dimensions={}, metadata={op_name="jit(mlp)/mul" stack_frame_id=5}
+  %convert.11 = f32[256,1024]{1,0:T(8,128)} convert(%mul.78)
+  %mul.75 = f32[256,1024]{1,0:T(8,128)} multiply(%add.55, %convert.11), metadata={op_name="jit(mlp)/mul" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  %mul.74 = f32[256,1024]{1,0:T(8,128)} multiply(%add.57, %mul.75), metadata={op_name="jit(mlp)/mul" stack_frame_id=5}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["256","1024"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  ROOT %convert.12 = bf16[256,1024]{1,0:T(8,128)(2,1)} convert(%mul.74)
+}
+
+%bitcast_fusion.1 (bitcast_input.1: bf16[1024,128]) -> bf16[1024,128] {
+  %bitcast_input.1 = bf16[1024,128]{1,0:T(8,128)(2,1)} parameter(0)
+  ROOT %bitcast.1 = bf16[1024,128]{1,0:T(8,128)(2,1)} bitcast(%bitcast_input.1)
+}
+
+%region_0.0 (reduce_max.6: bf16[], reduce_max.8: bf16[]) -> bf16[] {
+  %reduce_max.8 = bf16[]{:T(256)} parameter(1), metadata={op_name="jit(mlp)/reduce_max"}
+  %reduce_max.6 = bf16[]{:T(256)} parameter(0), metadata={op_name="jit(mlp)/reduce_max"}
+  ROOT %reduce_max.9 = bf16[]{:T(256)} maximum(%reduce_max.6, %reduce_max.8), metadata={op_name="jit(mlp)/reduce_max" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%fused_computation.22 (param_0.61: bf16[1024,128], param_1.66: bf16[256,512], param_2.53: bf16[512,1024], param_3.37: bf16[1024]) -> (bf16[256], bf16[256,128]) {
+  %param_1.66 = bf16[256,512]{1,0:T(8,128)(2,1)} parameter(1)
+  %param_2.53 = bf16[512,1024]{1,0:T(8,128)(2,1)S(1)} parameter(2)
+  %param_3.37 = bf16[1024]{0:T(1024)(128)(2,1)} parameter(3)
+  %fusion.6.clone.1.clone.1 = bf16[256,1024]{1,0:T(8,128)(2,1)} fusion(%param_1.66, %param_2.53, %param_3.37), kind=kOutput, calls=%fused_computation.8.clone.clone.clone.clone, metadata={op_name="jit(mlp)/dot_general" stack_frame_id=4}
+  %param_0.61 = bf16[1024,128]{1,0:T(8,128)(2,1)} parameter(0)
+  %fusion.21 = bf16[1024,128]{1,0:T(8,128)(2,1)} fusion(%param_0.61), kind=kLoop, calls=%bitcast_fusion.1
+  %convolution.6.clone.1 = bf16[256,128]{0,1:T(8,128)(2,1)S(1)} convolution(%fusion.6.clone.1.clone.1, %fusion.21), dim_labels=bf_io->bf, metadata={op_name="jit(mlp)/dot_general" stack_frame_id=6}
+  %constant.4.clone.1 = bf16[]{:T(256)} constant(-inf)
+  %reduce.4 = bf16[256]{0:T(256)(128)(2,1)S(1)} reduce(%convolution.6.clone.1, %constant.4.clone.1), dimensions={1}, to_apply=%region_0.0, metadata={op_name="jit(mlp)/reduce_max" stack_frame_id=2}
+  ROOT %tuple = (bf16[256]{0:T(256)(128)(2,1)S(1)}, bf16[256,128]{0,1:T(8,128)(2,1)S(1)}) tuple(%reduce.4, %convolution.6.clone.1)
+}
+
+%region_1.0 (reduce_sum.0: f32[], reduce_sum.1: f32[]) -> f32[] {
+  %reduce_sum.1 = f32[]{:T(128)} parameter(1), metadata={op_name="jit(mlp)/reduce_sum"}
+  %reduce_sum.0 = f32[]{:T(128)} parameter(0), metadata={op_name="jit(mlp)/reduce_sum"}
+  ROOT %reduce_sum.2 = f32[]{:T(128)} add(%reduce_sum.0, %reduce_sum.1), metadata={op_name="jit(mlp)/reduce_sum" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%fused_computation.17 (param_0.56: bf16[256,128], param_1.60: f32[256]) -> f32[256] {
+  %param_0.56 = bf16[256,128]{0,1:T(8,128)(2,1)S(1)} parameter(0)
+  %convert_element_type.7 = f32[256,128]{0,1:T(8,128)} convert(%param_0.56), metadata={op_name="jit(mlp)/convert_element_type" stack_frame_id=3}
+  %param_1.60 = f32[256]{0:T(256)S(1)} parameter(1)
+  %sub.14 = f32[256,128]{0,1:T(8,128)} broadcast(%param_1.60), dimensions={0}, metadata={op_name="jit(mlp)/sub" stack_frame_id=2}
+  %sub.12 = f32[256,128]{0,1:T(8,128)} subtract(%convert_element_type.7, %sub.14), metadata={op_name="jit(mlp)/sub" stack_frame_id=2}
+  %exp.7 = f32[256,128]{0,1:T(8,128)} exponential(%sub.12), metadata={op_name="jit(mlp)/exp" stack_frame_id=2}
+  %constant.5.clone.1 = f32[]{:T(128)} constant(0)
+  ROOT %reduce.3 = f32[256]{0:T(256)S(1)} reduce(%exp.7, %constant.5.clone.1), dimensions={1}, to_apply=%region_1.0, metadata={op_name="jit(mlp)/reduce_sum" stack_frame_id=2}
+}
+
+%fused_computation.16 (param_0.55: bf16[256,128], param_1.58: f32[256], param_2.43: f32[256]) -> f32[256,128] {
+  %param_0.55 = bf16[256,128]{0,1:T(8,128)(2,1)S(1)} parameter(0)
+  %convert_element_type.5 = f32[256,128]{0,1:T(8,128)} convert(%param_0.55), metadata={op_name="jit(mlp)/convert_element_type" stack_frame_id=3}
+  %param_2.43 = f32[256]{0:T(256)S(1)} parameter(2)
+  %sub.13 = f32[256,128]{0,1:T(8,128)} broadcast(%param_2.43), dimensions={0}, metadata={op_name="jit(mlp)/sub" stack_frame_id=2}
+  %sub.10 = f32[256,128]{0,1:T(8,128)} subtract(%convert_element_type.5, %sub.13), metadata={op_name="jit(mlp)/sub" stack_frame_id=2}
+  %exp.5 = f32[256,128]{0,1:T(8,128)} exponential(%sub.10), metadata={op_name="jit(mlp)/exp" stack_frame_id=2}
+  %param_1.58 = f32[256]{0:T(256)S(1)} parameter(1)
+  %div.9 = f32[256,128]{0,1:T(8,128)} broadcast(%param_1.58), dimensions={0}, metadata={op_name="jit(mlp)/div" stack_frame_id=2}
+  ROOT %div.8 = f32[256,128]{0,1:T(8,128)S(1)} divide(%exp.5, %div.9), metadata={op_name="jit(mlp)/div" stack_frame_id=2}
+}
+
+ENTRY %main.0_spmd (param: bf16[256,512], param.1: bf16[512,1024], param.2: bf16[1024], param.3: bf16[1024,128]) -> f32[256,128] {
+  %param.1 = bf16[512,1024]{1,0:T(8,128)(2,1)} parameter(1), sharding={replicated}, metadata={op_name="w1"}
+  %copy-start = (bf16[512,1024]{1,0:T(8,128)(2,1)S(1)}, bf16[512,1024]{1,0:T(8,128)(2,1)}, u32[]{:S(2)}) copy-start(%param.1), cross_program_prefetch_index=0, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %param.3 = bf16[1024,128]{1,0:T(8,128)(2,1)} parameter(3), sharding={replicated}, metadata={op_name="w2"}
+  %param.2 = bf16[1024]{0:T(1024)(128)(2,1)} parameter(2), sharding={mesh[], replicated}, metadata={op_name="b1"}
+  %param = bf16[256,512]{1,0:T(8,128)(2,1)} parameter(0), sharding={replicated}, metadata={op_name="x"}
+  %copy-done = bf16[512,1024]{1,0:T(8,128)(2,1)S(1)} copy-done(%copy-start), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %fusion.19 = (bf16[256]{0:T(256)(128)(2,1)S(1)}, bf16[256,128]{0,1:T(8,128)(2,1)S(1)}) fusion(%param.3, %param, %copy-done, %param.2), kind=kOutput, calls=%fused_computation.22, metadata={op_name="jit(mlp)/dot_general" stack_frame_id=6}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":["128","1"],"output_window_bounds":["16","2"],"input_window_bounds":["32","8"],"estimated_cycles":"6718","iteration_bounds":["1","1","1"],"cost_model_type":"COST_MODEL_TYPE_CLASSIC","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"1189888"}],"retry_config":{"retry_count":"0"},"convolution_algorithm_config":{"emitter":"EmitOutputBatchInLanesKernelOutputFeatureInLanes"},"aliasing_operands":{"lists":[]}}
+  %get-tuple-element.1 = bf16[256,128]{0,1:T(8,128)(2,1)S(1)} get-tuple-element(%fusion.19), index=1, metadata={op_name="jit(mlp)/reduce_max" stack_frame_id=2}
+  %get-tuple-element = bf16[256]{0:T(256)(128)(2,1)S(1)} get-tuple-element(%fusion.19), index=0, metadata={op_name="jit(mlp)/reduce_max" stack_frame_id=2}
+  %reduce_max.12 = f32[256]{0:T(256)S(1)} convert(%get-tuple-element), metadata={op_name="jit(mlp)/reduce_max" stack_frame_id=2}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["1"],"input_window_bounds":[],"estimated_cycles":"2120","iteration_bounds":["1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %fusion.14 = f32[256]{0:T(256)S(1)} fusion(%get-tuple-element.1, %reduce_max.12), kind=kLoop, calls=%fused_computation.17, metadata={op_name="jit(mlp)/reduce_sum" stack_frame_id=2}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["16","2"],"input_window_bounds":[],"estimated_cycles":"2310","iteration_bounds":["1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"4096"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %fusion.13 = f32[256,128]{0,1:T(8,128)S(1)} fusion(%get-tuple-element.1, %fusion.14, %reduce_max.12), kind=kLoop, calls=%fused_computation.16, metadata={op_name="jit(mlp)/div" stack_frame_id=2}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["16","2"],"input_window_bounds":[],"estimated_cycles":"2188","iteration_bounds":["1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  ROOT %copy = f32[256,128]{1,0:T(8,128)} copy(%fusion.13), metadata={op_name="jit(mlp)/div" stack_frame_id=2}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["32","1"],"input_window_bounds":["16","2"],"estimated_cycles":"2340","iteration_bounds":["1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"0"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"131072"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+}
+

@@ -1,0 +1,93 @@
+HloModule jit_attention, entry_computation_layout={(bf16[2,4,128,64]{3,2,1,0}, bf16[2,4,128,64]{3,2,1,0}, bf16[2,4,128,64]{3,2,1,0})->bf16[2,4,128,64]{3,2,1,0}}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "attention"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=85 end_line=85 column=8 end_column=34}
+3 {file_name_id=1 function_name_id=2 line=82 end_line=82 column=8 end_column=61}
+4 {file_name_id=1 function_name_id=2 line=83 end_line=83 column=11 end_column=26}
+5 {file_name_id=1 function_name_id=2 line=83 end_line=83 column=39 end_column=54}
+6 {file_name_id=1 function_name_id=2 line=84 end_line=84 column=8 end_column=32}
+7 {file_name_id=1 function_name_id=2 line=86 end_line=86 column=11 end_column=46}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+
+
+_where.1 {
+  Arg_0.1 = pred[128,128]{1,0} parameter(0)
+  broadcast_in_dim.4 = pred[2,4,128,128]{3,2,1,0} broadcast(Arg_0.1), dimensions={2,3}, metadata={op_name="broadcast_in_dim"}
+  Arg_1.1 = f32[2,4,128,128]{3,2,1,0} parameter(1)
+  Arg_2.1 = f32[] parameter(2)
+  broadcast_in_dim.5 = f32[2,4,128,128]{3,2,1,0} broadcast(Arg_2.1), dimensions={}, metadata={op_name="broadcast_in_dim"}
+  ROOT select_n.1 = f32[2,4,128,128]{3,2,1,0} select(broadcast_in_dim.4, Arg_1.1, broadcast_in_dim.5), metadata={op_name="select_n"}
+}
+
+region_0.2 {
+  reduce_max.3 = f32[] parameter(0), metadata={op_name="reduce_max"}
+  reduce_max.4 = f32[] parameter(1), metadata={op_name="reduce_max"}
+  ROOT reduce_max.5 = f32[] maximum(reduce_max.3, reduce_max.4), metadata={op_name="jit(attention)/reduce_max" stack_frame_id=2}
+}
+
+region_1.3 {
+  reduce_sum.3 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.4 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.5 = f32[] add(reduce_sum.3, reduce_sum.4), metadata={op_name="jit(attention)/reduce_sum" stack_frame_id=2}
+}
+
+ENTRY main.4 {
+  iota.2 = s32[128]{0} iota(), iota_dimension=0, metadata={op_name="jit(attention)/iota" stack_frame_id=4}
+  broadcast_in_dim.8 = s32[128,1]{1,0} reshape(iota.2), metadata={op_name="jit(attention)/broadcast_in_dim" stack_frame_id=4}
+  ge.7 = s32[128,1]{1,0} broadcast(broadcast_in_dim.8), dimensions={0,1}, metadata={op_name="jit(attention)/ge" stack_frame_id=4}
+  ge.8 = s32[128]{0} reshape(ge.7), metadata={op_name="jit(attention)/ge" stack_frame_id=4}
+  ge.9 = s32[128,128]{1,0} broadcast(ge.8), dimensions={0}, metadata={op_name="jit(attention)/ge" stack_frame_id=4}
+  iota.3 = s32[128]{0} iota(), iota_dimension=0, metadata={op_name="jit(attention)/iota" stack_frame_id=5}
+  broadcast_in_dim.9 = s32[1,128]{1,0} reshape(iota.3), metadata={op_name="jit(attention)/broadcast_in_dim" stack_frame_id=5}
+  ge.10 = s32[1,128]{1,0} broadcast(broadcast_in_dim.9), dimensions={0,1}, metadata={op_name="jit(attention)/ge" stack_frame_id=4}
+  ge.11 = s32[128]{0} reshape(ge.10), metadata={op_name="jit(attention)/ge" stack_frame_id=4}
+  ge.12 = s32[128,128]{1,0} broadcast(ge.11), dimensions={1}, metadata={op_name="jit(attention)/ge" stack_frame_id=4}
+  ge.13 = pred[128,128]{1,0} compare(ge.9, ge.12), direction=GE, metadata={op_name="jit(attention)/ge" stack_frame_id=4}
+  q.1 = bf16[2,4,128,64]{3,2,1,0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}, {}, {}]>"}, metadata={op_name="q"}
+  k.1 = bf16[2,4,128,64]{3,2,1,0} parameter(1), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}, {}, {}]>"}, metadata={op_name="k"}
+  dot_general.2 = bf16[2,4,128,128]{3,2,1,0} dot(q.1, k.1), lhs_batch_dims={0,1}, lhs_contracting_dims={3}, rhs_batch_dims={0,1}, rhs_contracting_dims={3}, metadata={op_name="jit(attention)/bhqd,bhkd->bhqk/dot_general" stack_frame_id=3}
+  convert_element_type.2 = f32[2,4,128,128]{3,2,1,0} convert(dot_general.2), metadata={op_name="jit(attention)/convert_element_type" stack_frame_id=3}
+  constant.6 = f32[] constant(8)
+  div.6 = f32[2,4,128,128]{3,2,1,0} broadcast(constant.6), dimensions={}, metadata={op_name="jit(attention)/div" stack_frame_id=3}
+  div.7 = f32[2,4,128,128]{3,2,1,0} divide(convert_element_type.2, div.6), metadata={op_name="jit(attention)/div" stack_frame_id=3}
+  constant.9 = f32[] constant(-1e+09)
+  jit__where_.1 = f32[2,4,128,128]{3,2,1,0} call(ge.13, div.7, constant.9), to_apply=_where.1, metadata={op_name="jit(attention)/jit(_where)" stack_frame_id=6}
+  constant.8 = f32[] constant(-inf)
+  reduce_max.7 = f32[2,4,128]{2,1,0} reduce(jit__where_.1, constant.8), dimensions={3}, to_apply=region_0.2, metadata={op_name="jit(attention)/reduce_max" stack_frame_id=2}
+  constant.5 = f32[] constant(-inf)
+  max.2 = f32[2,4,128]{2,1,0} broadcast(constant.5), dimensions={}, metadata={op_name="jit(attention)/max" stack_frame_id=2}
+  max.3 = f32[2,4,128]{2,1,0} maximum(reduce_max.7, max.2), metadata={op_name="jit(attention)/max" stack_frame_id=2}
+  broadcast_in_dim.10 = f32[2,4,128,1]{3,2,1,0} reshape(max.3), metadata={op_name="jit(attention)/broadcast_in_dim" stack_frame_id=2}
+  sub.4 = f32[2,4,128,1]{3,2,1,0} broadcast(broadcast_in_dim.10), dimensions={0,1,2,3}, metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  sub.5 = f32[2,4,128]{2,1,0} reshape(sub.4), metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  sub.6 = f32[2,4,128,128]{3,2,1,0} broadcast(sub.5), dimensions={0,1,2}, metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  sub.7 = f32[2,4,128,128]{3,2,1,0} subtract(jit__where_.1, sub.6), metadata={op_name="jit(attention)/sub" stack_frame_id=2}
+  exp.1 = f32[2,4,128,128]{3,2,1,0} exponential(sub.7), metadata={op_name="jit(attention)/exp" stack_frame_id=2}
+  constant.7 = f32[] constant(0)
+  reduce_sum.7 = f32[2,4,128]{2,1,0} reduce(exp.1, constant.7), dimensions={3}, to_apply=region_1.3, metadata={op_name="jit(attention)/reduce_sum" stack_frame_id=2}
+  broadcast_in_dim.11 = f32[2,4,128,1]{3,2,1,0} reshape(reduce_sum.7), metadata={op_name="jit(attention)/broadcast_in_dim" stack_frame_id=2}
+  div.8 = f32[2,4,128,1]{3,2,1,0} broadcast(broadcast_in_dim.11), dimensions={0,1,2,3}, metadata={op_name="jit(attention)/div" stack_frame_id=2}
+  div.9 = f32[2,4,128]{2,1,0} reshape(div.8), metadata={op_name="jit(attention)/div" stack_frame_id=2}
+  div.10 = f32[2,4,128,128]{3,2,1,0} broadcast(div.9), dimensions={0,1,2}, metadata={op_name="jit(attention)/div" stack_frame_id=2}
+  div.11 = f32[2,4,128,128]{3,2,1,0} divide(exp.1, div.10), metadata={op_name="jit(attention)/div" stack_frame_id=2}
+  convert_element_type.3 = bf16[2,4,128,128]{3,2,1,0} convert(div.11), metadata={op_name="jit(attention)/convert_element_type" stack_frame_id=2}
+  v.1 = bf16[2,4,128,64]{3,2,1,0} parameter(2), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}, {}, {}]>"}, metadata={op_name="v"}
+  ROOT dot_general.3 = bf16[2,4,128,64]{3,2,1,0} dot(convert_element_type.3, v.1), lhs_batch_dims={0,1}, lhs_contracting_dims={3}, rhs_batch_dims={0,1}, rhs_contracting_dims={2}, metadata={op_name="jit(attention)/bhqk,bhkd->bhqd/dot_general" stack_frame_id=7}
+}
+

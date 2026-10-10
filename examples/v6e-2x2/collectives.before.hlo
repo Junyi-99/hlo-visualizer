@@ -1,0 +1,69 @@
+HloModule jit_collectives, entry_computation_layout={(f32[1,64]{1,0})->(f32[1,64]{1,0}, f32[1,64]{1,0}, f32[1,1,64]{2,1,0}, s32[1]{0})}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=1]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "collectives.<locals>.<lambda>"
+2 "<module>"
+3 "collectives"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=187 end_line=187 column=28 end_column=44}
+2 {file_name_id=1 function_name_id=1 line=187 end_line=187 column=46 end_column=62}
+3 {file_name_id=1 function_name_id=1 line=187 end_line=187 column=64 end_column=86}
+4 {file_name_id=1 function_name_id=1 line=187 end_line=187 column=88 end_column=107}
+5 {file_name_id=1 function_name_id=2 line=255 end_line=255 column=18 end_column=73}
+6 {file_name_id=1 function_name_id=3 line=189 end_line=189 column=11 end_column=15}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=1 parent_frame_id=2}
+3 {file_location_id=2 parent_frame_id=1}
+4 {file_location_id=2 parent_frame_id=4}
+5 {file_location_id=3 parent_frame_id=1}
+6 {file_location_id=4 parent_frame_id=1}
+7 {file_location_id=5 parent_frame_id=1}
+8 {file_location_id=6 parent_frame_id=8}
+
+
+region_0.1 {
+  psum.2 = f32[] parameter(0), metadata={op_name="psum"}
+  psum.3 = f32[] parameter(1), metadata={op_name="psum"}
+  ROOT add.1 = f32[] add(psum.2, psum.3), metadata={op_name="add" stack_frame_id=2}
+}
+
+region_1.2 {
+  pmax.2 = f32[] parameter(0), metadata={op_name="pmax"}
+  pmax.3 = f32[] parameter(1), metadata={op_name="pmax"}
+  ROOT max.1 = f32[] maximum(pmax.2, pmax.3), metadata={op_name="max" stack_frame_id=4}
+}
+
+_fun.3 {
+  Arg_0.1 = f32[1,64]{1,0} parameter(0)
+  squeeze.1 = f32[64]{0} reshape(Arg_0.1), metadata={op_name="squeeze"}
+  psum.5 = f32[64]{0} all-reduce(squeeze.1), channel_id=1, replica_groups={{0}}, use_global_device_ids=true, to_apply=region_0.1, metadata={op_name="psum" stack_frame_id=1}
+  broadcast_in_dim.4 = f32[1,64]{1,0} reshape(psum.5), metadata={op_name="broadcast_in_dim"}
+  pmax.5 = f32[64]{0} all-reduce(squeeze.1), channel_id=1, replica_groups={{0}}, use_global_device_ids=true, to_apply=region_1.2, metadata={op_name="pmax" stack_frame_id=3}
+  broadcast_in_dim.5 = f32[1,64]{1,0} reshape(pmax.5), metadata={op_name="broadcast_in_dim"}
+  all_gather.1 = f32[1,64]{1,0} all-gather(Arg_0.1), channel_id=1, replica_groups={{0}}, dimensions={0}, use_global_device_ids=true, metadata={op_name="all_gather" stack_frame_id=5}
+  broadcast_in_dim.6 = f32[1,1,64]{2,1,0} reshape(all_gather.1), metadata={op_name="broadcast_in_dim"}
+  axis_index.4 = u32[] partition-id(), metadata={op_name="axis_index" stack_frame_id=6}
+  constant.1 = u32[] constant(1)
+  axis_index.5 = u32[] divide(axis_index.4, constant.1), metadata={op_name="axis_index" stack_frame_id=6}
+  axis_index.6 = u32[] remainder(axis_index.5, constant.1), metadata={op_name="axis_index" stack_frame_id=6}
+  axis_index.7 = s32[] convert(axis_index.6), metadata={op_name="axis_index" stack_frame_id=6}
+  broadcast_in_dim.7 = s32[1]{0} reshape(axis_index.7), metadata={op_name="broadcast_in_dim"}
+  ROOT tuple.1 = (f32[1,64]{1,0}, f32[1,64]{1,0}, f32[1,1,64]{2,1,0}, s32[1]{0}) tuple(broadcast_in_dim.4, broadcast_in_dim.5, broadcast_in_dim.6, broadcast_in_dim.7)
+}
+
+ENTRY main.4 {
+  x.1 = f32[1,64]{1,0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="x"}
+  jit__fun_.5 = (f32[1,64]{1,0}, f32[1,64]{1,0}, f32[1,1,64]{2,1,0}, s32[1]{0}) call(x.1), to_apply=_fun.3, metadata={op_name="jit(collectives)/jit(_fun)" stack_frame_id=8}
+  jit__fun_.6 = f32[1,64]{1,0} get-tuple-element(jit__fun_.5), index=0, metadata={op_name="jit(collectives)/jit(_fun)" stack_frame_id=8}
+  jit__fun_.7 = f32[1,64]{1,0} get-tuple-element(jit__fun_.5), index=1, metadata={op_name="jit(collectives)/jit(_fun)" stack_frame_id=8}
+  jit__fun_.8 = f32[1,1,64]{2,1,0} get-tuple-element(jit__fun_.5), index=2, metadata={op_name="jit(collectives)/jit(_fun)" stack_frame_id=8}
+  jit__fun_.9 = s32[1]{0} get-tuple-element(jit__fun_.5), index=3, metadata={op_name="jit(collectives)/jit(_fun)" stack_frame_id=8}
+  ROOT tuple.3 = (f32[1,64]{1,0}, f32[1,64]{1,0}, f32[1,1,64]{2,1,0}, s32[1]{0}) tuple(jit__fun_.6, jit__fun_.7, jit__fun_.8, jit__fun_.9)
+}
+

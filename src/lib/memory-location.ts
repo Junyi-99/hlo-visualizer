@@ -68,7 +68,7 @@ export function bufferStatus(module: HloModule, computation: Computation, node: 
 }
 
 // Memory locations to show for a node, or [] when the HLO text cannot tell us one.
-// Checked against XLA's buffer assignment for every compiled example (examples/tpu-v6e/*.after.memory.json).
+// Checked against XLA's buffer assignment for every compiled example (examples/v6e-1/*.after.memory.json).
 export function nodeMemoryLocations(module: HloModule, computation: Computation, node: HloNode): MemoryLocation[] {
   return bufferStatus(module, computation, node) === 'buffer' ? memoryLocations(node.type) : [];
 }

@@ -1,0 +1,32 @@
+HloModule jit_int8_quant, entry_computation_layout={(s8[8,12]{1,0}, bf16[8,12]{1,0})->(f32[8,8]{1,0}, s32[12]{0})}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "int8_quant"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=206 end_line=206 column=8 end_column=22}
+3 {file_name_id=1 function_name_id=2 line=207 end_line=207 column=11 end_column=68}
+4 {file_name_id=1 function_name_id=2 line=207 end_line=207 column=70 end_column=93}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+
+
+ENTRY main.1 {
+  q.1 = s8[8,12]{1,0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="q"}
+  convert_element_type.1 = bf16[8,12]{1,0} convert(q.1), metadata={op_name="jit(int8_quant)/convert_element_type" stack_frame_id=2}
+  scale.1 = bf16[8,12]{1,0} parameter(1), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="scale"}
+  mul.1 = bf16[8,12]{1,0} multiply(convert_element_type.1, scale.1), metadata={op_name="jit(int8_quant)/mul" stack_frame_id=2}
+  dot_general.1 = f32[8,8]{1,0} dot(mul.1, mul.1), lhs_contracting_dims={1}, rhs_contracting_dims={1}, metadata={op_name="jit(int8_quant)/ij,kj->ik/dot_general" stack_frame_id=3}
+  iota.1 = s32[12]{0} iota(), iota_dimension=0, metadata={op_name="jit(int8_quant)/iota" stack_frame_id=4}
+  ROOT tuple.1 = (f32[8,8]{1,0}, s32[12]{0}) tuple(dot_general.1, iota.1)
+}
+

@@ -12,7 +12,7 @@ Set LLO_DUMP_DIR to the same dump directory to copy final bundle files into OUT/
 Also writes XLA's own dumps to OUT/xla_dump (buffer assignment included), from the same compilation,
 for scripts/extract_memory_truth.py. Compilation is not byte-identical across runs, so always take
 the examples and the memory ground truth from one run.
-The files in examples/tpu-v6e were produced on a v6e-1 with JAX 0.11.2.
+The files in examples/v6e-1 were produced on a v6e-1 with JAX 0.11.2.
 """
 
 import glob

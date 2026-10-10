@@ -9,7 +9,7 @@ import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
 import { useStoredState } from './hooks/useStoredState';
 import { groupCopyPairs } from './lib/copy-grouping';
-import { examples } from './lib/examples';
+import { findExample } from './lib/examples';
 import { lloExamples, type LloExample } from './llo/examples';
 import { clampZoom, type LayoutMode } from './lib/graph-layout';
 import { parseHlo, reachable } from './lib/parser';
@@ -100,11 +100,10 @@ export default function App() {
   }, []);
 
   const loadExample = useCallback(
-    (id: string) =>
-      examples
-        .find(item => item.id === id)
-        ?.load()
-        .then(source => loadText(source, id)),
+    (id: string) => {
+      const example = findExample(id);
+      return example?.load().then(source => loadText(source, example.id));
+    },
     [loadText]
   );
 
@@ -175,16 +174,12 @@ export default function App() {
     onExample: (id: string) => void loadExample(id)
   };
 
-  // LLO programs compiled from this HLO example, one per instruction (v6e-1 matches the shipped HLO dumps).
-  const lloPrograms = useMemo(() => lloExamples.filter(item => item.topology === 'v6e-1' && item.hloExample === exampleId), [exampleId]);
+  // LLO programs compiled from this HLO example, one per instruction. A before-optimization
+  // module has no programs of its own, so its sidebar link falls back to the compiled module's default.
+  const lloPrograms = useMemo(() => lloExamples.filter(item => item.hloExample === exampleId), [exampleId]);
   const nodeLloHref = node ? lloLink(lloPrograms.find(item => item.instruction === node.name)) : null;
-  const lloHref =
-    nodeLloHref ??
-    lloLink(
-      lloPrograms.find(item => item.default) ??
-        lloExamples.find(item => item.topology === 'v6e-1' && item.default && !!exampleId && exampleId.startsWith(`${item.example}.`))
-    ) ??
-    '?view=llo';
+  const compiledId = exampleId?.replace(/\.before$/, '.after');
+  const lloHref = nodeLloHref ?? lloLink(lloExamples.find(item => item.default && item.hloExample === compiledId)) ?? '?view=llo';
 
   const status = node
     ? `%${node.name} · ${upstreamCount} upstream · ${downstreamCount} downstream`

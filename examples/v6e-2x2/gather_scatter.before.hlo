@@ -1,0 +1,132 @@
+HloModule jit_gather_scatter, entry_computation_layout={(f32[1000,64]{1,0}, s32[32]{0}, f32[32,64]{1,0})->(f32[32,64]{1,0}, f32[1000,64]{1,0}, f32[32,1]{1,0}, f32[1000,64]{1,0})}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "gather_scatter"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=111 end_line=111 column=8 end_column=30}
+3 {file_name_id=1 function_name_id=2 line=113 end_line=113 column=8 end_column=30}
+4 {file_name_id=1 function_name_id=2 line=110 end_line=110 column=8 end_column=18}
+5 {file_name_id=1 function_name_id=2 line=112 end_line=112 column=28 end_column=38}
+6 {file_name_id=1 function_name_id=2 line=112 end_line=112 column=41 end_column=53}
+7 {file_name_id=1 function_name_id=2 line=112 end_line=112 column=8 end_column=86}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+
+
+region_0.1 {
+  scatter-add.2 = f32[] parameter(0), metadata={op_name="scatter-add"}
+  scatter-add.3 = f32[] parameter(1), metadata={op_name="scatter-add"}
+  ROOT add.3 = f32[] add(scatter-add.2, scatter-add.3), metadata={op_name="jit(gather_scatter)/add" stack_frame_id=2}
+}
+
+_where.2 {
+  Arg_0.2 = pred[] parameter(0)
+  Arg_1.2 = s32[] parameter(1)
+  Arg_2.1 = s32[] parameter(2)
+  ROOT select_n.3 = s32[] select(Arg_0.2, Arg_1.2, Arg_2.1), metadata={op_name="select_n"}
+}
+
+remainder.3 {
+  Arg_0.3 = s32[32,1]{1,0} parameter(0)
+  Arg_1.3 = s32[] parameter(1)
+  constant.8 = s32[] constant(0)
+  eq.1 = pred[] compare(Arg_1.3, constant.8), direction=EQ, metadata={op_name="eq"}
+  constant.7 = s32[] constant(1)
+  jit__where_.1 = s32[] call(eq.1, constant.7, Arg_1.3), to_apply=_where.2, metadata={op_name="jit(_where)"}
+  rem.2 = s32[32,1]{1,0} broadcast(jit__where_.1), dimensions={}, metadata={op_name="rem"}
+  rem.3 = s32[32,1]{1,0} remainder(Arg_0.3, rem.2), metadata={op_name="rem"}
+  constant.6 = s32[] constant(0)
+  broadcast.3 = s32[32,1]{1,0} broadcast(constant.6), dimensions={}
+  lt.4 = pred[32,1]{1,0} compare(rem.3, broadcast.3), direction=LT, metadata={op_name="lt"}
+  lt.5 = pred[] compare(jit__where_.1, constant.8), direction=LT, metadata={op_name="lt"}
+  ne.4 = pred[32,1]{1,0} broadcast(lt.5), dimensions={}, metadata={op_name="ne"}
+  ne.5 = pred[32,1]{1,0} compare(lt.4, ne.4), direction=NE, metadata={op_name="ne"}
+  ne.3 = pred[32,1]{1,0} compare(rem.3, broadcast.3), direction=NE, metadata={op_name="ne"}
+  and.1 = pred[32,1]{1,0} and(ne.5, ne.3), metadata={op_name="and"}
+  add.6 = s32[32,1]{1,0} broadcast(jit__where_.1), dimensions={}, metadata={op_name="add"}
+  add.7 = s32[32,1]{1,0} add(rem.3, add.6), metadata={op_name="add"}
+  ROOT select_n.5 = s32[32,1]{1,0} select(and.1, add.7, rem.3), metadata={op_name="select_n"}
+}
+
+region_1.4 {
+  reduce_and.3 = pred[] parameter(0), metadata={op_name="reduce_and"}
+  reduce_and.4 = pred[] parameter(1), metadata={op_name="reduce_and"}
+  ROOT reduce_and.5 = pred[] and(reduce_and.3, reduce_and.4), metadata={op_name="reduce_and"}
+}
+
+take_along_axis.5 {
+  Arg_1.5 = s32[32,1]{1,0} parameter(1)
+  constant.20 = s32[] constant(0)
+  lt.8 = s32[32,1]{1,0} broadcast(constant.20), dimensions={}, metadata={op_name="lt"}
+  lt.9 = pred[32,1]{1,0} compare(Arg_1.5, lt.8), direction=LT, metadata={op_name="lt"}
+  constant.18 = s32[] constant(64)
+  add.10 = s32[32,1]{1,0} broadcast(constant.18), dimensions={}, metadata={op_name="add"}
+  add.11 = s32[32,1]{1,0} add(Arg_1.5, add.10), metadata={op_name="add"}
+  select_n.8 = s32[32,1]{1,0} select(lt.9, add.11, Arg_1.5), metadata={op_name="select_n"}
+  reshape.1 = s32[32,1,1]{2,1,0} reshape(select_n.8), metadata={op_name="reshape"}
+  constant.17 = s32[] constant(0)
+  ge.2 = s32[32,1,1]{2,1,0} broadcast(constant.17), dimensions={}, metadata={op_name="ge"}
+  ge.3 = pred[32,1,1]{2,1,0} compare(reshape.1, ge.2), direction=GE, metadata={op_name="ge"}
+  constant.16 = s32[] constant(63)
+  le.2 = s32[32,1,1]{2,1,0} broadcast(constant.16), dimensions={}, metadata={op_name="le"}
+  le.3 = pred[32,1,1]{2,1,0} compare(reshape.1, le.2), direction=LE, metadata={op_name="le"}
+  and.3 = pred[32,1,1]{2,1,0} and(ge.3, le.3), metadata={op_name="and"}
+  constant.19 = pred[] constant(true)
+  reduce_and.7 = pred[32,1]{1,0} reduce(and.3, constant.19), dimensions={2}, to_apply=region_1.4, metadata={op_name="reduce_and"}
+  Arg_0.5 = f32[32,64]{1,0} parameter(0)
+  gather.2 = f32[32,1]{1,0} gather(Arg_0.5, reshape.1), offset_dims={}, collapsed_slice_dims={1}, start_index_map={1}, operand_batching_dims={0}, start_indices_batching_dims={0}, index_vector_dim=2, slice_sizes={1,1}, metadata={op_name="gather"}
+  constant.15 = f32[] constant(nan)
+  broadcast_in_dim.4 = f32[32,1]{1,0} broadcast(constant.15), dimensions={}, metadata={op_name="broadcast_in_dim"}
+  ROOT select_n.9 = f32[32,1]{1,0} select(reduce_and.7, gather.2, broadcast_in_dim.4), metadata={op_name="select_n"}
+}
+
+region_2.6 {
+  scatter-max.2 = f32[] parameter(0), metadata={op_name="scatter-max"}
+  scatter-max.3 = f32[] parameter(1), metadata={op_name="scatter-max"}
+  ROOT max.1 = f32[] maximum(scatter-max.2, scatter-max.3), metadata={op_name="jit(gather_scatter)/max" stack_frame_id=3}
+}
+
+ENTRY main.7 {
+  table.1 = f32[1000,64]{1,0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="table"}
+  idx.1 = s32[32]{0} parameter(1), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}]>"}, metadata={op_name="idx"}
+  constant.23 = s32[] constant(0)
+  broadcast.5 = s32[32]{0} broadcast(constant.23), dimensions={}
+  lt.11 = pred[32]{0} compare(idx.1, broadcast.5), direction=LT, metadata={op_name="jit(gather_scatter)/lt" stack_frame_id=4}
+  constant.21 = s32[] constant(1000)
+  broadcast.4 = s32[32]{0} broadcast(constant.21), dimensions={}
+  add.13 = s32[32]{0} add(idx.1, broadcast.4), metadata={op_name="jit(gather_scatter)/add" stack_frame_id=4}
+  select_n.11 = s32[32]{0} select(lt.11, add.13, idx.1), metadata={op_name="jit(gather_scatter)/select_n" stack_frame_id=4}
+  broadcast_in_dim.6 = s32[32,1]{1,0} reshape(select_n.11), metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=4}
+  gather.3 = f32[32,64]{1,0} gather(table.1, broadcast_in_dim.6), offset_dims={1}, collapsed_slice_dims={0}, start_index_map={0}, index_vector_dim=1, slice_sizes={1,64}, metadata={op_name="jit(gather_scatter)/gather" stack_frame_id=4}
+  lt.12 = pred[32]{0} compare(idx.1, broadcast.5), direction=LT, metadata={op_name="jit(gather_scatter)/lt" stack_frame_id=2}
+  add.14 = s32[32]{0} add(idx.1, broadcast.4), metadata={op_name="jit(gather_scatter)/add" stack_frame_id=2}
+  select_n.12 = s32[32]{0} select(lt.12, add.14, idx.1), metadata={op_name="jit(gather_scatter)/select_n" stack_frame_id=2}
+  broadcast_in_dim.7 = s32[32,1]{1,0} reshape(select_n.12), metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=2}
+  upd.1 = f32[32,64]{1,0} parameter(2), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="upd"}
+  scatter-add.5 = f32[1000,64]{1,0} scatter(table.1, broadcast_in_dim.7, upd.1), update_window_dims={1}, inserted_window_dims={0}, scatter_dims_to_operand_dims={0}, index_vector_dim=1, to_apply=region_0.1, metadata={op_name="jit(gather_scatter)/scatter-add" stack_frame_id=2}
+  slice.1 = f32[32,64]{1,0} slice(table.1), slice={[0:32], [0:64]}, metadata={op_name="jit(gather_scatter)/slice" stack_frame_id=5}
+  broadcast_in_dim.8 = s32[32,1]{1,0} reshape(idx.1), metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=6}
+  constant.22 = s32[] constant(64)
+  jit_remainder_.1 = s32[32,1]{1,0} call(broadcast_in_dim.8, constant.22), to_apply=remainder.3, metadata={op_name="jit(gather_scatter)/jit(remainder)" stack_frame_id=6}
+  jit_take_along_axis_.1 = f32[32,1]{1,0} call(slice.1, jit_remainder_.1), to_apply=take_along_axis.5, metadata={op_name="jit(gather_scatter)/jit(take_along_axis)" stack_frame_id=7}
+  lt.13 = pred[32]{0} compare(idx.1, broadcast.5), direction=LT, metadata={op_name="jit(gather_scatter)/lt" stack_frame_id=3}
+  add.15 = s32[32]{0} add(idx.1, broadcast.4), metadata={op_name="jit(gather_scatter)/add" stack_frame_id=3}
+  select_n.13 = s32[32]{0} select(lt.13, add.15, idx.1), metadata={op_name="jit(gather_scatter)/select_n" stack_frame_id=3}
+  broadcast_in_dim.9 = s32[32,1]{1,0} reshape(select_n.13), metadata={op_name="jit(gather_scatter)/broadcast_in_dim" stack_frame_id=3}
+  scatter-max.5 = f32[1000,64]{1,0} scatter(table.1, broadcast_in_dim.9, upd.1), update_window_dims={1}, inserted_window_dims={0}, scatter_dims_to_operand_dims={0}, index_vector_dim=1, to_apply=region_2.6, metadata={op_name="jit(gather_scatter)/scatter-max" stack_frame_id=3}
+  ROOT tuple.1 = (f32[32,64]{1,0}, f32[1000,64]{1,0}, f32[32,1]{1,0}, f32[1000,64]{1,0}) tuple(gather.3, scatter-add.5, jit_take_along_axis_.1, scatter-max.5)
+}
+

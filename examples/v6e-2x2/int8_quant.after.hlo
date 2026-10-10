@@ -1,0 +1,47 @@
+HloModule jit_int8_quant, is_scheduled=true, entry_computation_layout={(s8[8,12]{1,0:T(8,128)(4,1)}, bf16[8,12]{1,0:T(8,128)(2,1)})->(f32[8,8]{1,0:T(8,128)}, s32[12]{0:T(128)})}, allow_spmd_sharding_propagation_to_parameters={false,false}, allow_spmd_sharding_propagation_to_output={true,true}, num_partitions=4, frontend_attributes={arg_layout_modes="default;default",arg_memory_spaces="0;0",out_layout_modes="default;default",out_memory_spaces="0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "int8_quant"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=18}
+2 {file_name_id=1 function_name_id=2 line=206 end_line=206 column=8 end_column=8}
+3 {file_name_id=1 function_name_id=2 line=207 end_line=207 column=11 end_column=11}
+4 {file_name_id=1 function_name_id=2 line=207 end_line=207 column=70 end_column=70}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+
+
+%fused_computation.1 (param_0.6: bf16[8,12], param_1.3: s8[8,12]) -> bf16[8,12] {
+  %param_1.3 = s8[8,12]{1,0:T(8,128)(4,1)} parameter(1)
+  %convert_element_type.6 = bf16[8,12]{1,0:T(8,128)(2,1)} convert(%param_1.3), metadata={op_name="jit(int8_quant)/convert_element_type" stack_frame_id=2}
+  %convert = f32[8,12]{1,0:T(8,128)} convert(%convert_element_type.6)
+  %param_0.6 = bf16[8,12]{1,0:T(8,128)(2,1)} parameter(0)
+  %convert.1 = f32[8,12]{1,0:T(8,128)} convert(%param_0.6)
+  %mul.4 = f32[8,12]{1,0:T(8,128)} multiply(%convert, %convert.1), metadata={op_name="jit(int8_quant)/mul" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"float_type_correction_info":{"original_type":"BF16","original_shape":{"element_type":"BF16","dimensions":["8","12"],"tuple_shapes":[],"layout":{"minor_to_major":["1","0"],"tiles":[{"dimensions":["8","128"]},{"dimensions":["2","1"]}],"element_size_in_bits":"0","memory_space":"0","dim_level_types":[],"index_primitive_type":"PRIMITIVE_TYPE_INVALID","pointer_primitive_type":"PRIMITIVE_TYPE_INVALID","dim_unique":[],"dim_ordered":[],"dynamic_shape_metadata_prefix_bytes":"0","tail_padding_alignment_in_elements":"1","split_configs":[]},"is_dynamic_dimension":[false,false]}}}
+  ROOT %convert.2 = bf16[8,12]{1,0:T(8,128)(2,1)} convert(%mul.4)
+}
+
+%fused_computation (param_0.3: bf16[8,12], param_1.2: s8[8,12]) -> f32[8,8] {
+  %param_0.3 = bf16[8,12]{1,0:T(8,128)(2,1)} parameter(0)
+  %param_1.2 = s8[8,12]{1,0:T(8,128)(4,1)} parameter(1)
+  %fusion.1 = bf16[8,12]{1,0:T(8,128)(2,1)} fusion(%param_0.3, %param_1.2), kind=kLoop, calls=%fused_computation.1, metadata={op_name="jit(int8_quant)/mul" stack_frame_id=2}
+  ROOT %convolution.1 = f32[8,8]{1,0:T(8,128)} convolution(%fusion.1, %fusion.1), dim_labels=bf_oi->bf, metadata={op_name="jit(int8_quant)/ij,kj->ik/dot_general" stack_frame_id=3}
+}
+
+ENTRY %main.0_spmd (param: s8[8,12], param.1: bf16[8,12]) -> (f32[8,8], s32[12]) {
+  %param.1 = bf16[8,12]{1,0:T(8,128)(2,1)} parameter(1), sharding={mesh[], replicated}, metadata={op_name="scale"}
+  %param = s8[8,12]{1,0:T(8,128)(4,1)} parameter(0), sharding={mesh[], replicated}, metadata={op_name="q"}
+  %iota.2 = s32[12]{0:T(128)} iota(), iota_dimension=0, metadata={op_name="jit(int8_quant)/iota" stack_frame_id=4}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["1"],"input_window_bounds":[],"estimated_cycles":"2120","iteration_bounds":["1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"1024"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %fusion = f32[8,8]{1,0:T(8,128)} fusion(%param.1, %param), kind=kOutput, calls=%fused_computation, metadata={op_name="jit(int8_quant)/ij,kj->ik/dot_general" stack_frame_id=3}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":["1","1"],"output_window_bounds":["1","1"],"input_window_bounds":["1","1"],"estimated_cycles":"5536","iteration_bounds":["1","1","1"],"cost_model_type":"COST_MODEL_TYPE_CLASSIC","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"10240"}],"retry_config":{"retry_count":"0"},"convolution_algorithm_config":{"emitter":"EmitOutputBatchInSublanes"},"aliasing_operands":{"lists":[]}}
+  ROOT %tuple.2 = (f32[8,8]{1,0:T(8,128)}, s32[12]{0:T(128)}) tuple(%fusion, %iota.2)
+}
+

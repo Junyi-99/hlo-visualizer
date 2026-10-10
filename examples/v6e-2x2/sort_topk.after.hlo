@@ -1,0 +1,166 @@
+HloModule jit_sort_topk, is_scheduled=true, entry_computation_layout={(f32[8,1000]{1,0:T(8,128)})->(f32[8,1000]{1,0:T(8,128)}, s32[8,1000]{1,0:T(8,128)}, f32[8,5]{1,0:T(8,128)}, s32[8,5]{1,0:T(8,128)}, s32[8]{0:T(128)}, /*index=5*/f32[8,1000]{1,0:T(8,128)})}, allow_spmd_sharding_propagation_to_output={true,true,true,true,true,true}, num_partitions=4, frontend_attributes={arg_layout_modes="default",arg_memory_spaces="0",out_layout_modes="default;default;default;default;default;default",out_memory_spaces="0;0;0;0;0;0"}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "sort_topk"
+2 "<module>"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=129 end_line=129 column=75 end_column=75}
+2 {file_name_id=1 function_name_id=2 line=252 end_line=252 column=18 end_column=18}
+3 {file_name_id=1 function_name_id=1 line=129 end_line=129 column=33 end_column=33}
+4 {file_name_id=1 function_name_id=1 line=129 end_line=129 column=58 end_column=58}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=1 parent_frame_id=2}
+3 {file_location_id=2 parent_frame_id=1}
+4 {file_location_id=3 parent_frame_id=4}
+5 {file_location_id=1 parent_frame_id=4}
+6 {file_location_id=1 parent_frame_id=6}
+7 {file_location_id=4 parent_frame_id=4}
+
+
+%region_0.2 (sort.14: f32[], sort.15: f32[], sort.16: s32[], sort.20: s32[]) -> pred[] {
+  %constant.27 = f32[]{:T(128)} constant(0)
+  %constant.26 = f32[]{:T(128)} constant(nan)
+  %constant.29 = s32[]{:T(128)} constant(2147483647)
+  %constant.28 = s32[]{:T(128)} constant(0)
+  %sort.20 = s32[]{:T(128)} parameter(3), metadata={op_name="sort.9"}
+  %sort.16 = s32[]{:T(128)} parameter(2), metadata={op_name="sort.9"}
+  %sort.15 = f32[]{:T(128)} parameter(1), metadata={op_name="sort.9"}
+  %sort.14 = f32[]{:T(128)} parameter(0), metadata={op_name="sort.9"}
+  %compare.22 = pred[]{:T(512)S(6)} compare(%sort.16, %sort.20), direction=LT, metadata={op_name="compare.15"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %eq.10 = pred[]{:T(512)S(6)} compare(%sort.15, %constant.27), direction=EQ, metadata={op_name="eq"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %select_n.20 = f32[]{:T(128)S(6)} select(%eq.10, %constant.27, %sort.15), metadata={op_name="select_n"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %ne.10 = pred[]{:T(512)S(6)} compare(%sort.15, %sort.15), direction=NE, metadata={op_name="ne"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[{"indices":["0","1"]}]}}
+  %select_n.21 = f32[]{:T(128)S(6)} select(%ne.10, %constant.26, %select_n.20), metadata={op_name="select_n"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %bitcast-convert.13 = s32[]{:T(128)S(6)} bitcast-convert(%select_n.21), metadata={op_name="bitcast-convert.7"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %xor.13 = s32[]{:T(128)S(6)} xor(%constant.29, %bitcast-convert.13), metadata={op_name="xor.7"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %compare.20 = pred[]{:T(512)S(6)} compare(%bitcast-convert.13, %constant.28), direction=LT, metadata={op_name="compare.11"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %select.14 = s32[]{:T(128)S(6)} select(%compare.20, %xor.13, %bitcast-convert.13), metadata={op_name="select.7"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %eq.8 = pred[]{:T(512)S(6)} compare(%sort.14, %constant.27), direction=EQ, metadata={op_name="eq"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %select_n.16 = f32[]{:T(128)S(6)} select(%eq.8, %constant.27, %sort.14), metadata={op_name="select_n"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %ne.8 = pred[]{:T(512)S(6)} compare(%sort.14, %sort.14), direction=NE, metadata={op_name="ne"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[{"indices":["0","1"]}]}}
+  %select_n.17 = f32[]{:T(128)S(6)} select(%ne.8, %constant.26, %select_n.16), metadata={op_name="select_n"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %bitcast-convert.12 = s32[]{:T(128)S(6)} bitcast-convert(%select_n.17), metadata={op_name="bitcast-convert.6"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %xor.12 = s32[]{:T(128)S(6)} xor(%constant.29, %bitcast-convert.12), metadata={op_name="xor.6"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %compare.19 = pred[]{:T(512)S(6)} compare(%bitcast-convert.12, %constant.28), direction=LT, metadata={op_name="compare.10"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %select.13 = s32[]{:T(128)S(6)} select(%compare.19, %xor.12, %bitcast-convert.12), metadata={op_name="select.6"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %lt_to.5 = pred[]{:T(512)S(6)} compare(%select.14, %select.13), direction=LT, metadata={op_name="lt_to"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %lt_to.4 = pred[]{:T(512)S(6)} compare(%select.13, %select.14), direction=LT, metadata={op_name="lt_to"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %compare.21 = pred[]{:T(512)S(6)} compare(%lt_to.4, %lt_to.5), direction=EQ, metadata={op_name="compare.14"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  ROOT %select.15 = pred[]{:T(512)} select(%compare.21, %compare.22, %lt_to.4), metadata={op_name="select.10"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%compare_greater_than.1.1.clone (p_0_lhs.0: f32[], p_0_rhs.0: f32[], p_1_lhs.0: s32[], p_1_rhs.0: s32[]) -> pred[] {
+  %constant.34 = s32[]{:T(128)} constant(2147483647)
+  %constant.33 = s32[]{:T(128)} constant(0)
+  %p_1_rhs.0 = s32[]{:T(128)} parameter(3), metadata={op_name="p.1.rhs.1"}
+  %p_1_lhs.0 = s32[]{:T(128)} parameter(2), metadata={op_name="p.1.lhs.1"}
+  %p_0_rhs.0 = f32[]{:T(128)} parameter(1), metadata={op_name="p.0.rhs.1"}
+  %p_0_lhs.0 = f32[]{:T(128)} parameter(0), metadata={op_name="p.0.lhs.1"}
+  %bitcast-convert.15 = s32[]{:T(128)S(6)} bitcast-convert(%p_0_rhs.0), metadata={op_name="bitcast-convert.5"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %xor.15 = s32[]{:T(128)S(6)} xor(%constant.34, %bitcast-convert.15), metadata={op_name="xor.5"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %compare.24 = pred[]{:T(512)S(6)} compare(%bitcast-convert.15, %constant.33), direction=LT, metadata={op_name="compare.8"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %select.17 = s32[]{:T(128)S(6)} select(%compare.24, %xor.15, %bitcast-convert.15), metadata={op_name="select.5"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %bitcast-convert.14 = s32[]{:T(128)S(6)} bitcast-convert(%p_0_lhs.0), metadata={op_name="bitcast-convert.4"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %xor.14 = s32[]{:T(128)S(6)} xor(%constant.34, %bitcast-convert.14), metadata={op_name="xor.4"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %compare.23 = pred[]{:T(512)S(6)} compare(%bitcast-convert.14, %constant.33), direction=LT, metadata={op_name="compare.7"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %select.16 = s32[]{:T(128)S(6)} select(%compare.23, %xor.14, %bitcast-convert.14), metadata={op_name="select.4"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  ROOT %compare.25 = pred[]{:T(512)} compare(%select.16, %select.17), direction=GT, metadata={op_name="compare.1"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%region_1.0 (reduce.2: f32[], reduce.3: s32[], reduce.8: f32[], reduce.9: s32[]) -> (f32[], s32[]) {
+  %reduce.9 = s32[]{:T(128)} parameter(3), metadata={op_name="jit(sort_topk)/reduce"}
+  %reduce.8 = f32[]{:T(128)} parameter(2), metadata={op_name="jit(sort_topk)/reduce"}
+  %reduce.3 = s32[]{:T(128)} parameter(1), metadata={op_name="jit(sort_topk)/reduce"}
+  %reduce.2 = f32[]{:T(128)} parameter(0), metadata={op_name="jit(sort_topk)/reduce"}
+  %lt.0 = pred[]{:T(512)S(6)} compare(%reduce.3, %reduce.9), direction=LT, metadata={op_name="lt" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %eq.11 = pred[]{:T(512)S(6)} compare(%reduce.2, %reduce.8), direction=EQ, metadata={op_name="eq" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %and.0 = pred[]{:T(512)S(6)} and(%eq.11, %lt.0), metadata={op_name="and" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %ne.11 = pred[]{:T(512)S(6)} compare(%reduce.2, %reduce.2), direction=NE, metadata={op_name="ne" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[{"indices":["0","1"]}]}}
+  %gt.0 = pred[]{:T(512)S(6)} compare(%reduce.2, %reduce.8), direction=GT, metadata={op_name="gt" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %or.0 = pred[]{:T(512)S(6)} or(%gt.0, %ne.11), metadata={op_name="or" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %or.1 = pred[]{:T(512)S(6)} or(%or.0, %and.0), metadata={op_name="or" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %select_n.23 = s32[]{:T(128)} select(%or.1, %reduce.3, %reduce.9), metadata={op_name="select_n" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  %select_n.22 = f32[]{:T(128)} select(%or.0, %reduce.2, %reduce.8), metadata={op_name="select_n" stack_frame_id=2}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+  ROOT %tuple.4 = (f32[]{:T(128)}, s32[]{:T(128)}) tuple(%select_n.22, %select_n.23)
+}
+
+%fused_computation.4 (param_0.8: f32[8,1000]) -> (bf16[8], s32[8]) {
+  %param_0.8 = f32[8,1000]{1,0:T(8,128)} parameter(0)
+  %iota.14 = s32[8,1000]{1,0:T(8,128)} iota(), iota_dimension=1, metadata={op_name="jit(sort_topk)/jit(argsort)/iota" stack_frame_id=4}
+  %constant.30.clone.1 = f32[]{:T(128)} constant(-inf)
+  %constant.31.clone.1 = s32[]{:T(128)} constant(0)
+  ROOT %reduce.19 = (bf16[8]{0:T(256)(128)(2,1)}, s32[8]{0:T(128)}) reduce(%param_0.8, %iota.14, %constant.30.clone.1, %constant.31.clone.1), dimensions={1}, to_apply=%region_1.0, metadata={op_name="jit(sort_topk)/reduce" stack_frame_id=6}
+}
+
+%fused_computation.3 (param_0.7: f32[8,1000]) -> f32[8,8,128] {
+  %param_0.7 = f32[8,1000]{1,0:T(8,128)S(1)} parameter(0)
+  %constant.32.clone.1 = f32[]{:T(128)} constant(0)
+  %pad.3 = f32[8,1024]{1,0:T(8,128)} pad(%param_0.7, %constant.32.clone.1), padding=0_0x0_24, metadata={op_name="pad"}
+  ROOT %bitcast.5 = f32[8,8,128]{2,0,1:T(8,128)S(1)} bitcast(%pad.3), metadata={op_name="reshape"}
+}
+
+%region_2.4 (reduce-window.2: f32[], reduce-window.3: f32[]) -> f32[] {
+  %reduce-window.3 = f32[]{:T(128)} parameter(1), metadata={op_name="reduce-window"}
+  %reduce-window.2 = f32[]{:T(128)} parameter(0), metadata={op_name="reduce-window"}
+  ROOT %reduce_window_sum.9 = f32[]{:T(128)} add(%reduce-window.2, %reduce-window.3), metadata={op_name="reduce_window_sum"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%slice.8.reduce_sub_computation (lhs: f32[], rhs: f32[]) -> f32[] {
+  %rhs = f32[] parameter(1)
+  %lhs = f32[] parameter(0)
+  ROOT %add = f32[] add(%lhs, %rhs), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%fused_computation.1 (param_0.9: f32[8,8,128]) -> f32[8,8] {
+  %param_0.9 = f32[8,8,128]{2,1,0:T(8,128)S(1)} parameter(0)
+  %slice.13 = f32[8,8,1]{2,1,0:T(8,128)} slice(%param_0.9), slice={[0:8], [0:8], [127:128]}, metadata={op_name="slice.2"}
+  %constant.36 = f32[]{:T(128)} constant(-0), metadata={op_name="slice.2"}
+  ROOT %reduce.18 = f32[8,8]{1,0:T(8,128)S(1)} reduce(%slice.13, %constant.36), dimensions={2}, to_apply=%slice.8.reduce_sub_computation, metadata={op_name="slice.2"}
+}
+
+%region_3.5 (reduce-window.7: f32[], reduce-window.8: f32[]) -> f32[] {
+  %reduce-window.8 = f32[]{:T(128)} parameter(1), metadata={op_name="reduce-window.1"}
+  %reduce-window.7 = f32[]{:T(128)} parameter(0), metadata={op_name="reduce-window.1"}
+  ROOT %reduce_window_sum.10 = f32[]{:T(128)} add(%reduce-window.7, %reduce-window.8), metadata={op_name="reduce_window_sum"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"aliasing_operands":{"lists":[]}}
+}
+
+%fused_computation.2 (param_0.5: f32[8,8,128], param_1.6: f32[8,8]) -> f32[1,8,8,128] {
+  %param_0.5 = f32[8,8,128]{2,1,0:T(8,128)S(1)} parameter(0)
+  %param_1.6 = f32[8,8]{1,0:T(8,128)S(1)} parameter(1)
+  %broadcast.14 = f32[8,8,128]{2,1,0:T(8,128)} broadcast(%param_1.6), dimensions={0,1}, metadata={op_name="broadcast.10"}
+  %reduce_window_sum.15 = f32[8,8,128]{2,1,0:T(8,128)} add(%param_0.5, %broadcast.14), metadata={op_name="reduce_window_sum"}
+  ROOT %bitcast.4 = f32[1,8,8,128]{3,2,1,0:T(8,128)S(1)} bitcast(%reduce_window_sum.15)
+}
+
+ENTRY %main.6_spmd (param: f32[8,1000]) -> (f32[8,1000], s32[8,1000], f32[8,5], s32[8,5], s32[8], /*index=5*/f32[8,1000]) {
+  %constant.32.clone = f32[]{:T(128)} constant(0)
+  %param = f32[8,1000]{1,0:T(8,128)} parameter(0), sharding={mesh[], replicated}, metadata={op_name="x"}
+  %copy-start = (f32[8,1000]{1,0:T(8,128)S(1)}, f32[8,1000]{1,0:T(8,128)}, u32[]{:S(2)}) copy-start(%param), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %iota_reduce_fusion = (bf16[8]{0:T(256)(128)(2,1)}, s32[8]{0:T(128)}) fusion(%param), kind=kLoop, calls=%fused_computation.4, metadata={op_name="jit(sort_topk)/reduce" stack_frame_id=6}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["1","8"],"input_window_bounds":[],"estimated_cycles":"2324","iteration_bounds":["1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"43008"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %get-tuple-element.11 = s32[8]{0:T(128)} get-tuple-element(%iota_reduce_fusion), index=1, metadata={op_name="jit(sort_topk)/reduce" stack_frame_id=6}
+  %copy-done = f32[8,1000]{1,0:T(8,128)S(1)} copy-done(%copy-start), backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[],"dma_priority":1}
+  %top_k.6 = (f32[8,5]{1,0:T(8,128)}, s32[8,5]{1,0:T(8,128)}) custom-call(%copy-done), custom_call_target="TopK", called_computations={%compare_greater_than.1.1.clone}, metadata={op_name="jit(sort_topk)/top_k" stack_frame_id=7}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"custom_call_metadata":{"metadata":"{is_stable = true}"},"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"90112"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %get-tuple-element.10 = s32[8,5]{1,0:T(8,128)} get-tuple-element(%top_k.6), index=1, metadata={op_name="jit(sort_topk)/top_k" stack_frame_id=7}
+  %get-tuple-element.9 = f32[8,5]{1,0:T(8,128)} get-tuple-element(%top_k.6), index=0, metadata={op_name="jit(sort_topk)/top_k" stack_frame_id=7}
+  %pad_bitcast_fusion = f32[8,8,128]{2,0,1:T(8,128)S(1)} fusion(%copy-done), kind=kLoop, calls=%fused_computation.3, metadata={op_name="reshape"}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["8","1","1"],"input_window_bounds":[],"estimated_cycles":"2128","iteration_bounds":["1","1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %copy.1 = f32[8,8,128]{2,1,0:T(8,128)S(1)} copy(%pad_bitcast_fusion), metadata={op_name="reshape"}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["8","1","1"],"input_window_bounds":[],"estimated_cycles":"20","iteration_bounds":["1","1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %reduce-window.4 = f32[8,8,128]{2,1,0:T(8,128)S(1)} reduce-window(%copy.1, %constant.32.clone), window={size=1x1x128 pad=0_0x0_0x127_0}, to_apply=%region_2.4, metadata={op_name="reduce-window"}, backend_config={"flag_configs":[{"flag_type":"XLA_TPU_STORE_TO_LOAD_FORWARDING_WINDOW","value":{"integer_value":"100000"}}],"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"139264"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %slice_reduce_fusion = f32[8,8]{1,0:T(8,128)S(1)} fusion(%reduce-window.4), kind=kLoop, calls=%fused_computation.1, metadata={op_name="slice.2"}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["8","1","1"],"input_window_bounds":[],"estimated_cycles":"2165","iteration_bounds":["1","1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %reduce-window.5 = f32[8,9]{1,0:T(8,128)S(1)} reduce-window(%slice_reduce_fusion, %constant.32.clone), window={size=1x8 pad=0_0x8_0}, to_apply=%region_3.5, metadata={op_name="reduce-window.1"}, backend_config={"flag_configs":[{"flag_type":"XLA_TPU_STORE_TO_LOAD_FORWARDING_WINDOW","value":{"integer_value":"100000"}}],"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"12288"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %bitcast.10 = f32[8,8]{1,0:T(8,128)S(1)} bitcast(%reduce-window.5)
+  %add_bitcast_fusion = f32[1,8,8,128]{3,2,1,0:T(8,128)S(1)} fusion(%reduce-window.4, %bitcast.10), kind=kLoop, calls=%fused_computation.2, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["1","8","1","1"],"input_window_bounds":[],"estimated_cycles":"2190","iteration_bounds":["1","1","1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %copy.4 = f32[1,8,8,128]{3,1,2,0:T(8,128)} copy(%add_bitcast_fusion), backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["1","8","1","1"],"input_window_bounds":[],"estimated_cycles":"2155","iteration_bounds":["1","1","1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"32768"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %iota.12 = s32[8,1000]{1,0:T(8,128)S(1)} iota(), iota_dimension=1, metadata={op_name="jit(sort_topk)/jit(argsort)/iota" stack_frame_id=4}, backend_config={"flag_configs":[],"window_config":{"kernel_window_bounds":[],"output_window_bounds":["1","8"],"input_window_bounds":[],"estimated_cycles":"18","iteration_bounds":["1","1"],"cost_model_type":"COST_MODEL_TYPE_INVALID","ml_estimated_microseconds":0,"is_mask":false,"pad_output_on_minor_dim":"0","pad_input_on_minor_dim":"0","estimated_vmem_bytes":"0","estimated_bundle_count":"0","estimated_scoped_vmem_bytes":"0","buffering_level":"2"},"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"0"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %sort.24 = (f32[8,1000]{1,0:T(8,128)}, s32[8,1000]{1,0:T(8,128)}) sort(%copy-done, %iota.12), dimensions={1}, to_apply=%region_0.2, metadata={op_name="sort.9"}, backend_config={"flag_configs":[],"scoped_memory_configs":[],"used_scoped_memory_configs":[{"memory_space":"1","offset":"0","size":"90112"}],"retry_config":{"retry_count":"0"},"aliasing_operands":{"lists":[]}}
+  %get-tuple-element.8 = s32[8,1000]{1,0:T(8,128)} get-tuple-element(%sort.24), index=1, metadata={op_name="sort.9"}
+  %get-tuple-element.7 = f32[8,1000]{1,0:T(8,128)} get-tuple-element(%sort.24), index=0, metadata={op_name="sort.9"}
+  %bitcast.9 = f32[8,1000]{1,0:T(8,128)} bitcast(%copy.4)
+  ROOT %tuple.6 = (f32[8,1000]{1,0:T(8,128)}, s32[8,1000]{1,0:T(8,128)}, f32[8,5]{1,0:T(8,128)}, s32[8,5]{1,0:T(8,128)}, s32[8]{0:T(128)}, /*index=5*/f32[8,1000]{1,0:T(8,128)}) tuple(%get-tuple-element.7, %get-tuple-element.8, %get-tuple-element.9, %get-tuple-element.10, %get-tuple-element.11, /*index=5*/%bitcast.9)
+}
+

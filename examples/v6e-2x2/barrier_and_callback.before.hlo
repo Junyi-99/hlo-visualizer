@@ -1,0 +1,59 @@
+HloModule jit_barrier_and_callback, entry_computation_layout={(f32[32,32]{1,0}, f32[32,32]{1,0})->f32[32,32]{1,0}}, frontend_attributes={xla.sdy.meshes={maximal_mesh_0 = #sdy.mesh<[], device_ids=[0]>, mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "barrier_and_callback"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=195 end_line=195 column=30 end_column=37}
+3 {file_name_id=1 function_name_id=2 line=194 end_line=194 column=44 end_column=49}
+4 {file_name_id=1 function_name_id=2 line=194 end_line=194 column=37 end_column=42}
+5 {file_name_id=1 function_name_id=2 line=194 end_line=194 column=11 end_column=51}
+6 {file_name_id=1 function_name_id=2 line=195 end_line=195 column=4 end_column=38}
+7 {file_name_id=1 function_name_id=2 line=196 end_line=196 column=11 end_column=16}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+
+
+region_0.1 {
+  reduce_sum.3 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.4 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.5 = f32[] add(reduce_sum.3, reduce_sum.4), metadata={op_name="jit(barrier_and_callback)/reduce_sum" stack_frame_id=2}
+}
+
+ENTRY main.2 {
+  x.1 = f32[32,32]{1,0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="x"}
+  constant.5 = f32[] constant(2)
+  mul.2 = f32[32,32]{1,0} broadcast(constant.5), dimensions={}, metadata={op_name="jit(barrier_and_callback)/mul" stack_frame_id=4}
+  mul.3 = f32[32,32]{1,0} multiply(x.1, mul.2), metadata={op_name="jit(barrier_and_callback)/mul" stack_frame_id=4}
+  y.1 = f32[32,32]{1,0} parameter(1), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="y"}
+  constant.3 = f32[] constant(1)
+  add.2 = f32[32,32]{1,0} broadcast(constant.3), dimensions={}, metadata={op_name="jit(barrier_and_callback)/add" stack_frame_id=3}
+  add.3 = f32[32,32]{1,0} add(y.1, add.2), metadata={op_name="jit(barrier_and_callback)/add" stack_frame_id=3}
+  optimization_barrier.4 = (f32[32,32]{1,0}, f32[32,32]{1,0}) tuple(mul.3, add.3), metadata={op_name="jit(barrier_and_callback)/optimization_barrier" stack_frame_id=5}
+  optimization_barrier.5 = (f32[32,32]{1,0}, f32[32,32]{1,0}) opt-barrier(optimization_barrier.4), metadata={op_name="jit(barrier_and_callback)/optimization_barrier" stack_frame_id=5}
+  optimization_barrier.6 = f32[32,32]{1,0} get-tuple-element(optimization_barrier.5), index=0, metadata={op_name="jit(barrier_and_callback)/optimization_barrier" stack_frame_id=5}
+  constant.4 = f32[] constant(0)
+  reduce_sum.7 = f32[] reduce(optimization_barrier.6, constant.4), dimensions={0,1}, to_apply=region_0.1, metadata={op_name="jit(barrier_and_callback)/reduce_sum" stack_frame_id=2}
+  debug_print.7 = token[] after-all(), metadata={op_type="debug_print" op_name="jit(barrier_and_callback)/debug_print" stack_frame_id=6}
+  debug_print.8 = (f32[], u32[], token[]) send(reduce_sum.7, debug_print.7), channel_id=2, is_host_transfer=true, sharding={{maximal device=0}, {maximal device=0}, {maximal device=0}}, frontend_attributes={_xla_host_transfer_handler_name="pjrt_rendezvous",_xla_host_transfer_rendezvous="2",xla.sdy.sharding="#sdy.sharding_per_value<[<@maximal_mesh_0, []>]>"}, metadata={op_type="debug_print" op_name="jit(barrier_and_callback)/debug_print" stack_frame_id=6}
+  debug_print.9 = token[] send-done(debug_print.8), channel_id=2, is_host_transfer=true, sharding={maximal device=0}, frontend_attributes={_xla_host_transfer_handler_name="pjrt_rendezvous",_xla_host_transfer_rendezvous="2",xla.sdy.sharding="#sdy.sharding_per_value<[<@maximal_mesh_0, []>]>"}, metadata={op_type="debug_print" op_name="jit(barrier_and_callback)/debug_print" stack_frame_id=6}
+  debug_print.10 = (f32[], u32[], token[]) recv(debug_print.9), channel_id=3, is_host_transfer=true, sharding={{maximal device=0}, {maximal device=0}, {maximal device=0}}, frontend_attributes={_xla_host_transfer_handler_name="pjrt_rendezvous",_xla_host_transfer_rendezvous="3",xla.sdy.sharding="#sdy.sharding_per_value<[<@maximal_mesh_0, []>, <@maximal_mesh_0, []>]>"}, metadata={op_type="debug_print" op_name="jit(barrier_and_callback)/debug_print" stack_frame_id=6}
+  debug_print.11 = (f32[], token[]) recv-done(debug_print.10), channel_id=3, is_host_transfer=true, sharding={{maximal device=0}, {maximal device=0}}, frontend_attributes={_xla_host_transfer_handler_name="pjrt_rendezvous",_xla_host_transfer_rendezvous="3",xla.sdy.sharding="#sdy.sharding_per_value<[<@maximal_mesh_0, []>, <@maximal_mesh_0, []>]>"}, metadata={op_type="debug_print" op_name="jit(barrier_and_callback)/debug_print" stack_frame_id=6}
+  debug_print.12 = f32[] get-tuple-element(debug_print.11), index=0, sharding={maximal device=0}, frontend_attributes={_xla_host_transfer_handler_name="pjrt_rendezvous",_xla_host_transfer_rendezvous="3",xla.sdy.sharding="#sdy.sharding_per_value<[<@maximal_mesh_0, []>, <@maximal_mesh_0, []>]>"}, metadata={op_type="debug_print" op_name="jit(barrier_and_callback)/debug_print" stack_frame_id=6}
+  debug_print.13 = token[] get-tuple-element(debug_print.11), index=1, sharding={maximal device=0}, frontend_attributes={_xla_host_transfer_handler_name="pjrt_rendezvous",_xla_host_transfer_rendezvous="3",xla.sdy.sharding="#sdy.sharding_per_value<[<@maximal_mesh_0, []>, <@maximal_mesh_0, []>]>"}, metadata={op_type="debug_print" op_name="jit(barrier_and_callback)/debug_print" stack_frame_id=6}
+  optimization_barrier.7 = f32[32,32]{1,0} get-tuple-element(optimization_barrier.5), index=1, metadata={op_name="jit(barrier_and_callback)/optimization_barrier" stack_frame_id=5}
+  ROOT dot_general.1 = f32[32,32]{1,0} dot(optimization_barrier.6, optimization_barrier.7), lhs_contracting_dims={1}, rhs_contracting_dims={0}, metadata={op_name="jit(barrier_and_callback)/dot_general" stack_frame_id=7}
+}
+

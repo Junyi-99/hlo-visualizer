@@ -1,0 +1,57 @@
+HloModule jit_fft_complex, entry_computation_layout={(f32[256]{0}, f32[8,64]{1,0})->(f32[256]{0}, f32[256]{0}, f32[8,64]{1,0})}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "fft_complex"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=154 end_line=154 column=8 end_column=22}
+3 {file_name_id=1 function_name_id=2 line=155 end_line=155 column=22 end_column=46}
+4 {file_name_id=1 function_name_id=2 line=155 end_line=155 column=8 end_column=56}
+5 {file_name_id=1 function_name_id=2 line=156 end_line=156 column=11 end_column=21}
+6 {file_name_id=1 function_name_id=2 line=156 end_line=156 column=23 end_column=34}
+7 {file_name_id=1 function_name_id=2 line=156 end_line=156 column=37 end_column=48}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+7 {file_location_id=7 parent_frame_id=2}
+
+
+fft.1 {
+  Arg_0.1 = f32[256]{0} parameter(0)
+  convert_element_type.1 = c64[256]{0} convert(Arg_0.1), metadata={op_name="convert_element_type"}
+  ROOT fft.1 = c64[256]{0} fft(convert_element_type.1), fft_type=FFT, fft_length={256}, metadata={op_name="fft"}
+}
+
+fft_0.2 {
+  Arg_0.3 = f32[8,64]{1,0} parameter(0)
+  ROOT fft.3 = c64[8,33]{1,0} fft(Arg_0.3), fft_type=RFFT, fft_length={64}, metadata={op_name="fft"}
+}
+
+fft_1.3 {
+  Arg_0.5 = c64[8,33]{1,0} parameter(0)
+  ROOT fft.5 = f32[8,64]{1,0} fft(Arg_0.5), fft_type=IRFFT, fft_length={64}, metadata={op_name="fft"}
+}
+
+ENTRY main.4 {
+  x.1 = f32[256]{0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}]>"}, metadata={op_name="x"}
+  jit_fft_.3 = c64[256]{0} call(x.1), to_apply=fft.1, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=2}
+  abs.1 = f32[256]{0} abs(jit_fft_.3), metadata={op_name="jit(fft_complex)/abs" stack_frame_id=5}
+  real.1 = f32[256]{0} real(jit_fft_.3), metadata={op_name="jit(fft_complex)/real" stack_frame_id=6}
+  imag.1 = f32[256]{0} imag(jit_fft_.3), metadata={op_name="jit(fft_complex)/imag" stack_frame_id=7}
+  add.1 = f32[256]{0} add(real.1, imag.1), metadata={op_name="jit(fft_complex)/add" stack_frame_id=6}
+  y.1 = f32[8,64]{1,0} parameter(1), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="y"}
+  jit_fft_.4 = c64[8,33]{1,0} call(y.1), to_apply=fft_0.2, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=3}
+  jit_fft_.5 = f32[8,64]{1,0} call(jit_fft_.4), to_apply=fft_1.3, metadata={op_name="jit(fft_complex)/jit(fft)" stack_frame_id=4}
+  ROOT tuple.1 = (f32[256]{0}, f32[256]{0}, f32[8,64]{1,0}) tuple(abs.1, add.1, jit_fft_.5)
+}
+

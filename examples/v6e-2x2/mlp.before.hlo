@@ -1,0 +1,88 @@
+HloModule jit_mlp, entry_computation_layout={(bf16[256,512]{1,0}, bf16[512,1024]{1,0}, bf16[1024]{0}, bf16[1024,128]{1,0})->f32[256,128]{1,0}}, frontend_attributes={xla.sdy.meshes={mesh = #sdy.mesh<["devices"=4]>}}
+
+FileNames
+1 "scripts/dump_hlo.py"
+
+FunctionNames
+1 "<module>"
+2 "mlp"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=252 end_line=252 column=18 end_column=67}
+2 {file_name_id=1 function_name_id=2 line=57 end_line=57 column=11 end_column=56}
+3 {file_name_id=1 function_name_id=2 line=56 end_line=56 column=8 end_column=32}
+4 {file_name_id=1 function_name_id=2 line=56 end_line=56 column=20 end_column=26}
+5 {file_name_id=1 function_name_id=2 line=57 end_line=57 column=27 end_column=33}
+6 {file_name_id=1 function_name_id=2 line=57 end_line=57 column=26 end_column=46}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=2}
+4 {file_location_id=4 parent_frame_id=2}
+5 {file_location_id=5 parent_frame_id=2}
+6 {file_location_id=6 parent_frame_id=2}
+
+
+region_0.1 {
+  reduce_max.3 = f32[] parameter(0), metadata={op_name="reduce_max"}
+  reduce_max.4 = f32[] parameter(1), metadata={op_name="reduce_max"}
+  ROOT reduce_max.5 = f32[] maximum(reduce_max.3, reduce_max.4), metadata={op_name="jit(mlp)/reduce_max" stack_frame_id=2}
+}
+
+region_1.2 {
+  reduce_sum.3 = f32[] parameter(0), metadata={op_name="reduce_sum"}
+  reduce_sum.4 = f32[] parameter(1), metadata={op_name="reduce_sum"}
+  ROOT reduce_sum.5 = f32[] add(reduce_sum.3, reduce_sum.4), metadata={op_name="jit(mlp)/reduce_sum" stack_frame_id=2}
+}
+
+ENTRY main.3 {
+  x.1 = bf16[256,512]{1,0} parameter(0), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="x"}
+  w1.1 = bf16[512,1024]{1,0} parameter(1), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="w1"}
+  dot_general.2 = bf16[256,1024]{1,0} dot(x.1, w1.1), lhs_contracting_dims={1}, rhs_contracting_dims={0}, metadata={op_name="jit(mlp)/dot_general" stack_frame_id=4}
+  b1.1 = bf16[1024]{0} parameter(2), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}]>"}, metadata={op_name="b1"}
+  broadcast_in_dim.3 = bf16[1,1024]{1,0} reshape(b1.1), metadata={op_name="jit(mlp)/broadcast_in_dim" stack_frame_id=4}
+  add.8 = bf16[1,1024]{1,0} broadcast(broadcast_in_dim.3), dimensions={0,1}, metadata={op_name="jit(mlp)/add" stack_frame_id=4}
+  add.9 = bf16[1024]{0} reshape(add.8), metadata={op_name="jit(mlp)/add" stack_frame_id=4}
+  add.10 = bf16[256,1024]{1,0} broadcast(add.9), dimensions={1}, metadata={op_name="jit(mlp)/add" stack_frame_id=4}
+  add.11 = bf16[256,1024]{1,0} add(dot_general.2, add.10), metadata={op_name="jit(mlp)/add" stack_frame_id=4}
+  integer_pow.2 = bf16[256,1024]{1,0} multiply(add.11, add.11), metadata={op_name="jit(mlp)/integer_pow" stack_frame_id=3}
+  integer_pow.3 = bf16[256,1024]{1,0} multiply(integer_pow.2, add.11), metadata={op_name="jit(mlp)/integer_pow" stack_frame_id=3}
+  constant.11 = bf16[] constant(0.04468)
+  mul.9 = bf16[256,1024]{1,0} broadcast(constant.11), dimensions={}, metadata={op_name="jit(mlp)/mul" stack_frame_id=3}
+  mul.10 = bf16[256,1024]{1,0} multiply(integer_pow.3, mul.9), metadata={op_name="jit(mlp)/mul" stack_frame_id=3}
+  add.12 = bf16[256,1024]{1,0} add(add.11, mul.10), metadata={op_name="jit(mlp)/add" stack_frame_id=3}
+  constant.10 = bf16[] constant(0.7969)
+  mul.8 = bf16[256,1024]{1,0} broadcast(constant.10), dimensions={}, metadata={op_name="jit(mlp)/mul" stack_frame_id=3}
+  mul.11 = bf16[256,1024]{1,0} multiply(add.12, mul.8), metadata={op_name="jit(mlp)/mul" stack_frame_id=3}
+  tanh.1 = bf16[256,1024]{1,0} tanh(mul.11), metadata={op_name="jit(mlp)/tanh" stack_frame_id=3}
+  constant.9 = bf16[] constant(1)
+  add.7 = bf16[256,1024]{1,0} broadcast(constant.9), dimensions={}, metadata={op_name="jit(mlp)/add" stack_frame_id=3}
+  add.13 = bf16[256,1024]{1,0} add(tanh.1, add.7), metadata={op_name="jit(mlp)/add" stack_frame_id=3}
+  constant.8 = bf16[] constant(0.5)
+  mul.7 = bf16[256,1024]{1,0} broadcast(constant.8), dimensions={}, metadata={op_name="jit(mlp)/mul" stack_frame_id=3}
+  mul.12 = bf16[256,1024]{1,0} multiply(add.13, mul.7), metadata={op_name="jit(mlp)/mul" stack_frame_id=3}
+  mul.13 = bf16[256,1024]{1,0} multiply(add.11, mul.12), metadata={op_name="jit(mlp)/mul" stack_frame_id=3}
+  w2.1 = bf16[1024,128]{1,0} parameter(3), sharding={replicated}, frontend_attributes={xla.sdy.sharding="#sdy.sharding<@mesh, [{}, {}]>"}, metadata={op_name="w2"}
+  dot_general.3 = bf16[256,128]{1,0} dot(mul.13, w2.1), lhs_contracting_dims={1}, rhs_contracting_dims={0}, metadata={op_name="jit(mlp)/dot_general" stack_frame_id=5}
+  convert_element_type.1 = f32[256,128]{1,0} convert(dot_general.3), metadata={op_name="jit(mlp)/convert_element_type" stack_frame_id=6}
+  constant.13 = f32[] constant(-inf)
+  reduce_max.7 = f32[256]{0} reduce(convert_element_type.1, constant.13), dimensions={1}, to_apply=region_0.1, metadata={op_name="jit(mlp)/reduce_max" stack_frame_id=2}
+  constant.7 = f32[] constant(-inf)
+  max.2 = f32[256]{0} broadcast(constant.7), dimensions={}, metadata={op_name="jit(mlp)/max" stack_frame_id=2}
+  max.3 = f32[256]{0} maximum(reduce_max.7, max.2), metadata={op_name="jit(mlp)/max" stack_frame_id=2}
+  broadcast_in_dim.4 = f32[256,1]{1,0} reshape(max.3), metadata={op_name="jit(mlp)/broadcast_in_dim" stack_frame_id=2}
+  sub.4 = f32[256,1]{1,0} broadcast(broadcast_in_dim.4), dimensions={0,1}, metadata={op_name="jit(mlp)/sub" stack_frame_id=2}
+  sub.5 = f32[256]{0} reshape(sub.4), metadata={op_name="jit(mlp)/sub" stack_frame_id=2}
+  sub.6 = f32[256,128]{1,0} broadcast(sub.5), dimensions={0}, metadata={op_name="jit(mlp)/sub" stack_frame_id=2}
+  sub.7 = f32[256,128]{1,0} subtract(convert_element_type.1, sub.6), metadata={op_name="jit(mlp)/sub" stack_frame_id=2}
+  exp.1 = f32[256,128]{1,0} exponential(sub.7), metadata={op_name="jit(mlp)/exp" stack_frame_id=2}
+  constant.12 = f32[] constant(0)
+  reduce_sum.7 = f32[256]{0} reduce(exp.1, constant.12), dimensions={1}, to_apply=region_1.2, metadata={op_name="jit(mlp)/reduce_sum" stack_frame_id=2}
+  broadcast_in_dim.5 = f32[256,1]{1,0} reshape(reduce_sum.7), metadata={op_name="jit(mlp)/broadcast_in_dim" stack_frame_id=2}
+  div.4 = f32[256,1]{1,0} broadcast(broadcast_in_dim.5), dimensions={0,1}, metadata={op_name="jit(mlp)/div" stack_frame_id=2}
+  div.5 = f32[256]{0} reshape(div.4), metadata={op_name="jit(mlp)/div" stack_frame_id=2}
+  div.6 = f32[256,128]{1,0} broadcast(div.5), dimensions={0}, metadata={op_name="jit(mlp)/div" stack_frame_id=2}
+  ROOT div.7 = f32[256,128]{1,0} divide(exp.1, div.6), metadata={op_name="jit(mlp)/div" stack_frame_id=2}
+}
+
