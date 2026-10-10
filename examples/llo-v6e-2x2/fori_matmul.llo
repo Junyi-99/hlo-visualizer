@@ -1,0 +1,68 @@
+// fori_matmul · v6e:2x2 · 1791619902522558059-fusion.8-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v802_v40 = vmov 0.0 /* materialized constant */  ;;  %s940_s1 = inlined_call_operand.vmem [shape: bf16[128,128], index: 1, kind: input, shape index: {}] /* operand 1 */  ;;  %s941_s0 = inlined_call_operand.vmem [shape: bf16[128,128], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s942_s2 = inlined_call_operand.<no memory space> [shape: bf16[], index: 2, kind: input, shape index: {}] /* operand 2 */  ;;  %s943_s3 = inlined_call_operand.vmem [shape: bf16[128,128], index: 3, kind: output, shape index: {}] /* operand 3 */ } /* entry bundle: %fusion.8 = fusion(%copy.11, %get-tuple-element.99, %convert_element_type.8) */
+   0x1   :  { %v754_v0 = vld [vmem:[%s940_s1 + $0x38] sm:$0xff] /* combined load */  ;;  %v755_v1 = vld [vmem:[%s940_s1 + $0x30] sm:$0xff] /* combined load */  ;;  %v756_v2 = vld [vmem:[%s940_s1 + $0x28] sm:$0xff] /* combined load */  ;;  %v4_v24 = vstv %s942_s2 }
+   0x2   :  { %705 = vmatprep.subr.bf16.mxu0 %v754_v0  ;;  %737 = vmatprep.subr.bf16.mxu1 %v754_v0  ;;  %v757_v3 = vld [vmem:[%s940_s1 + $0x20] sm:$0xff] /* combined load */  ;;  %v758_v6 = vld [vmem:[%s940_s1 + $0x18] sm:$0xff] /* combined load */  ;;  %v759_v7 = vld [vmem:[%s940_s1 + $0x10] sm:$0xff] /* combined load */  ;;  %v874_v29 = vunpack.i.l.bf16 %v4_v24 }
+   0x3   :  { %706 = vmatpush3.bf16.msra.mxu0 %v754_v0  ;;  %745 = vmatpush3.bf16.msra.mxu1 %v754_v0  ;;  %v762_v4 = vld [vmem:[%s941_s0] sm:$0xff] /* combined load */  ;;  %v760_v8 = vld [vmem:[%s940_s1 + $0x8] sm:$0xff] /* combined load */  ;;  %v766_v12 = vld [vmem:[%s941_s0 + $0x10] sm:$0xff] /* combined load */ }
+   0x4   :  { %707 = vmatprep.subr.bf16.mxu0 %v755_v1  ;;  %738 = vmatprep.subr.bf16.mxu1 %v755_v1  ;;  %v763_v5 = vld [vmem:[%s941_s0 + $0x20] sm:$0xff] /* combined load */  ;;  %v764_v10 = vld [vmem:[%s941_s0 + $0x8] sm:$0xff] /* combined load */  ;;  %v767_v13 = vld [vmem:[%s941_s0 + $0x30] sm:$0xff] /* combined load */ }
+   0x5   :  { %721 = vmatprep.mubr.bf16.mxu0 %v762_v4  ;;  %729 = vmatprep.mubr.bf16.mxu1 %v763_v5  ;;  %v761_v9 = vld [vmem:[%s940_s1] sm:$0xff] /* combined load */  ;;  %v765_v11 = vld [vmem:[%s941_s0 + $0x28] sm:$0xff] /* combined load */  ;;  %v768_v14 = vld [vmem:[%s941_s0 + $0x18] sm:$0xff] /* combined load */ }
+   0x6   :  { %v769_v15 = vld [vmem:[%s941_s0 + $0x38] sm:$0xff] /* combined load */ }
+   0x7   :  { %708 = vmatpush3.bf16.msra.mxu0 %v755_v1  ;;  %746 = vmatpush3.bf16.msra.mxu1 %v755_v1 }
+   0x8   :  { %709 = vmatprep.subr.bf16.mxu0 %v756_v2  ;;  %739 = vmatprep.subr.bf16.mxu1 %v756_v2 }
+   0x9   :  { %710 = vmatpush3.bf16.msra.mxu0 %v756_v2  ;;  %747 = vmatpush3.bf16.msra.mxu1 %v756_v2 }
+   0xa   :  { %711 = vmatprep.subr.bf16.mxu0 %v757_v3  ;;  %740 = vmatprep.subr.bf16.mxu1 %v757_v3 }
+   0xb   :  { %712 = vmatpush3.bf16.msra.mxu0 %v757_v3  ;;  %748 = vmatpush3.bf16.msra.mxu1 %v757_v3 }
+   0xc   :  { %713 = vmatprep.subr.bf16.mxu0 %v758_v6  ;;  %741 = vmatprep.subr.bf16.mxu1 %v758_v6 }
+   0xd   :  { %714 = vmatpush3.bf16.msra.mxu0 %v758_v6  ;;  %749 = vmatpush3.bf16.msra.mxu1 %v758_v6 }
+   0xe   :  { %715 = vmatprep.subr.bf16.mxu0 %v759_v7  ;;  %742 = vmatprep.subr.bf16.mxu1 %v759_v7 }
+   0xf   :  { %716 = vmatpush3.bf16.msra.mxu0 %v759_v7  ;;  %750 = vmatpush3.bf16.msra.mxu1 %v759_v7 }
+  0x10   :  { %717 = vmatprep.subr.bf16.mxu0 %v760_v8  ;;  %743 = vmatprep.subr.bf16.mxu1 %v760_v8 }
+  0x11   :  { %718 = vmatpush3.bf16.msra.mxu0 %v760_v8  ;;  %751 = vmatpush3.bf16.msra.mxu1 %v760_v8 }
+  0x12   :  { %719 = vmatprep.subr.bf16.mxu0 %v761_v9  ;;  %744 = vmatprep.subr.bf16.mxu1 %v761_v9 }
+  0x13   :  { %720 = vmatpush3.bf16.msra.mxu0 %v761_v9  ;;  %752 = vmatpush3.bf16.msra.mxu1 %v761_v9 }
+  0x14   :  { %722 = vmatmul.mubr.bf16.vlgmr.msra.gmra.mxu0 %v764_v10  ;;  %730 = vmatmul.mubr.bf16.vlgmr.msra.gmra.mxu1 %v765_v11 }
+  0x15   :  { %725 = vmatprep.mubr.bf16.mxu0 %v766_v12  ;;  %733 = vmatprep.mubr.bf16.mxu1 %v767_v13 }
+  0x16   :  { %726 = vmatmul.mubr.bf16.gmra.mxu0 %v768_v14  ;;  %734 = vmatmul.mubr.bf16.gmra.mxu1 %v769_v15 }
+  0x17   :  { %v723_v16 = vpop.f32.mrf.mxu0  ;;  %v731_v17 = vpop.f32.mrf.mxu1 }
+  0x18   :  { %770 = vtanh.f32 %v723_v16 }
+  0x19   :  { %772 = vtanh.f32 %v731_v17  ;;  %v268_v18 = vpop.f32.mrf.mxu0  ;;  %v454_v19 = vpop.f32.mrf.mxu1 }
+  0x1a   :  { %774 = vtanh.f32 %v268_v18 }
+  0x1b   :  { %776 = vtanh.f32 %v454_v19  ;;  %v724_v20 = vpop.f32.mrf.mxu0  ;;  %v732_v21 = vpop.f32.mrf.mxu1 }
+  0x1c   :  { %778 = vtanh.f32 %v724_v20 }
+  0x1d   :  { %780 = vtanh.f32 %v732_v21  ;;  %v288_v22 = vpop.f32.mrf.mxu0  ;;  %v476_v23 = vpop.f32.mrf.mxu1 }
+  0x1e   :  { %782 = vtanh.f32 %v288_v22 }
+  0x1f   :  { %784 = vtanh.f32 %v476_v23  ;;  %v727_v25 = vpop.f32.mrf.mxu0  ;;  %v735_v26 = vpop.f32.mrf.mxu1 }
+  0x20   :  { %786 = vtanh.f32 %v727_v25 }
+  0x21   :  { %788 = vtanh.f32 %v735_v26  ;;  %v360_v27 = vpop.f32.mrf.mxu0  ;;  %v548_v28 = vpop.f32.mrf.mxu1 }
+  0x22   :  { %790 = vtanh.f32 %v360_v27 }
+  0x23   :  { %792 = vtanh.f32 %v548_v28  ;;  %v728_v30 = vpop.f32.mrf.mxu0  ;;  %v736_v31 = vpop.f32.mrf.mxu1 }
+  0x24   :  { %794 = vtanh.f32 %v728_v30 }
+  0x25   :  { %v771_v32 = vpop.eup %770  ;;  %796 = vtanh.f32 %v736_v31  ;;  %v382_v33 = vpop.f32.mrf.mxu0 }
+  0x26   :  { %v570_v34 = vpop.f32.mrf.mxu1  ;;  %v773_v35 = vpop.eup %772  ;;  %v327_v36 = vadd.f32 %v771_v32, %v874_v29  ;;  %798 = vtanh.f32 %v382_v33 }
+  0x27   :  { %v775_v37 = vpop.eup %774  ;;  %v515_v38 = vadd.f32 %v773_v35, %v874_v29  ;;  %800 = vtanh.f32 %v570_v34 }
+  0x28   :  { %v777_v39 = vpop.eup %776  ;;  %v333_v41 = vpack.c.bf16 %v802_v40, %v327_v36  ;;  %v281_v42 = vadd.f32 %v775_v37, %v874_v29 }
+  0x29   :  { %v779_v43 = vpop.eup %778  ;;  %v521_v44 = vpack.c.bf16 %v802_v40, %v515_v38  ;;  %v468_v45 = vadd.f32 %v777_v39, %v874_v29 }
+  0x2a   :  { %v781_v46 = vpop.eup %780  ;;  %691 = vst [vmem:[%s943_s3 + $0x8] sm:$0xf] /*vst_source=*/%v333_v41  ;;  %v286_v47 = vpack.c.bf16 %v802_v40, %v281_v42  ;;  %v349_v48 = vadd.f32 %v779_v43, %v874_v29 }
+  0x2b   :  { %v783_v49 = vpop.eup %782  ;;  %699 = vst [vmem:[%s943_s3 + $0x28] sm:$0xf] /*vst_source=*/%v521_v44  ;;  %v474_v50 = vpack.c.bf16 %v802_v40, %v468_v45  ;;  %v537_v51 = vadd.f32 %v781_v46, %v874_v29 }
+  0x2c   :  { %v785_v52 = vpop.eup %784  ;;  %287 = vst [vmem:[%s943_s3] sm:$0xf] /*vst_source=*/%v286_v47  ;;  %v355_v53 = vpack.c.bf16 %v802_v40, %v349_v48  ;;  %v302_v54 = vadd.f32 %v783_v49, %v874_v29 }
+  0x2d   :  { %v787_v55 = vpop.eup %786  ;;  %697 = vst [vmem:[%s943_s3 + $0x20] sm:$0xf] /*vst_source=*/%v474_v50  ;;  %v543_v56 = vpack.c.bf16 %v802_v40, %v537_v51  ;;  %v490_v57 = vadd.f32 %v785_v52, %v874_v29 }
+  0x2e   :  { %v789_v58 = vpop.eup %788  ;;  %692 = vst [vmem:[%s943_s3 + $0xc] sm:$0xf] /*vst_source=*/%v355_v53  ;;  %v308_v59 = vpack.c.bf16 %v802_v40, %v302_v54  ;;  %v421_v60 = vadd.f32 %v787_v55, %v874_v29 }
+  0x2f   :  { %v791_v61 = vpop.eup %790  ;;  %700 = vst [vmem:[%s943_s3 + $0x2c] sm:$0xf] /*vst_source=*/%v543_v56  ;;  %v496_v62 = vpack.c.bf16 %v802_v40, %v490_v57  ;;  %v609_v63 = vadd.f32 %v789_v58, %v874_v29 }
+  0x30   :  { %v793_v0 = vpop.eup %792  ;;  %690 = vst [vmem:[%s943_s3 + $0x4] sm:$0xf] /*vst_source=*/%v308_v59  ;;  %v427_v1 = vpack.c.bf16 %v802_v40, %v421_v60  ;;  %v374_v2 = vadd.f32 %v791_v61, %v874_v29 }
+  0x31   :  { %v795_v3 = vpop.eup %794  ;;  %698 = vst [vmem:[%s943_s3 + $0x24] sm:$0xf] /*vst_source=*/%v496_v62  ;;  %v615_v4 = vpack.c.bf16 %v802_v40, %v609_v63  ;;  %v562_v5 = vadd.f32 %v793_v0, %v874_v29 }
+  0x32   :  { %v797_v6 = vpop.eup %796  ;;  %695 = vst [vmem:[%s943_s3 + $0x18] sm:$0xf] /*vst_source=*/%v427_v1  ;;  %v380_v7 = vpack.c.bf16 %v802_v40, %v374_v2  ;;  %v443_v8 = vadd.f32 %v795_v3, %v874_v29 }
+  0x33   :  { %v799_v9 = vpop.eup %798  ;;  %703 = vst [vmem:[%s943_s3 + $0x38] sm:$0xf] /*vst_source=*/%v615_v4  ;;  %v568_v10 = vpack.c.bf16 %v802_v40, %v562_v5  ;;  %v631_v11 = vadd.f32 %v797_v6, %v874_v29 }
+  0x34   :  { %v801_v12 = vpop.eup %800  ;;  %693 = vst [vmem:[%s943_s3 + $0x10] sm:$0xf] /*vst_source=*/%v380_v7  ;;  %v449_v13 = vpack.c.bf16 %v802_v40, %v443_v8  ;;  %v396_v14 = vadd.f32 %v799_v9, %v874_v29 }
+  0x35   :  { %701 = vst [vmem:[%s943_s3 + $0x30] sm:$0xf] /*vst_source=*/%v568_v10  ;;  %v637_v15 = vpack.c.bf16 %v802_v40, %v631_v11  ;;  %v584_v16 = vadd.f32 %v801_v12, %v874_v29 }
+  0x36   :  { %696 = vst [vmem:[%s943_s3 + $0x1c] sm:$0xf] /*vst_source=*/%v449_v13  ;;  %v402_v17 = vpack.c.bf16 %v802_v40, %v396_v14 }
+  0x37   :  { %704 = vst [vmem:[%s943_s3 + $0x3c] sm:$0xf] /*vst_source=*/%v637_v15  ;;  %v590_v18 = vpack.c.bf16 %v802_v40, %v584_v16 }
+  0x38   :  { %694 = vst [vmem:[%s943_s3 + $0x14] sm:$0xf] /*vst_source=*/%v402_v17 }
+  0x39   :  { %702 = vst [vmem:[%s943_s3 + $0x34] sm:$0xf] /*vst_source=*/%v590_v18 } /* exit bundle: %fusion.8 = fusion(%copy.11, %get-tuple-element.99, %convert_element_type.8) */

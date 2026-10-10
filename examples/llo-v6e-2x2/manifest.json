@@ -1,0 +1,112 @@
+{
+  "jax": "0.11.2",
+  "topology": "v6e:2x2",
+  "selection": "largest non-copy final-bundle program per example",
+  "examples": {
+    "mlp": {
+      "source": "1791619847578866770-fusion.19-01-final_bundles.txt",
+      "bytes": 434964,
+      "bundles": 1313
+    },
+    "conv_pool": {
+      "source": "1791619856599351239-fusion.10-01-final_bundles.txt",
+      "bytes": 1999089,
+      "bundles": 4858
+    },
+    "conv_grad": {
+      "source": "1791619885890149960-fusion-01-final_bundles.txt",
+      "bytes": 860143,
+      "bundles": 2383
+    },
+    "attention": {
+      "source": "1791619899432777340-fusion.10-01-final_bundles.txt",
+      "bytes": 115541,
+      "bundles": 524
+    },
+    "fori_matmul": {
+      "source": "1791619902522558059-fusion.8-01-final_bundles.txt",
+      "bytes": 8977,
+      "bundles": 58
+    },
+    "scan_rnn": {
+      "source": "1791619905529225253-dynamic_update_slice.6-01-final_bundles.txt",
+      "bytes": 61928,
+      "bundles": 148
+    },
+    "cond_switch": {
+      "source": "1791619908229526711-cosine_multiply_fusion-01-final_bundles.txt",
+      "bytes": 7077,
+      "bundles": 55
+    },
+    "gather_scatter": {
+      "source": "1791619911854762821-scatter_fusion.1-01-final_bundles.txt",
+      "bytes": 50774,
+      "bundles": 121
+    },
+    "dynamic_slices": {
+      "source": "1791619915995826760-dynamic_update_slice.2-01-final_bundles.txt",
+      "bytes": 126782,
+      "bundles": 135
+    },
+    "sort_topk": {
+      "source": "1791619920158255413-sort.24-01-final_bundles.txt",
+      "bytes": 1334046,
+      "bundles": 4265
+    },
+    "random_ops": {
+      "source": "1791619930081230298-select_multiply_fusion-01-final_bundles.txt",
+      "bytes": 173069,
+      "bundles": 846
+    },
+    "elementwise_zoo": {
+      "source": "1791619933685110220-fusion-01-final_bundles.txt",
+      "bytes": 130922,
+      "bundles": 508
+    },
+    "fft_complex": {
+      "source": "1791619937701735759-multiply_reduce_fusion.1-01-final_bundles.txt",
+      "bytes": 495626,
+      "bundles": 1992
+    },
+    "linalg": {
+      "source": "1791619942720257142-cholesky.5-01-final_bundles.txt",
+      "bytes": 172970,
+      "bundles": 2185
+    },
+    "remat_grad": {
+      "source": "1791619945862105224-fusion-01-final_bundles.txt",
+      "bytes": 28198,
+      "bundles": 255
+    },
+    "barrier_and_callback": {
+      "source": "1791619949176212238-fusion-01-final_bundles.txt",
+      "bytes": 3667,
+      "bundles": 25
+    },
+    "donated_update": {
+      "source": "1791619951424460127-multiply_reduce_fusion-01-final_bundles.txt",
+      "bytes": 11647,
+      "bundles": 77
+    },
+    "int8_quant": {
+      "source": "1791619953622850164-fusion-01-final_bundles.txt",
+      "bytes": 7793,
+      "bundles": 58
+    },
+    "nested_calls": {
+      "source": "1791619955655842213-multiply_add_fusion-01-final_bundles.txt",
+      "bytes": 9678,
+      "bundles": 74
+    },
+    "pallas_add": {
+      "source": "1791620037694434216-pallas_add.1-01-final_bundles.txt",
+      "bytes": 5147,
+      "bundles": 32
+    },
+    "collectives": {
+      "source": "1791620039551698605-TLP-01-final_bundles.txt",
+      "bytes": 17752,
+      "bundles": 190
+    }
+  }
+}

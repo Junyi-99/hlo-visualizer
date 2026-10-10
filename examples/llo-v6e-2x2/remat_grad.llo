@@ -1,0 +1,278 @@
+// remat_grad · v6e:2x2 · 1791619945862105224-fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v2213_v0 = vmov 0.0 /* materialized constant */  ;;  %s2431_s0 = inlined_call_operand.vmem [shape: f32[256,256], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s2432_s1 = inlined_call_operand.hbm [shape: f32[128,256], index: 1, kind: input, shape index: {}] /* operand 1 */  ;;  %s2433_s2 = inlined_call_operand.hbm [shape: f32[], index: 2, kind: output, shape index: {}] /* operand 2 */ } /* entry bundle: %fusion = fusion(%copy-done, %param) */
+   0x1   :  { %4 = vst [vmem:[#allocation5] sm:$0xff] /*vst_source=*/%v2213_v0 }
+   0x2   :  { %5 = vsyncpa [#allocation8], 0  ;;  %s2214_s9 = smov [#allocation7] /* materialized constant */ } /* Start region 3 */
+   0x3   :  { %s9_s10 = sshll.u32 %s2214_s9, 4  ;;  %s10_s10 = int_to_ptr.vmem [resolvable:$true] %s9_s10 }
+   0x4   :  { %s2177_s11 = scalar_lea.vmem %s10_s10, 4096  ;;  %p2182_p1 = scmp.lt.s32.totalorder %s10_s10, %s10_s10 }
+   0x5   :  { %p2178_p0 = scmp.ne.s32.totalorder %s10_s10, %s2177_s11  ;;  %p2183_p2 = scmp.lt.s32.totalorder %s2177_s11, %s2177_s11 }
+   0x6   :  { %p2184_p3 = por %p2183_p2, %p2182_p1 }
+   0x7   :  { %p2185_p4 = pnand %p2184_p3, %p2178_p0 }
+   0x8   :  { %2188 = shalt.err (!%p2185_p4) /* BoundsCheck 1 [deref of opnd#2] for %15=dma.hbm_to_vmem
+hlo: fusion
+ */ }
+   0x9   :  { %s2215_s12 = smov 256 /* materialized constant */  ;;  %s2216_s13 = smov 16 /* materialized constant */  ;;  %v1910_v1 = vld [vmem:[%s2431_s0 + $0xe8] sm:$0xff]  ;;  %v1911_v2 = vld [vmem:[%s2431_s0 + $0xf8] sm:$0xff]  ;;  %v1912_v3 = vld [vmem:[%s2431_s0 + $0xe0] sm:$0xff] }
+   0xa   :  { %15 = dma.hbm_to_vmem [thread:$0]  /*hbm=*/%s2432_s1, /*size_in_granules=*/4096, /*vmem=*/%s10_s10, /*dst_syncflagno=*/[#allocation8], /*src_stride=*/%s2215_s12, /*dst_stride=*/%s2215_s12, /*steps_per_stride=*/%s2216_s13 /* 
+base_bounds: (16, 2)
+dynamic_base_bounds: (16, 2)
+window_bounds: (16, 2)
+iteration_bounds: (1, 1, 1)
+strides: (16, 2)
+pad_low: (0, 0)
+pad_high: (0, 0)
+element_size_in_bytes: 4096
+second_minor_factor: 1 */  ;;  %v206_v4 = vpack.c.bf16 %v1911_v2, %v1910_v1 }
+   0xb   :  { %v1913_v5 = vld [vmem:[%s2431_s0 + $0xf0] sm:$0xff]  ;;  %v1914_v6 = vld [vmem:[%s2431_s0 + $0xc8] sm:$0xff]  ;;  %v1915_v7 = vld [vmem:[%s2431_s0 + $0xd8] sm:$0xff] }
+   0xc   :  { %v218_v8 = vpack.c.bf16 %v1913_v5, %v1912_v3  ;;  %v230_v9 = vpack.c.bf16 %v1915_v7, %v1914_v6  ;;  %v1916_v10 = vld [vmem:[%s2431_s0 + $0xc0] sm:$0xff]  ;;  %v1917_v11 = vld [vmem:[%s2431_s0 + $0xd0] sm:$0xff]  ;;  %v1918_v12 = vld [vmem:[%s2431_s0 + $0xa8] sm:$0xff]  ;;  %211 = vmatprep.subr.bf16.mxu0 %v206_v4  ;;  %1135 = vmatprep.subr.bf16.mxu1 %v206_v4 }
+   0xd   :  { %v1919_v13 = vld [vmem:[%s2431_s0 + $0xb8] sm:$0xff]  ;;  %v242_v14 = vpack.c.bf16 %v1917_v11, %v1916_v10  ;;  %v1920_v16 = vld [vmem:[%s2431_s0 + $0xa0] sm:$0xff]  ;;  %v1921_v17 = vld [vmem:[%s2431_s0 + $0xb0] sm:$0xff] }
+   0xe   :  { %223 = vmatpush1.bf16.msra.mxu0 %v218_v8  ;;  %1147 = vmatpush1.bf16.msra.mxu1 %v218_v8  ;;  %v254_v15 = vpack.c.bf16 %v1919_v13, %v1918_v12  ;;  %v1922_v18 = vld [vmem:[%s2431_s0 + $0x88] sm:$0xff]  ;;  %v1923_v19 = vld [vmem:[%s2431_s0 + $0x98] sm:$0xff]  ;;  %v266_v20 = vpack.c.bf16 %v1921_v17, %v1920_v16  ;;  %v1924_v22 = vld [vmem:[%s2431_s0 + $0x80] sm:$0xff] }
+   0xf   :  { %235 = vmatprep.subr.bf16.mxu0 %v230_v9  ;;  %1159 = vmatprep.subr.bf16.mxu1 %v230_v9  ;;  %v278_v21 = vpack.c.bf16 %v1923_v19, %v1922_v18  ;;  %v1925_v23 = vld [vmem:[%s2431_s0 + $0x90] sm:$0xff]  ;;  %v1926_v24 = vld [vmem:[%s2431_s0 + $0x68] sm:$0xff]  ;;  %v1927_v25 = vld [vmem:[%s2431_s0 + $0x78] sm:$0xff] }
+  0x10   :  { %v290_v26 = vpack.c.bf16 %v1925_v23, %v1924_v22  ;;  %v302_v27 = vpack.c.bf16 %v1927_v25, %v1926_v24  ;;  %v1928_v28 = vld [vmem:[%s2431_s0 + $0x60] sm:$0xff]  ;;  %v1929_v29 = vld [vmem:[%s2431_s0 + $0x70] sm:$0xff]  ;;  %v1930_v30 = vld [vmem:[%s2431_s0 + $0x48] sm:$0xff] }
+  0x11   :  { %v1931_v31 = vld [vmem:[%s2431_s0 + $0x58] sm:$0xff]  ;;  %v314_v32 = vpack.c.bf16 %v1929_v29, %v1928_v28  ;;  %v1932_v34 = vld [vmem:[%s2431_s0 + $0x40] sm:$0xff]  ;;  %v1933_v35 = vld [vmem:[%s2431_s0 + $0x50] sm:$0xff] }
+  0x12   :  { %247 = vmatpush1.bf16.msra.mxu0 %v242_v14  ;;  %1171 = vmatpush1.bf16.msra.mxu1 %v242_v14  ;;  %v326_v33 = vpack.c.bf16 %v1931_v31, %v1930_v30  ;;  %v1934_v36 = vld [vmem:[%s2431_s0 + $0x28] sm:$0xff]  ;;  %v1935_v37 = vld [vmem:[%s2431_s0 + $0x38] sm:$0xff] }
+  0x13   :  { %259 = vmatprep.subr.bf16.mxu0 %v254_v15  ;;  %1183 = vmatprep.subr.bf16.mxu1 %v254_v15 }
+  0x14   :  { %271 = vmatpush1.bf16.msra.mxu0 %v266_v20  ;;  %1195 = vmatpush1.bf16.msra.mxu1 %v266_v20 }
+  0x15   :  { %283 = vmatprep.subr.bf16.mxu0 %v278_v21  ;;  %1207 = vmatprep.subr.bf16.mxu1 %v278_v21 }
+  0x16   :  { %295 = vmatpush1.bf16.msra.mxu0 %v290_v26  ;;  %1219 = vmatpush1.bf16.msra.mxu1 %v290_v26 }
+  0x17   :  { %307 = vmatprep.subr.bf16.mxu0 %v302_v27  ;;  %1231 = vmatprep.subr.bf16.mxu1 %v302_v27 }
+  0x18   :  { %2209 = dma.done.wait [#allocation8], 4096 /* pipeline-emitter-dma-wait */ }
+  0x19   :  { %2210 = vsyncadd [#allocation8], 4294963200  ;;  %v338_v38 = vpack.c.bf16 %v1933_v35, %v1932_v34  ;;  %v350_v39 = vpack.c.bf16 %v1935_v37, %v1934_v36  ;;  %v1936_v40 = vld [vmem:[%s2431_s0 + $0x20] sm:$0xff]  ;;  %v1937_v41 = vld [vmem:[%s2431_s0 + $0x30] sm:$0xff] }
+  0x1a   :  { %319 = vmatpush1.bf16.msra.mxu0 %v314_v32  ;;  %1243 = vmatpush1.bf16.msra.mxu1 %v314_v32  ;;  %v1938_v42 = vld [vmem:[%s2431_s0 + $0x8] sm:$0xff]  ;;  %v1939_v43 = vld [vmem:[%s2431_s0 + $0x18] sm:$0xff]  ;;  %v362_v44 = vpack.c.bf16 %v1937_v41, %v1936_v40  ;;  %v380_v45 = vld [vmem:[%s2431_s0] sm:$0xff] }
+  0x1b   :  { %331 = vmatprep.subr.bf16.mxu0 %v326_v33  ;;  %1255 = vmatprep.subr.bf16.mxu1 %v326_v33  ;;  %v374_v46 = vpack.c.bf16 %v1939_v43, %v1938_v42  ;;  %v1940_v47 = vld [vmem:[%s2431_s0 + $0x10] sm:$0xff]  ;;  %v50_v49 = vld [vmem:[#allocation7 + $0x18] sm:$0xff]  ;;  %v1941_v50 = vld [vmem:[%s2431_s0 + $0x1e8] sm:$0xff] }
+  0x1c   :  { %v45_v48 = vld [vmem:[#allocation7 + $0x8] sm:$0xff]  ;;  %v1942_v51 = vld [vmem:[%s2431_s0 + $0x1f8] sm:$0xff]  ;;  %v384_v53 = vpack.c.bf16 %v1940_v47, %v380_v45  ;;  %v1943_v55 = vld [vmem:[%s2431_s0 + $0x1e0] sm:$0xff] }
+  0x1d   :  { %v140_v52 = vpack.c.bf16 %v50_v49, %v45_v48  ;;  %v396_v54 = vpack.c.bf16 %v1942_v51, %v1941_v50  ;;  %v1944_v56 = vld [vmem:[%s2431_s0 + $0x1f0] sm:$0xff]  ;;  %v1945_v57 = vld [vmem:[%s2431_s0 + $0x1c8] sm:$0xff]  ;;  %v1946_v58 = vld [vmem:[%s2431_s0 + $0x1d8] sm:$0xff] }
+  0x1e   :  { %343 = vmatpush1.bf16.msra.mxu0 %v338_v38  ;;  %1267 = vmatpush1.bf16.msra.mxu1 %v338_v38  ;;  %v408_v59 = vpack.c.bf16 %v1944_v56, %v1943_v55  ;;  %v420_v60 = vpack.c.bf16 %v1946_v58, %v1945_v57  ;;  %v1947_v61 = vld [vmem:[%s2431_s0 + $0x1c0] sm:$0xff]  ;;  %v1948_v62 = vld [vmem:[%s2431_s0 + $0x1d0] sm:$0xff]  ;;  %v1949_v63 = vld [vmem:[%s2431_s0 + $0x1a8] sm:$0xff] }
+  0x1f   :  { %355 = vmatprep.subr.bf16.mxu0 %v350_v39  ;;  %1279 = vmatprep.subr.bf16.mxu1 %v350_v39  ;;  %v1950_v0 = vld [vmem:[%s2431_s0 + $0x1b8] sm:$0xff]  ;;  %v432_v1 = vpack.c.bf16 %v1948_v62, %v1947_v61  ;;  %v1951_v3 = vld [vmem:[%s2431_s0 + $0x1a0] sm:$0xff]  ;;  %v1952_v4 = vld [vmem:[%s2431_s0 + $0x1b0] sm:$0xff] }
+  0x20   :  { %584 = vmatprep.mubr.bf16.mxu0 %v140_v52  ;;  %v444_v2 = vpack.c.bf16 %v1950_v0, %v1949_v63  ;;  %v1953_v5 = vld [vmem:[%s2431_s0 + $0x188] sm:$0xff]  ;;  %v1954_v6 = vld [vmem:[%s2431_s0 + $0x198] sm:$0xff]  ;;  %v456_v7 = vpack.c.bf16 %v1952_v4, %v1951_v3  ;;  %v1955_v9 = vld [vmem:[%s2431_s0 + $0x180] sm:$0xff] }
+  0x21   :  { %v468_v8 = vpack.c.bf16 %v1954_v6, %v1953_v5  ;;  %v1956_v10 = vld [vmem:[%s2431_s0 + $0x190] sm:$0xff]  ;;  %v1957_v11 = vld [vmem:[%s2431_s0 + $0x168] sm:$0xff]  ;;  %v1958_v12 = vld [vmem:[%s2431_s0 + $0x178] sm:$0xff] }
+  0x22   :  { %367 = vmatpush1.bf16.msra.mxu0 %v362_v44  ;;  %1291 = vmatpush1.bf16.msra.mxu1 %v362_v44  ;;  %v480_v13 = vpack.c.bf16 %v1956_v10, %v1955_v9  ;;  %v492_v14 = vpack.c.bf16 %v1958_v12, %v1957_v11  ;;  %v1959_v15 = vld [vmem:[%s2431_s0 + $0x160] sm:$0xff]  ;;  %v1960_v16 = vld [vmem:[%s2431_s0 + $0x170] sm:$0xff]  ;;  %v1961_v17 = vld [vmem:[%s2431_s0 + $0x148] sm:$0xff] }
+  0x23   :  { %379 = vmatprep.subr.bf16.mxu0 %v374_v46  ;;  %1303 = vmatprep.subr.bf16.mxu1 %v374_v46  ;;  %v1962_v18 = vld [vmem:[%s2431_s0 + $0x158] sm:$0xff]  ;;  %v504_v19 = vpack.c.bf16 %v1960_v16, %v1959_v15  ;;  %v1963_v21 = vld [vmem:[%s2431_s0 + $0x140] sm:$0xff]  ;;  %v1964_v22 = vld [vmem:[%s2431_s0 + $0x150] sm:$0xff] }
+  0x24   :  { %v516_v20 = vpack.c.bf16 %v1962_v18, %v1961_v17  ;;  %v1965_v23 = vld [vmem:[%s2431_s0 + $0x128] sm:$0xff]  ;;  %v1966_v24 = vld [vmem:[%s2431_s0 + $0x138] sm:$0xff]  ;;  %v528_v25 = vpack.c.bf16 %v1964_v22, %v1963_v21  ;;  %v1967_v27 = vld [vmem:[%s2431_s0 + $0x120] sm:$0xff] }
+  0x25   :  { %v540_v26 = vpack.c.bf16 %v1966_v24, %v1965_v23  ;;  %v1968_v28 = vld [vmem:[%s2431_s0 + $0x130] sm:$0xff]  ;;  %v1969_v29 = vld [vmem:[%s2431_s0 + $0x108] sm:$0xff]  ;;  %v1970_v30 = vld [vmem:[%s2431_s0 + $0x118] sm:$0xff] }
+  0x26   :  { %389 = vmatpush1.bf16.msra.mxu0 %v384_v53  ;;  %1313 = vmatpush1.bf16.msra.mxu1 %v384_v53  ;;  %v552_v31 = vpack.c.bf16 %v1968_v28, %v1967_v27  ;;  %v564_v32 = vpack.c.bf16 %v1970_v30, %v1969_v29  ;;  %v1971_v33 = vld [vmem:[%s2431_s0 + $0x100] sm:$0xff]  ;;  %v1972_v34 = vld [vmem:[%s2431_s0 + $0x110] sm:$0xff]  ;;  %v43_v36 = vld [vmem:[#allocation7] sm:$0xff] }
+  0x27   :  { %401 = vmatprep.subr.bf16.mxu0 %v396_v54  ;;  %1325 = vmatprep.subr.bf16.mxu1 %v396_v54  ;;  %v576_v35 = vpack.c.bf16 %v1972_v34, %v1971_v33  ;;  %v48_v37 = vld [vmem:[#allocation7 + $0x10] sm:$0xff]  ;;  %v56_v38 = vld [vmem:[#allocation7 + $0x28] sm:$0xff]  ;;  %v62_v39 = vld [vmem:[#allocation7 + $0x38] sm:$0xff] }
+  0x28   :  { %v136_v40 = vpack.c.bf16 %v48_v37, %v43_v36  ;;  %v148_v41 = vpack.c.bf16 %v62_v39, %v56_v38  ;;  %v53_v42 = vld [vmem:[#allocation7 + $0x20] sm:$0xff]  ;;  %v59_v43 = vld [vmem:[#allocation7 + $0x30] sm:$0xff]  ;;  %v68_v44 = vld [vmem:[#allocation7 + $0x48] sm:$0xff] }
+  0x29   :  { %v74_v45 = vld [vmem:[#allocation7 + $0x58] sm:$0xff]  ;;  %v144_v46 = vpack.c.bf16 %v59_v43, %v53_v42  ;;  %v65_v48 = vld [vmem:[#allocation7 + $0x40] sm:$0xff]  ;;  %v71_v49 = vld [vmem:[#allocation7 + $0x50] sm:$0xff] }
+  0x2a   :  { %413 = vmatpush2.bf16.msra.mxu0 %v408_v59  ;;  %1337 = vmatpush2.bf16.msra.mxu1 %v408_v59  ;;  %v156_v47 = vpack.c.bf16 %v74_v45, %v68_v44  ;;  %v80_v50 = vld [vmem:[#allocation7 + $0x68] sm:$0xff]  ;;  %v86_v51 = vld [vmem:[#allocation7 + $0x78] sm:$0xff]  ;;  %v152_v52 = vpack.c.bf16 %v71_v49, %v65_v48  ;;  %v77_v54 = vld [vmem:[#allocation7 + $0x60] sm:$0xff] }
+  0x2b   :  { %425 = vmatprep.subr.bf16.mxu0 %v420_v60  ;;  %1349 = vmatprep.subr.bf16.mxu1 %v420_v60  ;;  %v164_v53 = vpack.c.bf16 %v86_v51, %v80_v50  ;;  %v83_v55 = vld [vmem:[#allocation7 + $0x70] sm:$0xff]  ;;  %v92_v56 = vld [vmem:[#allocation7 + $0x88] sm:$0xff]  ;;  %v98_v57 = vld [vmem:[#allocation7 + $0x98] sm:$0xff] }
+  0x2c   :  { %v160_v58 = vpack.c.bf16 %v83_v55, %v77_v54  ;;  %v172_v59 = vpack.c.bf16 %v98_v57, %v92_v56  ;;  %v89_v60 = vld [vmem:[#allocation7 + $0x80] sm:$0xff]  ;;  %v95_v61 = vld [vmem:[#allocation7 + $0x90] sm:$0xff]  ;;  %v104_v62 = vld [vmem:[#allocation7 + $0xa8] sm:$0xff] }
+  0x2d   :  { %v110_v63 = vld [vmem:[#allocation7 + $0xb8] sm:$0xff]  ;;  %v168_v0 = vpack.c.bf16 %v95_v61, %v89_v60  ;;  %v107_v3 = vld [vmem:[#allocation7 + $0xb0] sm:$0xff]  ;;  %v116_v4 = vld [vmem:[#allocation7 + $0xc8] sm:$0xff] }
+  0x2e   :  { %437 = vmatpush2.bf16.msra.mxu0 %v432_v1  ;;  %1361 = vmatpush2.bf16.msra.mxu1 %v432_v1  ;;  %v180_v1 = vpack.c.bf16 %v110_v63, %v104_v62  ;;  %v122_v5 = vld [vmem:[#allocation7 + $0xd8] sm:$0xff]  ;;  %v119_v9 = vld [vmem:[#allocation7 + $0xd0] sm:$0xff]  ;;  %v128_v10 = vld [vmem:[#allocation7 + $0xe8] sm:$0xff] }
+  0x2f   :  { %449 = vmatprep.subr.bf16.mxu0 %v444_v2  ;;  %1373 = vmatprep.subr.bf16.mxu1 %v444_v2  ;;  %v101_v2 = vld [vmem:[#allocation7 + $0xa0] sm:$0xff]  ;;  %v134_v11 = vld [vmem:[#allocation7 + $0xf8] sm:$0xff]  ;;  %v131_v15 = vld [vmem:[#allocation7 + $0xf0] sm:$0xff] }
+  0x30   :  { %v176_v6 = vpack.c.bf16 %v107_v3, %v101_v2 }
+  0x31   :  { %461 = vmatpush2.bf16.msra.mxu0 %v456_v7  ;;  %1385 = vmatpush2.bf16.msra.mxu1 %v456_v7  ;;  %v188_v7 = vpack.c.bf16 %v122_v5, %v116_v4 }
+  0x32   :  { %473 = vmatprep.subr.bf16.mxu0 %v468_v8  ;;  %1397 = vmatprep.subr.bf16.mxu1 %v468_v8  ;;  %v113_v8 = vld [vmem:[#allocation7 + $0xc0] sm:$0xff] }
+  0x33   :  { %v184_v12 = vpack.c.bf16 %v119_v9, %v113_v8 }
+  0x34   :  { %485 = vmatpush2.bf16.msra.mxu0 %v480_v13  ;;  %1409 = vmatpush2.bf16.msra.mxu1 %v480_v13  ;;  %v196_v13 = vpack.c.bf16 %v134_v11, %v128_v10 }
+  0x35   :  { %497 = vmatprep.subr.bf16.mxu0 %v492_v14  ;;  %1421 = vmatprep.subr.bf16.mxu1 %v492_v14  ;;  %v125_v14 = vld [vmem:[#allocation7 + $0xe0] sm:$0xff] }
+  0x36   :  { %v192_v16 = vpack.c.bf16 %v131_v15, %v125_v14 }
+  0x37   :  { %509 = vmatpush2.bf16.msra.mxu0 %v504_v19  ;;  %1433 = vmatpush2.bf16.msra.mxu1 %v504_v19 }
+  0x38   :  { %521 = vmatprep.subr.bf16.mxu0 %v516_v20  ;;  %1445 = vmatprep.subr.bf16.mxu1 %v516_v20 }
+  0x39   :  { %533 = vmatpush2.bf16.msra.mxu0 %v528_v25  ;;  %1457 = vmatpush2.bf16.msra.mxu1 %v528_v25 }
+  0x3a   :  { %545 = vmatprep.subr.bf16.mxu0 %v540_v26  ;;  %1469 = vmatprep.subr.bf16.mxu1 %v540_v26 }
+  0x3b   :  { %557 = vmatpush2.bf16.msra.mxu0 %v552_v31  ;;  %1481 = vmatpush2.bf16.msra.mxu1 %v552_v31 }
+  0x3c   :  { %569 = vmatprep.subr.bf16.mxu0 %v564_v32  ;;  %1493 = vmatprep.subr.bf16.mxu1 %v564_v32 }
+  0x3d   :  { %581 = vmatpush2.bf16.msra.mxu0 %v576_v35  ;;  %1505 = vmatpush2.bf16.msra.mxu1 %v576_v35 }
+  0x3e   :  { %586 = vmatmul.mubr.bf16.vlgmr.msra.gmra.mxu0 %v136_v40 }
+  0x3f   :  { %628 = vmatprep.mubr.bf16.mxu0 %v148_v41 }
+  0x40   :  { %631 = vmatmul.mubr.bf16.gmra.mxu0 %v144_v46 }
+  0x41   :  { %674 = vmatprep.mubr.bf16.mxu0 %v156_v47 }
+  0x42   :  { %677 = vmatmul.mubr.bf16.gmra.mxu0 %v152_v52 }
+  0x43   :  { %720 = vmatprep.mubr.bf16.mxu0 %v164_v53 }
+  0x44   :  { %723 = vmatmul.mubr.bf16.gmra.mxu0 %v160_v58 }
+  0x45   :  { %766 = vmatprep.mubr.bf16.mxu0 %v172_v59 }
+  0x46   :  { %769 = vmatmul.mubr.bf16.gmra.mxu0 %v168_v0 }
+  0x47   :  { %812 = vmatprep.mubr.bf16.mxu0 %v180_v1 }
+  0x48   :  { %815 = vmatmul.mubr.bf16.gmra.mxu0 %v176_v6 }
+  0x49   :  { %858 = vmatprep.mubr.bf16.mxu0 %v188_v7 }
+  0x4a   :  { %861 = vmatmul.mubr.bf16.gmra.mxu0 %v184_v12 }
+  0x4b   :  { %904 = vmatprep.mubr.bf16.mxu0 %v196_v13 }
+  0x4c   :  { %907 = vmatmul.mubr.bf16.gmra.mxu0 %v192_v16 }
+  0x4d   :  { %v587_v17 = vpop.f32.mrf.mxu0 }
+  0x4e   :  { %2041 = vtanh.f32 %v587_v17 }
+  0x4f   :  { %v596_v18 = vpop.f32.mrf.mxu0 }
+  0x50   :  { %v606_v19 = vpop.f32.mrf.mxu0 }
+  0x51   :  { %2043 = vtanh.f32 %v606_v19 }
+  0x52   :  { %2045 = vtanh.f32 %v596_v18  ;;  %v616_v20 = vpop.f32.mrf.mxu0 }
+  0x53   :  { %2047 = vtanh.f32 %v616_v20 }
+  0x54   :  { %v632_v21 = vpop.f32.mrf.mxu0 }
+  0x55   :  { %2049 = vtanh.f32 %v632_v21 }
+  0x56   :  { %v642_v22 = vpop.f32.mrf.mxu0 }
+  0x57   :  { %v652_v23 = vpop.f32.mrf.mxu0 }
+  0x58   :  { %2051 = vtanh.f32 %v652_v23 }
+  0x59   :  { %2053 = vtanh.f32 %v642_v22  ;;  %v662_v24 = vpop.f32.mrf.mxu0  ;;  %v2042_v26 = vpop.eup %2041 }
+  0x5a   :  { %2055 = vtanh.f32 %v662_v24 }
+  0x5b   :  { %v678_v25 = vpop.f32.mrf.mxu0 }
+  0x5c   :  { %2057 = vtanh.f32 %v678_v25 }
+  0x5d   :  { %v2044_v27 = vpop.eup %2043  ;;  %v688_v28 = vpop.f32.mrf.mxu0 }
+  0x5e   :  { %v2046_v29 = vpop.eup %2045  ;;  %v1060_v30 = vpack.c.bf16 %v2044_v27, %v2042_v26 }
+  0x5f   :  { %v2048_v31 = vpop.eup %2047  ;;  %v698_v32 = vpop.f32.mrf.mxu0 }
+  0x60   :  { %2059 = vtanh.f32 %v698_v32  ;;  %v1064_v33 = vpack.c.bf16 %v2048_v31, %v2046_v29 }
+  0x61   :  { %2061 = vtanh.f32 %v688_v28  ;;  %v708_v34 = vpop.f32.mrf.mxu0  ;;  %v2050_v36 = vpop.eup %2049 }
+  0x62   :  { %2063 = vtanh.f32 %v708_v34  ;;  %1508 = vmatprep.mubr.bf16.mxu1 %v1064_v33 }
+  0x63   :  { %v724_v35 = vpop.f32.mrf.mxu0  ;;  %1510 = vmatmul.mubr.bf16.vlgmr.msra.gmra.mxu1 %v1060_v30 }
+  0x64   :  { %2065 = vtanh.f32 %v724_v35 }
+  0x65   :  { %v2052_v37 = vpop.eup %2051  ;;  %v734_v38 = vpop.f32.mrf.mxu0 }
+  0x66   :  { %v2054_v39 = vpop.eup %2053  ;;  %v1068_v40 = vpack.c.bf16 %v2052_v37, %v2050_v36 }
+  0x67   :  { %v2056_v41 = vpop.eup %2055  ;;  %v744_v42 = vpop.f32.mrf.mxu0 }
+  0x68   :  { %2067 = vtanh.f32 %v744_v42  ;;  %v1072_v43 = vpack.c.bf16 %v2056_v41, %v2054_v39 }
+  0x69   :  { %2069 = vtanh.f32 %v734_v38  ;;  %v754_v44 = vpop.f32.mrf.mxu0  ;;  %v2058_v46 = vpop.eup %2057 }
+  0x6a   :  { %2071 = vtanh.f32 %v754_v44  ;;  %1548 = vmatprep.mubr.bf16.mxu1 %v1072_v43 }
+  0x6b   :  { %v770_v45 = vpop.f32.mrf.mxu0  ;;  %1551 = vmatmul.mubr.bf16.gmra.mxu1 %v1068_v40 }
+  0x6c   :  { %2073 = vtanh.f32 %v770_v45 }
+  0x6d   :  { %v2060_v47 = vpop.eup %2059  ;;  %v780_v48 = vpop.f32.mrf.mxu0 }
+  0x6e   :  { %v2062_v49 = vpop.eup %2061  ;;  %v1076_v50 = vpack.c.bf16 %v2060_v47, %v2058_v46 }
+  0x6f   :  { %v2064_v51 = vpop.eup %2063  ;;  %v790_v52 = vpop.f32.mrf.mxu0 }
+  0x70   :  { %2075 = vtanh.f32 %v790_v52  ;;  %v1080_v53 = vpack.c.bf16 %v2064_v51, %v2062_v49 }
+  0x71   :  { %2077 = vtanh.f32 %v780_v48  ;;  %v800_v54 = vpop.f32.mrf.mxu0  ;;  %v2066_v56 = vpop.eup %2065 }
+  0x72   :  { %2079 = vtanh.f32 %v800_v54  ;;  %1594 = vmatprep.mubr.bf16.mxu1 %v1080_v53 }
+  0x73   :  { %v816_v55 = vpop.f32.mrf.mxu0  ;;  %1597 = vmatmul.mubr.bf16.gmra.mxu1 %v1076_v50 }
+  0x74   :  { %2081 = vtanh.f32 %v816_v55 }
+  0x75   :  { %v2068_v57 = vpop.eup %2067  ;;  %v826_v58 = vpop.f32.mrf.mxu0 }
+  0x76   :  { %v2070_v59 = vpop.eup %2069  ;;  %v1084_v60 = vpack.c.bf16 %v2068_v57, %v2066_v56 }
+  0x77   :  { %v2072_v61 = vpop.eup %2071  ;;  %v836_v62 = vpop.f32.mrf.mxu0 }
+  0x78   :  { %2083 = vtanh.f32 %v836_v62  ;;  %v1088_v63 = vpack.c.bf16 %v2072_v61, %v2070_v59 }
+  0x79   :  { %2085 = vtanh.f32 %v826_v58  ;;  %v846_v0 = vpop.f32.mrf.mxu0  ;;  %v2074_v2 = vpop.eup %2073 }
+  0x7a   :  { %2087 = vtanh.f32 %v846_v0  ;;  %1640 = vmatprep.mubr.bf16.mxu1 %v1088_v63 }
+  0x7b   :  { %v862_v1 = vpop.f32.mrf.mxu0  ;;  %1643 = vmatmul.mubr.bf16.gmra.mxu1 %v1084_v60 }
+  0x7c   :  { %2089 = vtanh.f32 %v862_v1 }
+  0x7d   :  { %v2076_v3 = vpop.eup %2075  ;;  %v872_v4 = vpop.f32.mrf.mxu0 }
+  0x7e   :  { %v2078_v5 = vpop.eup %2077  ;;  %v1092_v6 = vpack.c.bf16 %v2076_v3, %v2074_v2 }
+  0x7f   :  { %v2080_v7 = vpop.eup %2079  ;;  %v882_v8 = vpop.f32.mrf.mxu0 }
+  0x80   :  { %2091 = vtanh.f32 %v882_v8  ;;  %v1096_v9 = vpack.c.bf16 %v2080_v7, %v2078_v5 }
+  0x81   :  { %2093 = vtanh.f32 %v872_v4  ;;  %v892_v10 = vpop.f32.mrf.mxu0  ;;  %v2082_v12 = vpop.eup %2081 }
+  0x82   :  { %2095 = vtanh.f32 %v892_v10  ;;  %1686 = vmatprep.mubr.bf16.mxu1 %v1096_v9 }
+  0x83   :  { %v908_v11 = vpop.f32.mrf.mxu0  ;;  %1689 = vmatmul.mubr.bf16.gmra.mxu1 %v1092_v6 }
+  0x84   :  { %2097 = vtanh.f32 %v908_v11 }
+  0x85   :  { %v2084_v13 = vpop.eup %2083  ;;  %v918_v14 = vpop.f32.mrf.mxu0 }
+  0x86   :  { %v2086_v15 = vpop.eup %2085  ;;  %v1100_v16 = vpack.c.bf16 %v2084_v13, %v2082_v12 }
+  0x87   :  { %v2088_v17 = vpop.eup %2087  ;;  %v928_v18 = vpop.f32.mrf.mxu0 }
+  0x88   :  { %2099 = vtanh.f32 %v928_v18  ;;  %v1104_v19 = vpack.c.bf16 %v2088_v17, %v2086_v15 }
+  0x89   :  { %2101 = vtanh.f32 %v918_v14  ;;  %v938_v20 = vpop.f32.mrf.mxu0  ;;  %v2090_v21 = vpop.eup %2089 }
+  0x8a   :  { %2103 = vtanh.f32 %v938_v20  ;;  %1732 = vmatprep.mubr.bf16.mxu1 %v1104_v19 }
+  0x8b   :  { %1735 = vmatmul.mubr.bf16.gmra.mxu1 %v1100_v16 }
+  0x8c   :  { %v2092_v22 = vpop.eup %2091 }
+  0x8d   :  { %v2094_v23 = vpop.eup %2093  ;;  %v1108_v24 = vpack.c.bf16 %v2092_v22, %v2090_v21 }
+  0x8e   :  { %v2096_v25 = vpop.eup %2095 }
+  0x8f   :  { %v1112_v26 = vpack.c.bf16 %v2096_v25, %v2094_v23 }
+  0x90   :  { %v2098_v27 = vpop.eup %2097 }
+  0x91   :  { %1778 = vmatprep.mubr.bf16.mxu1 %v1112_v26 }
+  0x92   :  { %1781 = vmatmul.mubr.bf16.gmra.mxu1 %v1108_v24 }
+  0x93   :  { %v2100_v28 = vpop.eup %2099 }
+  0x94   :  { %v2102_v29 = vpop.eup %2101  ;;  %v1116_v30 = vpack.c.bf16 %v2100_v28, %v2098_v27 }
+  0x95   :  { %v2104_v31 = vpop.eup %2103 }
+  0x96   :  { %v1120_v32 = vpack.c.bf16 %v2104_v31, %v2102_v29 }
+  0x97   :  { %1824 = vmatprep.mubr.bf16.mxu1 %v1120_v32 }
+  0x98   :  { %1827 = vmatmul.mubr.bf16.gmra.mxu1 %v1116_v30 }
+  0x99   :  { %v1511_v33 = vpop.f32.mrf.mxu1 }
+  0x9a   :  { %2105 = vtanh.f32 %v1511_v33 }
+  0x9b   :  { %v1516_v34 = vpop.f32.mrf.mxu1 }
+  0x9c   :  { %2107 = vtanh.f32 %v1516_v34 }
+  0x9d   :  { %v1526_v35 = vpop.f32.mrf.mxu1 }
+  0x9e   :  { %2109 = vtanh.f32 %v1526_v35 }
+  0x9f   :  { %v1536_v36 = vpop.f32.mrf.mxu1 }
+  0xa0   :  { %2111 = vtanh.f32 %v1536_v36 }
+  0xa1   :  { %v1552_v37 = vpop.f32.mrf.mxu1 }
+  0xa2   :  { %2113 = vtanh.f32 %v1552_v37 }
+  0xa3   :  { %v1562_v38 = vpop.f32.mrf.mxu1 }
+  0xa4   :  { %2115 = vtanh.f32 %v1562_v38 }
+  0xa5   :  { %v1572_v39 = vpop.f32.mrf.mxu1 }
+  0xa6   :  { %2117 = vtanh.f32 %v1572_v39 }
+  0xa7   :  { %v1582_v40 = vpop.f32.mrf.mxu1  ;;  %v2106_v41 = vpop.eup %2105 }
+  0xa8   :  { %2119 = vtanh.f32 %v1582_v40 }
+  0xa9   :  { %v2108_v42 = vpop.eup %2107  ;;  %v1598_v43 = vpop.f32.mrf.mxu1 }
+  0xaa   :  { %v1524_v44 = vadd.f32 %v2108_v42, %v2106_v41  ;;  %2121 = vtanh.f32 %v1598_v43 }
+  0xab   :  { %v2110_v45 = vpop.eup %2109  ;;  %v1608_v46 = vpop.f32.mrf.mxu1 }
+  0xac   :  { %v1534_v47 = vadd.f32 %v2110_v45, %v1524_v44  ;;  %2123 = vtanh.f32 %v1608_v46 }
+  0xad   :  { %v2112_v48 = vpop.eup %2111  ;;  %v1618_v49 = vpop.f32.mrf.mxu1 }
+  0xae   :  { %v1544_v50 = vadd.f32 %v2112_v48, %v1534_v47  ;;  %2125 = vtanh.f32 %v1618_v49 }
+  0xaf   :  { %v2114_v51 = vpop.eup %2113  ;;  %v1628_v52 = vpop.f32.mrf.mxu1 }
+  0xb0   :  { %v1560_v53 = vadd.f32 %v2114_v51, %v1544_v50  ;;  %2127 = vtanh.f32 %v1628_v52 }
+  0xb1   :  { %v2116_v54 = vpop.eup %2115  ;;  %v1644_v55 = vpop.f32.mrf.mxu1 }
+  0xb2   :  { %v1570_v56 = vadd.f32 %v2116_v54, %v1560_v53  ;;  %2129 = vtanh.f32 %v1644_v55 }
+  0xb3   :  { %v2118_v57 = vpop.eup %2117  ;;  %v1654_v58 = vpop.f32.mrf.mxu1 }
+  0xb4   :  { %v1580_v59 = vadd.f32 %v2118_v57, %v1570_v56  ;;  %2131 = vtanh.f32 %v1654_v58 }
+  0xb5   :  { %v2120_v60 = vpop.eup %2119  ;;  %v1664_v61 = vpop.f32.mrf.mxu1 }
+  0xb6   :  { %v1590_v62 = vadd.f32 %v2120_v60, %v1580_v59  ;;  %2133 = vtanh.f32 %v1664_v61 }
+  0xb7   :  { %v2122_v63 = vpop.eup %2121  ;;  %v1674_v0 = vpop.f32.mrf.mxu1 }
+  0xb8   :  { %v1606_v1 = vadd.f32 %v2122_v63, %v1590_v62  ;;  %2135 = vtanh.f32 %v1674_v0  ;;  %v1869_v63 = vld [vmem:[#allocation5] sm:$0xff] }
+  0xb9   :  { %v2124_v2 = vpop.eup %2123  ;;  %v1690_v3 = vpop.f32.mrf.mxu1 }
+  0xba   :  { %v1616_v4 = vadd.f32 %v2124_v2, %v1606_v1  ;;  %2137 = vtanh.f32 %v1690_v3 }
+  0xbb   :  { %v2126_v5 = vpop.eup %2125  ;;  %v1700_v6 = vpop.f32.mrf.mxu1 }
+  0xbc   :  { %v1626_v7 = vadd.f32 %v2126_v5, %v1616_v4  ;;  %2139 = vtanh.f32 %v1700_v6 }
+  0xbd   :  { %v2128_v8 = vpop.eup %2127  ;;  %v1710_v9 = vpop.f32.mrf.mxu1 }
+  0xbe   :  { %v1636_v10 = vadd.f32 %v2128_v8, %v1626_v7  ;;  %2141 = vtanh.f32 %v1710_v9 }
+  0xbf   :  { %v2130_v11 = vpop.eup %2129  ;;  %v1720_v12 = vpop.f32.mrf.mxu1 }
+  0xc0   :  { %v1652_v13 = vadd.f32 %v2130_v11, %v1636_v10  ;;  %2143 = vtanh.f32 %v1720_v12 }
+  0xc1   :  { %v2132_v14 = vpop.eup %2131  ;;  %v1736_v15 = vpop.f32.mrf.mxu1 }
+  0xc2   :  { %v1662_v16 = vadd.f32 %v2132_v14, %v1652_v13  ;;  %2145 = vtanh.f32 %v1736_v15 }
+  0xc3   :  { %v2134_v17 = vpop.eup %2133  ;;  %v1746_v18 = vpop.f32.mrf.mxu1 }
+  0xc4   :  { %v1672_v19 = vadd.f32 %v2134_v17, %v1662_v16  ;;  %2147 = vtanh.f32 %v1746_v18 }
+  0xc5   :  { %v2136_v20 = vpop.eup %2135  ;;  %v1756_v21 = vpop.f32.mrf.mxu1 }
+  0xc6   :  { %v1682_v22 = vadd.f32 %v2136_v20, %v1672_v19  ;;  %2149 = vtanh.f32 %v1756_v21 }
+  0xc7   :  { %v2138_v23 = vpop.eup %2137  ;;  %v1766_v24 = vpop.f32.mrf.mxu1 }
+  0xc8   :  { %v1698_v25 = vadd.f32 %v2138_v23, %v1682_v22  ;;  %2151 = vtanh.f32 %v1766_v24 }
+  0xc9   :  { %v2140_v26 = vpop.eup %2139  ;;  %v1782_v27 = vpop.f32.mrf.mxu1 }
+  0xca   :  { %v1708_v28 = vadd.f32 %v2140_v26, %v1698_v25  ;;  %2153 = vtanh.f32 %v1782_v27 }
+  0xcb   :  { %v2142_v29 = vpop.eup %2141  ;;  %v1792_v30 = vpop.f32.mrf.mxu1 }
+  0xcc   :  { %v1718_v31 = vadd.f32 %v2142_v29, %v1708_v28  ;;  %2155 = vtanh.f32 %v1792_v30 }
+  0xcd   :  { %v2144_v32 = vpop.eup %2143  ;;  %v1802_v33 = vpop.f32.mrf.mxu1 }
+  0xce   :  { %v1728_v34 = vadd.f32 %v2144_v32, %v1718_v31  ;;  %2157 = vtanh.f32 %v1802_v33 }
+  0xcf   :  { %v2146_v35 = vpop.eup %2145  ;;  %v1812_v36 = vpop.f32.mrf.mxu1 }
+  0xd0   :  { %v1744_v37 = vadd.f32 %v2146_v35, %v1728_v34  ;;  %2159 = vtanh.f32 %v1812_v36 }
+  0xd1   :  { %v2148_v38 = vpop.eup %2147  ;;  %v1828_v39 = vpop.f32.mrf.mxu1 }
+  0xd2   :  { %v1754_v40 = vadd.f32 %v2148_v38, %v1744_v37  ;;  %2161 = vtanh.f32 %v1828_v39 }
+  0xd3   :  { %v2150_v41 = vpop.eup %2149  ;;  %v1838_v42 = vpop.f32.mrf.mxu1 }
+  0xd4   :  { %v1764_v43 = vadd.f32 %v2150_v41, %v1754_v40  ;;  %2163 = vtanh.f32 %v1838_v42 }
+  0xd5   :  { %v2152_v44 = vpop.eup %2151  ;;  %v1848_v45 = vpop.f32.mrf.mxu1 }
+  0xd6   :  { %v1774_v46 = vadd.f32 %v2152_v44, %v1764_v43  ;;  %2165 = vtanh.f32 %v1848_v45 }
+  0xd7   :  { %v2154_v47 = vpop.eup %2153  ;;  %v1858_v48 = vpop.f32.mrf.mxu1 }
+  0xd8   :  { %v1790_v49 = vadd.f32 %v2154_v47, %v1774_v46  ;;  %2167 = vtanh.f32 %v1858_v48 }
+  0xd9   :  { %v2156_v50 = vpop.eup %2155 }
+  0xda   :  { %v1800_v51 = vadd.f32 %v2156_v50, %v1790_v49 }
+  0xdb   :  { %v2158_v52 = vpop.eup %2157 }
+  0xdc   :  { %v1810_v53 = vadd.f32 %v2158_v52, %v1800_v51 }
+  0xdd   :  { %v2160_v54 = vpop.eup %2159 }
+  0xde   :  { %v1820_v55 = vadd.f32 %v2160_v54, %v1810_v53 }
+  0xdf   :  { %v2162_v56 = vpop.eup %2161 }
+  0xe0   :  { %v1836_v57 = vadd.f32 %v2162_v56, %v1820_v55 }
+  0xe1   :  { %v2164_v58 = vpop.eup %2163 }
+  0xe2   :  { %v1846_v59 = vadd.f32 %v2164_v58, %v1836_v57 }
+  0xe3   :  { %v2166_v60 = vpop.eup %2165 }
+  0xe4   :  { %v1856_v61 = vadd.f32 %v2166_v60, %v1846_v59 }
+  0xe5   :  { %v2168_v62 = vpop.eup %2167 }
+  0xe6   :  { %v1866_v0 = vadd.f32 %v2168_v62, %v1856_v61 }
+  0xe7   :  { %v1872_v1 = vadd.f32 %v1869_v63, %v1866_v0 }
+  0xe8   :  { %1874 = vst [vmem:[#allocation5] sm:$0xff] /*vst_source=*/%v1872_v1 }
+  0xe9   :  { %1875 = vsyncpa [#allocation8], 1  ;;  %s2217_s0 = smov [#allocation5] /* materialized constant */ } /* End region 3 */
+  0xea   :  { %s1903_s27 = sshll.u32 %s2217_s0, 4  ;;  %s1904_s27 = int_to_ptr.vmem [resolvable:$true] %s1903_s27 }
+  0xeb   :  { %s2189_s28 = scalar_lea.vmem %s1904_s27, 16  ;;  %s2193_s29 = scalar_lea.vmem %s1904_s27, 128 }
+  0xec   :  { %p2190_p5 = scmp.ne.s32.totalorder %s1904_s27, %s2189_s28  ;;  %p2194_p6 = scmp.lt.s32.totalorder %s1904_s27, %s1904_s27 }
+  0xed   :  { %p2195_p7 = scmp.lt.s32.totalorder %s2193_s29, %s2189_s28 }
+  0xee   :  { %v1876_v2 = vld [vmem:[#allocation5] sm:$0xff]  ;;  %p2196_p8 = por %p2195_p7, %p2194_p6 }
+  0xef   :  { %v1877_v3 = vrot.slane %v1876_v2, 4 }
+  0xf0   :  { %p2197_p9 = pnand %p2196_p8, %p2190_p5 }
+  0xf1   :  { %v1880_v4 = vadd.f32 %v1877_v3, %v1876_v2 }
+  0xf2   :  { %v1882_v5 = vrot.slane %v1880_v4, 2 }
+  0xf3   :  { %v1885_v6 = vadd.f32 %v1882_v5, %v1880_v4 }
+  0xf4   :  { %v1887_v7 = vrot.slane %v1885_v6, 1 }
+  0xf5   :  { %v1890_v8 = vadd.f32 %v1887_v7, %v1885_v6 }
+  0xf6   :  { %1892 = vadd.xlane.f32.xlu0 %v1890_v8 }
+  0xf7   :  { %v1893_v9 = vpop.xlane.xlu0 %1892 }
+  0xf8   :  { %1894 = vst [vmem:[#allocation5] sm:$0xff] /*vst_source=*/%v1893_v9 }
+  0xf9   :  { %v1899_v10 = vld [vmem:[#allocation5] sm:$0x1] }
+  0xfa   :  { %1902 = vst [vmem:[#allocation5] sm:$0x1] /*vst_source=*/%v1899_v10 }
+  0xfb   :  { %2200 = shalt.err (!%p2197_p9) /* BoundsCheck 104 [deref of opnd#0] for %1906=dma.vmem_to_hbm
+hlo: fusion
+ */ }
+  0xfc   :  { %1906 = dma.vmem_to_hbm [thread:$0]  /*vmem=*/%s1904_s27, /*size_in_granules=*/16, /*hbm=*/%s2433_s2, /*dst_syncflagno=*/[#allocation9] }
+  0xfd   :  { %2211 = dma.done.wait [#allocation9], 16 /* fusion-emitter-dma-wait */ }
+  0xfe   :  { %2212 = vsyncadd [#allocation9], 4294967280 } /* exit bundle: %fusion = fusion(%copy-done, %param) */

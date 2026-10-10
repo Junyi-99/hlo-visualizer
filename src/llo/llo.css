@@ -1,0 +1,732 @@
+.llo-app {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr) 310px;
+  transition: grid-template-columns 240ms var(--spring);
+  height: 100dvh;
+  min-height: 500px;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.45 var(--font-ui);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.llo-inspector,
+.llo-inspector *,
+.llo-app input,
+.llo-app textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.llo-app input::placeholder,
+.llo-app textarea::placeholder {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.llo-app.sidebar-collapsed {
+  grid-template-columns: 0px minmax(0, 1fr) 310px;
+}
+.llo-app.sidebar-collapsed .llo-sidebar {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    visibility 0s linear 240ms;
+}
+.llo-app button {
+  font: inherit;
+}
+.llo-app .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.075em;
+  color: var(--text-3);
+}
+.llo-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  transition: opacity 180ms ease;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border-soft);
+}
+.llo-brand {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.llo-logo {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: white;
+  font-size: 25px;
+  font-weight: 600;
+}
+.llo-brand strong,
+.llo-brand span {
+  display: block;
+}
+.llo-brand strong {
+  font-size: 14px;
+}
+.llo-brand span {
+  font-size: 11px;
+  color: var(--text-3);
+}
+.llo-side-section {
+  padding: 22px 18px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.llo-side-section h1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 8px 0 3px;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+}
+.llo-side-section p,
+.llo-side-bottom p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12px;
+}
+.llo-region-section {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px 10px;
+}
+.llo-section-title {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px 10px;
+  font-weight: 600;
+}
+.llo-section-title span {
+  color: var(--text-3);
+}
+.llo-region-section nav {
+  display: grid;
+  gap: 4px;
+}
+.llo-region-section nav button {
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  min-width: 0;
+}
+.llo-region-section nav button:hover {
+  background: var(--fill);
+}
+.llo-region-section nav button.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+.llo-region-section nav strong,
+.llo-region-section nav small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.llo-region-section nav small {
+  color: var(--text-3);
+  font-size: 11px;
+}
+.llo-side-bottom {
+  padding: 18px;
+  border-top: 1px solid var(--border-soft);
+}
+.llo-side-bottom p {
+  margin: 7px 0 12px;
+}
+.llo-side-bottom a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.llo-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.llo-topbar {
+  height: 52px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 24px;
+  background: var(--chrome);
+  border-bottom: 1px solid var(--border-soft);
+}
+.llo-topbar-leading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.llo-sidebar-toggle {
+  flex: none;
+}
+.llo-crumb {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-3);
+}
+.llo-crumb span {
+  padding: 0 6px;
+}
+.llo-crumb strong {
+  color: var(--text);
+}
+.llo-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.llo-example-select {
+  height: 32px;
+  max-width: 180px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+.llo-button,
+.llo-primary,
+.llo-icon-button {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-weight: 600 !important;
+  white-space: nowrap;
+}
+.llo-button,
+.llo-icon-button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.llo-primary {
+  border: 0;
+  background: var(--accent);
+  color: white;
+}
+.llo-icon-button {
+  width: 32px;
+  padding: 0;
+  font-size: 18px !important;
+}
+.llo-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 23px 26px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-soft);
+}
+.llo-heading h2 {
+  margin: 3px 0 3px;
+  font-size: 24px;
+  letter-spacing: -0.04em;
+}
+.llo-heading p {
+  margin: 0;
+  color: var(--text-2);
+}
+.llo-summary {
+  display: flex;
+  gap: 20px;
+  flex: none;
+  color: var(--text-3);
+  font-size: 11px;
+  text-align: right;
+}
+.llo-summary span {
+  display: flex;
+  flex-direction: column;
+}
+.llo-summary strong {
+  font-size: 20px;
+  color: var(--text);
+  line-height: 1.1;
+}
+.llo-controls {
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.llo-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--fill);
+  border-radius: 8px;
+  padding: 0 10px;
+  height: 34px;
+  max-width: 440px;
+}
+.llo-search span {
+  font-size: 20px;
+  color: var(--text-3);
+}
+.llo-search input {
+  min-width: 0;
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+.llo-search kbd {
+  color: var(--text-3);
+  font-size: 11px;
+}
+.llo-unit-filters {
+  display: flex;
+  gap: 5px;
+  overflow: auto;
+}
+.llo-unit-filter {
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  color: var(--text-3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.03em;
+  opacity: 0.55;
+}
+.llo-unit-filter.active {
+  opacity: 1;
+  color: var(--unit-color);
+  border-color: color-mix(in srgb, var(--unit-color) 35%, transparent);
+  background: color-mix(in srgb, var(--unit-color) 9%, var(--surface));
+}
+.llo-unit-filter span {
+  margin-left: 3px;
+  color: var(--text-3);
+}
+.unit-mxu {
+  --unit-color: #a347d1;
+}
+.unit-xlu {
+  --unit-color: #bd6ca5;
+}
+.unit-dma {
+  --unit-color: #dc7600;
+}
+.unit-vload {
+  --unit-color: #0071bf;
+}
+.unit-vstore {
+  --unit-color: #168c86;
+}
+.unit-vpu {
+  --unit-color: #5b6ec7;
+}
+.unit-scalar {
+  --unit-color: #757b85;
+}
+.unit-other {
+  --unit-color: #8a8a90;
+}
+.llo-content {
+  flex: 1;
+  overflow: auto;
+  padding: 20px 24px;
+  background-image: radial-gradient(var(--grid-dot) 0.65px, transparent 0.65px);
+  background-size: 18px 18px;
+}
+.llo-timeline {
+  min-width: 920px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.llo-timeline-head,
+.llo-timeline-row {
+  display: grid;
+  grid-template-columns: 86px repeat(8, minmax(99px, 1fr));
+}
+.llo-timeline-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-2);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+}
+.llo-timeline-head span {
+  padding: 10px;
+  border-right: 1px solid var(--border-soft);
+}
+.llo-timeline-row {
+  min-height: 58px;
+  border-top: 1px solid var(--border-soft);
+}
+.llo-timeline-row:nth-child(odd) {
+  background: var(--surface-2);
+}
+.llo-address {
+  padding: 9px 10px;
+  border-right: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+}
+.llo-address strong,
+.llo-address small {
+  display: block;
+}
+.llo-address small {
+  color: var(--text-3);
+  font: 10px var(--font-ui);
+}
+.llo-lane {
+  min-width: 0;
+  padding: 6px 4px;
+  border-right: 1px solid var(--border-soft);
+}
+.llo-lane > div + div {
+  margin-top: 4px;
+}
+.llo-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid color-mix(in srgb, var(--unit-color) 28%, transparent);
+  border-left: 3px solid var(--unit-color);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--unit-color) 8%, var(--surface));
+  color: var(--text);
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  line-height: 1.3;
+}
+.llo-chip:hover,
+.llo-chip.selected {
+  background: color-mix(in srgb, var(--unit-color) 17%, var(--surface));
+  border-color: var(--unit-color);
+}
+.llo-chip span,
+.llo-chip small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.llo-chip small {
+  color: var(--text-3);
+}
+.llo-stream {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.llo-stream-row {
+  display: grid;
+  grid-template-columns: 45px 68px minmax(140px, 240px) minmax(280px, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.llo-stream-row:hover {
+  background: var(--surface-2);
+}
+.llo-line {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.llo-unit-label {
+  color: var(--unit-color);
+  font-size: 10px;
+  font-weight: 700;
+}
+.llo-stream-row code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-2);
+  font-size: 11px;
+}
+.llo-empty {
+  padding: 50px;
+  text-align: center;
+  color: var(--text-3);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+.llo-show-more {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 600 !important;
+}
+.llo-status {
+  padding: 7px 24px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 11px;
+  color: var(--text-3);
+  background: var(--surface);
+}
+.llo-inspector {
+  overflow: auto;
+  min-width: 0;
+  padding: 22px 19px;
+  background: var(--surface);
+  border-left: 1px solid var(--border-soft);
+}
+.llo-inspector-empty {
+  color: var(--text-2);
+}
+.llo-inspector h2 {
+  margin: 5px 0;
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+.llo-inspector p {
+  color: var(--text-2);
+  margin: 8px 0 20px;
+}
+.llo-inspector-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.llo-close {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--fill);
+  font-size: 20px !important;
+}
+.llo-inspector-section {
+  padding: 16px 0;
+  border-top: 1px solid var(--border-soft);
+}
+.llo-inspector-section .eyebrow {
+  margin-bottom: 9px;
+}
+.llo-detail {
+  overflow-wrap: anywhere;
+}
+.llo-inspector pre {
+  margin: 0;
+  padding: 12px;
+  border-radius: 7px;
+  background: var(--code-bg);
+  font: 11px/1.5 var(--font-mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.llo-ref-list {
+  display: grid;
+  gap: 5px;
+}
+.llo-ref-list button {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+}
+.llo-ref-list button:not(:disabled):hover {
+  border-color: var(--accent);
+}
+.llo-ref-list button:disabled {
+  opacity: 0.6;
+}
+.llo-ref-list span {
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.llo-allocation-detail {
+  display: grid;
+  gap: 2px;
+  padding: 7px 0;
+  font-size: 11px;
+}
+.llo-allocation-detail span {
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+.llo-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--scrim);
+}
+.llo-modal {
+  width: min(720px, 100%);
+  padding: 23px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+.llo-modal-head {
+  display: flex;
+  justify-content: space-between;
+}
+.llo-modal h2 {
+  margin: 4px 0;
+  font-size: 22px;
+}
+.llo-modal p {
+  color: var(--text-2);
+}
+.llo-modal textarea {
+  display: block;
+  width: 100%;
+  height: min(45vh, 360px);
+  padding: 12px;
+  resize: vertical;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: 12px/1.5 var(--font-mono);
+}
+.llo-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.llo-modal-actions span {
+  flex: 1;
+  color: var(--danger);
+  font-size: 12px;
+}
+.llo-drop-hint {
+  position: fixed;
+  inset: 10px;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  border: 3px dashed var(--accent);
+  border-radius: 16px;
+  background: var(--chrome);
+  color: var(--accent);
+  font-size: 22px;
+  font-weight: 700;
+  pointer-events: none;
+}
+@media (max-width: 1250px) {
+  .llo-app.sidebar-collapsed {
+    grid-template-columns: 0px minmax(0, 1fr) 270px;
+  }
+  .llo-app {
+    grid-template-columns: 205px minmax(0, 1fr) 270px;
+  }
+  .llo-summary {
+    gap: 10px;
+  }
+}
+@media (max-width: 980px) {
+  .llo-app.sidebar-collapsed {
+    grid-template-columns: 0px minmax(0, 1fr);
+  }
+  .llo-app {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+  .llo-inspector {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    width: min(340px, 85vw);
+    box-shadow: var(--shadow-lg);
+  }
+  .llo-inspector-empty {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .llo-sidebar-toggle {
+    display: none;
+  }
+  .llo-app {
+    display: block;
+    height: 100dvh;
+  }
+  .llo-sidebar {
+    display: none;
+  }
+  .llo-main {
+    height: 100%;
+  }
+  .llo-topbar {
+    padding: 0 12px;
+  }
+  .llo-crumb {
+    max-width: 90px;
+  }
+  .llo-heading {
+    padding: 16px;
+  }
+  .llo-heading h2 {
+    font-size: 19px;
+  }
+  .llo-heading p,
+  .llo-summary {
+    display: none;
+  }
+  .llo-controls {
+    padding: 10px;
+  }
+  .llo-content {
+    padding: 10px;
+  }
+  .llo-button {
+    display: none;
+  }
+}

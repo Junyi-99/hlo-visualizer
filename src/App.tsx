@@ -42,6 +42,7 @@ export default function App() {
 
   const [autoGroup, setAutoGroup] = useStoredState('auto-group', readAutoGroup);
   const [layoutMode, setLayoutMode] = useStoredState('graph-layout', readLayoutMode);
+  const [sidebarCollapsed, setSidebarCollapsed] = useStoredState('hlo-sidebar-collapsed', readAutoGroup);
   const [zoom, setZoom] = useState(1);
   const [useOpName, setUseOpName] = useState(false);
   const [showLastNameOnly, setShowLastNameOnly] = useState(false);
@@ -165,10 +166,23 @@ export default function App() {
 
   return (
     <>
-      <div className={`app antialiased${node ? ' inspector-open' : ''}`}>
-        <Sidebar module={module} current={current} onOverview={() => showComputation(null)} onComputation={showComputation} />
+      <div className={`app antialiased${node ? ' inspector-open' : ''}${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
+        <Sidebar
+          module={module}
+          current={current}
+          collapsed={sidebarCollapsed}
+          onOverview={() => showComputation(null)}
+          onComputation={showComputation}
+        />
         <main className="main min-w-0">
-          <Toolbar {...viewProps} {...toolbarActions} canGoBack={history.length > 0} exampleId={exampleId} />
+          <Toolbar
+            {...viewProps}
+            {...toolbarActions}
+            canGoBack={history.length > 0}
+            exampleId={exampleId}
+            sidebarCollapsed={sidebarCollapsed}
+            onToggleSidebar={() => setSidebarCollapsed(value => !value)}
+          />
           <GraphCanvas
             {...viewProps}
             ref={graphRef}

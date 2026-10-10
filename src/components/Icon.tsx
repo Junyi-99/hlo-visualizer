@@ -12,6 +12,12 @@ const paths = {
   back: <path d="m15 18-6-6 6-6" />,
   chevron: <path d="m9 18 6-6-6-6" />,
   down: <path d="m6 9 6 6 6-6" />,
+  sidebar: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M9 3v18" />
+    </>
+  ),
   overview: (
     <>
       <rect x="3" y="3" width="7" height="7" rx="1.5" />

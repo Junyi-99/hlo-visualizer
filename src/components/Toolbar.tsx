@@ -32,6 +32,8 @@ interface ToolbarProps {
   onImport: () => void;
   exampleId: string | null;
   onExample: (id: string) => void;
+  sidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
 }
 
 const MEMORY_LOCATION_UNAVAILABLE =
@@ -244,7 +246,18 @@ function eyebrowLabel(computation: Computation | null | undefined, role: string 
   return computation.entry ? 'ENTRY COMPUTATION' : role;
 }
 
-export function Toolbar({ module, current, onComputation, onSearch, onImport, exampleId, onExample, ...viewActionProps }: ToolbarProps) {
+export function Toolbar({
+  module,
+  current,
+  onComputation,
+  onSearch,
+  onImport,
+  exampleId,
+  onExample,
+  sidebarCollapsed,
+  onToggleSidebar,
+  ...viewActionProps
+}: ToolbarProps) {
   const roles = useComputationRoles(module);
 
   const computation = current ? module.byName.get(current) : null;
@@ -253,13 +266,29 @@ export function Toolbar({ module, current, onComputation, onSearch, onImport, ex
   return (
     <>
       <header className="topbar">
-        <div className="crumb">
-          <span>Workspace</span>
-          <span className="slash">/</span>
-          <strong>{crumbLabel(computation)}</strong>
+        <div className="topbar-leading">
+          <button
+            className="icon-button sidebar-toggle"
+            type="button"
+            title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+            aria-label={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+            aria-controls="hlo-sidebar"
+            aria-expanded={!sidebarCollapsed}
+            onClick={onToggleSidebar}
+          >
+            <Icon name="sidebar" />
+          </button>
+          <div className="crumb">
+            <span>Workspace</span>
+            <span className="slash">/</span>
+            <strong>{crumbLabel(computation)}</strong>
+          </div>
         </div>
 
         <div className="top-actions">
+          <a className="subtle-button" href="?view=llo" title="Explore TPU LLO instruction dumps">
+            LLO Visualizer →
+          </a>
           <a
             className="icon-button repo-link"
             href="https://github.com/Junyi-99/hlo-visualizer"

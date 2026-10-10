@@ -4,6 +4,11 @@ For each program: <name>.after.hlo  = compiled (post-optimization, scheduled) mo
                   <name>.before.hlo = lowered module before XLA optimizations
 
 Usage (on a TPU VM with JAX installed):  python scripts/dump_hlo.py OUT
+Offline TPU compilation (Linux x86_64 with jax[tpu]):
+  TPU_OFFLINE_TOPOLOGY=v6e:1 python scripts/dump_hlo.py OUT
+  TPU_OFFLINE_TOPOLOGY=v6e:2x2 python scripts/dump_hlo.py OUT
+Set LIBTPU_INIT_ARGS with --xla_jf_dump_to and --xla_jf_dump_llo_text before starting Python to capture LLO.
+Set LLO_DUMP_DIR to the same dump directory to copy final bundle files into OUT/llo/<program>/.
 Also writes XLA's own dumps to OUT/xla_dump (buffer assignment included), from the same compilation,
 for scripts/extract_memory_truth.py. Compilation is not byte-identical across runs, so always take
 the examples and the memory ground truth from one run.
@@ -12,8 +17,13 @@ The files in examples/tpu-v6e were produced on a v6e-1 with JAX 0.11.2.
 import os
 import sys
 import traceback
+import json
+import glob
+import shutil
 
 out = sys.argv[1] if len(sys.argv) > 1 else "hlo-out"
+offline_topology = os.environ.get("TPU_OFFLINE_TOPOLOGY")
+llo_dump_dir = os.environ.get("LLO_DUMP_DIR")
 os.environ["XLA_FLAGS"] = f"{os.environ.get('XLA_FLAGS', '')} --xla_dump_to={out}/xla_dump --xla_dump_hlo_as_text".strip()
 
 import jax
@@ -173,7 +183,9 @@ def pallas_add(x, y):
 
 @program(arr((1, 64)))
 def collectives(x):
-    f = jax.pmap(lambda v: (lax.psum(v, "i"), lax.pmax(v, "i"), lax.all_gather(v, "i"), lax.axis_index("i")), axis_name="i")
+    devices = topology.devices[:1] if offline_topology else None
+    f = jax.pmap(lambda v: (lax.psum(v, "i"), lax.pmax(v, "i"), lax.all_gather(v, "i"), lax.axis_index("i")),
+                 axis_name="i", devices=devices)
     return f(x)
 
 
@@ -208,16 +220,58 @@ def nested_calls(x):
     return _middle(x)
 
 
+if offline_topology:
+    from jax.experimental import topologies
+    from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
+
+    topology_name = "v6e:1x1" if offline_topology == "v6e:1" else offline_topology
+    topology_options = {"chips_per_host_bounds": (1, 1, 1)} if offline_topology == "v6e:1" else {}
+    topology = topologies.get_topology_desc(platform="tpu", topology_name=topology_name, **topology_options)
+    mesh = Mesh(np.asarray(topology.devices), ("devices",))
+    sharding = NamedSharding(mesh, P())  # Replicate the existing single-device examples on the target slice.
+    single_sharding = NamedSharding(Mesh(np.asarray(topology.devices[:1]), ("devices",)), P())
+
+
+def compile_args(name, args):
+    if not offline_topology:
+        return args
+    # Pallas kernels cannot be automatically partitioned; the original collectives example pmaps over one device.
+    target_sharding = single_sharding if name in {"pallas_add", "collectives"} else sharding
+    return tuple(jax.ShapeDtypeStruct(arg.shape, arg.dtype, sharding=target_sharding) for arg in args)
+
+
 failed = []
+passed = []
+llo_files = {}
+only_programs = set(os.environ.get("ONLY_PROGRAMS", "").split(",")) - {""}
 for name, (fn, args, jit_kwargs) in programs.items():
+    if only_programs and name not in only_programs:
+        continue
     try:
-        lowered = jax.jit(fn, **jit_kwargs).lower(*args)
+        before_llo = set(glob.glob(f"{llo_dump_dir}/*-final_bundles.txt")) if llo_dump_dir else set()
+        options = dict(jit_kwargs)
+        if offline_topology and not args:
+            options["device"] = topology.devices[0]
+        lowered = jax.jit(fn, **options).lower(*compile_args(name, args))
         with open(f"{out}/{name}.before.hlo", "w") as f:
             f.write(lowered.as_text(dialect="hlo", debug_info=True))  # keep metadata (op_name, source lines)
         with open(f"{out}/{name}.after.hlo", "w") as f:
             f.write(lowered.compile().as_text())
-        print("ok", name)
+        if llo_dump_dir:
+            new_llo = sorted(set(glob.glob(f"{llo_dump_dir}/*-final_bundles.txt")) - before_llo)
+            new_llo = [path for path in new_llo if not path.endswith("schedule-analysis_final_bundles.txt")]
+            target = f"{out}/llo/{name}"
+            os.makedirs(target, exist_ok=True)
+            for path in new_llo:
+                shutil.copy2(path, target)
+            llo_files[name] = [os.path.basename(path) for path in new_llo]
+        passed.append(name)
+        print("ok", name, f"({len(llo_files.get(name, []))} LLO programs)" if llo_dump_dir else "", flush=True)
     except Exception:
         failed.append(name)
-        print("FAIL", name); traceback.print_exc(limit=3)
-print("jax", jax.__version__, jax.devices()[0].device_kind, "failed:", failed)
+        print("FAIL", name, flush=True)
+        traceback.print_exc(limit=3)
+with open(f"{out}/manifest.json", "w") as f:
+    json.dump({"jax": jax.__version__, "topology": offline_topology, "passed": passed, "failed": failed,
+               "llo_files": llo_files}, f, indent=2)
+print("jax", jax.__version__, offline_topology or jax.devices()[0].device_kind, "failed:", failed)

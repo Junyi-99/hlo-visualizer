@@ -5,6 +5,7 @@ import { useComputationRoles } from '../hooks/useComputationRoles';
 interface SidebarProps {
   module: HloModule | null;
   current: string | null;
+  collapsed: boolean;
   onOverview: () => void;
   onComputation: (name: string) => void;
 }
@@ -46,7 +47,7 @@ function ComputationItem({ active, overview = false, icon, title, detail, onClic
   );
 }
 
-export function Sidebar({ module, current, onOverview, onComputation }: SidebarProps) {
+export function Sidebar({ module, current, collapsed, onOverview, onComputation }: SidebarProps) {
   const roles = useComputationRoles(module);
 
   const computations = module?.computations ?? [];
@@ -56,7 +57,7 @@ export function Sidebar({ module, current, onOverview, onComputation }: SidebarP
     module && `${computations.length} ${computations.length === 1 ? 'computation' : 'computations'} · ${instructionCount} instructions`;
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" id="hlo-sidebar" inert={collapsed}>
       <div className="brand">
         <div className="brand-mark">
           <Icon name="graph" size={18} />

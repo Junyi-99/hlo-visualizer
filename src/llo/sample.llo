@@ -1,0 +1,19 @@
+// Illustrative excerpt showing the shape of a TPU final_bundles.txt dump.
+$region0: #{multiply_reduce_fusion}
+  #allocation0 [shape = 'f32[1024]{0}', space=vmem, size = 0x1000, tag = 'scoped memory']
+  #allocation1 [shape = 'f32[16]{0:T(1024)S(1)}', space=vmem, size = 0x1000, tag = 'reduce buffer']
+
+  %s0 = inlined_call_operand.hbm [shape: f32[16,64], index: 0, kind: input]
+  %s1 = inlined_call_operand.vmem [shape: f32[64,64], index: 1, kind: input]
+  0x9 : { %22 = dma.hbm_to_vmem [thread:$0] /*hbm=*/%s0, /*vmem=*/#allocation0
+          %v28 = vlaneseq
+          %v29 = vmov 0.0
+          %v30 = vld [vmem:[%s1] sm:$0xff] }
+  0xa : { %v31 = vpack.c.bf16 %v30, %v29
+          %v32 = vld [vmem:[#allocation0] sm:$0xff] }
+  0xb : { %33 = vmatpush3.bf16.msra.mxu0 %v31
+          %34 = dma.done.wait [#allocation0], 256 }
+  0xc : { %35 = vmatmul.bf16.gmra.mxu0 %v32 }
+  0xd : { %v36 = vpop.f32.mrf.mxu0 }
+  0xe : { %v37 = vmul.f32 %v36, %v36
+          %38 = vst [vmem:[#allocation1] sm:$0xff] /*vst_source=*/%v37 }
