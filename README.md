@@ -6,6 +6,8 @@ The same app now has an [LLO Visualizer](?view=llo) for TPU backend instruction 
 
 **Open it here: https://www.junyi.dev/hlo-visualizer/**
 
+The site can also be installed as a PWA from your browser's install or Add to Home Screen menu. After the first production visit finishes caching, both HLO and LLO views and their bundled examples work offline. Local files and pasted text are processed in the browser. The development server does not register a service worker; use `npm run build && npm run preview` to try the installed app locally.
+
 <table>
   <tr>
     <th>XLA's built-in HLO graph</th>
