@@ -42,11 +42,11 @@ export function ImportDialog({ onClose, onLoad }: ImportDialogProps) {
   };
 
   return (
-    <dialog ref={dialogRef} onCancel={cancel} onClick={closeOnBackdrop}>
+    <dialog ref={dialogRef} aria-labelledby="import-title" onCancel={cancel} onClick={closeOnBackdrop}>
       <div className="dialog-head">
         <div>
           <div className="eyebrow">IMPORT MODULE</div>
-          <h2>Open HLO text</h2>
+          <h2 id="import-title">Open HLO text</h2>
         </div>
         <button className="icon-button" type="button" aria-label="Close" onClick={onClose}>
           <Icon name="close" />
@@ -58,6 +58,8 @@ export function ImportDialog({ onClose, onLoad }: ImportDialogProps) {
         browser.
       </p>
       <textarea
+        aria-label="HLO module text"
+        aria-describedby="import-error"
         spellCheck={false}
         autoCapitalize="none"
         autoCorrect="off"

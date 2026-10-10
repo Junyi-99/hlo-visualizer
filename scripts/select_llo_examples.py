@@ -22,7 +22,11 @@ for program in manifest["passed"]:
     files = list((source / "llo" / program).glob("*-final_bundles.txt"))
     if not files:
         raise RuntimeError(f"{program}: no final-bundle files")
-    candidates = [path for path in files if not re.search(r"-(?:TLP|copy[^-]*|<late-[^>]*>)-", path.name, re.I)]
+    candidates = [
+        path
+        for path in files
+        if not re.search(r"-(?:TLP|copy[^-]*|<late-[^>]*>)-", path.name, re.IGNORECASE)
+    ]
     chosen = max(candidates or files, key=lambda path: path.stat().st_size)
     content = chosen.read_text()
     header = f"// {program} · {manifest['topology']} · {chosen.name}\n"
@@ -30,10 +34,25 @@ for program in manifest["passed"]:
     selected[program] = {
         "source": chosen.name,
         "bytes": len(content.encode()),
-        "bundles": len(re.findall(r"^\s*(?:0x[0-9a-f]+|\d+)\s*:\s*\{", content, re.I | re.M)),
+        "bundles": len(
+            re.findall(
+                r"^\s*(?:0x[0-9a-f]+|\d+)\s*:\s*\{",
+                content,
+                re.IGNORECASE | re.MULTILINE,
+            )
+        ),
     }
 
-(target / "manifest.json").write_text(json.dumps({"jax": manifest["jax"], "topology": manifest["topology"],
-                                                 "selection": "largest non-copy final-bundle program per example",
-                                                 "examples": selected}, indent=2) + "\n")
+(target / "manifest.json").write_text(
+    json.dumps(
+        {
+            "jax": manifest["jax"],
+            "topology": manifest["topology"],
+            "selection": "largest non-copy final-bundle program per example",
+            "examples": selected,
+        },
+        indent=2,
+    )
+    + "\n"
+)
 print(f"selected {len(selected)} programs for {manifest['topology']} in {target}")

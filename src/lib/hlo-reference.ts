@@ -17,7 +17,6 @@ const OPS: Record<string, string> = {
   'copy-start': 'starts an asynchronous copy (for example between HBM and VMEM); its tuple result goes to the matching copy-done.',
   'copy-done': 'waits for the asynchronous copy started by copy-start and yields the copied array.',
   'opt-barrier': 'optimization barrier: returns its input unchanged but stops the compiler from moving or merging work across it.',
-  'optimization-barrier': 'optimization barrier: returns its input unchanged and stops the compiler from moving work across it.',
   'after-all': 'joins tokens into a new token, used to order side-effecting operations such as send/recv.',
   'add-dependency': 'returns the first operand unchanged and adds a dependency on the second (usually a token) for ordering.',
   domain: 'marks a boundary for properties such as sharding; the data is unchanged.',
@@ -315,19 +314,19 @@ const FUSION_KIND: Record<string, string> = {
   kCustom: 'Custom fusion: the backend generates the kernel from a specific pattern (convolution templates, Pallas, TPU-specific code).'
 };
 
-export interface AttributeContext {
+interface AttributeContext {
   node: HloNode;
   module?: HloModule;
   computation?: Computation;
 }
 
-export interface AttributeExplanation {
+interface AttributeExplanation {
   key: string;
   label: string;
   text: string;
 }
 
-// Part keys kept stable for existing styling and tests.
+// Part keys kept stable for existing styling.
 const KEY: Record<string, string> = {
   metadata: 'metadata',
   backend_config: 'backend',

@@ -18,7 +18,7 @@
   --border-soft: rgba(0, 0, 0, 0.065);
   --text: #1d1d1f;
   --text-2: #5c5c62;
-  --text-3: #74747a;
+  --text-3: #6b6b70;
   --accent: #0066cc;
   --accent-hover: #0058b0;
   --accent-bg: rgba(0, 102, 204, 0.1);
@@ -118,6 +118,21 @@
   --cat: var(--c-tuple);
 }
 
+/* Light mode: the category hues are 2.7–3.5:1 on white, so text set in them is mixed toward --text
+   (≥4.5:1). Dark mode keeps the plain hues, which already pass on the dark surfaces. */
+:root:not([data-theme='dark']) :is(.node-op, .nested-node small) {
+  color: color-mix(in srgb, var(--cat, var(--text-2)) 65%, var(--text));
+}
+:root:not([data-theme='dark']) :is(.type-badge, .overview-role) {
+  color: color-mix(in srgb, var(--cat) 65%, var(--text));
+}
+:root:not([data-theme='dark']) .node-memory {
+  color: color-mix(in srgb, var(--mem) 65%, var(--text));
+}
+:root:not([data-theme='dark']) .node-expand {
+  color: color-mix(in srgb, var(--c-fusion) 65%, var(--text));
+}
+
 /* ───────────── Base ───────────── */
 
 *,
@@ -172,9 +187,7 @@ select optgroup,
 .graph-hint,
 .layout-status,
 .graph-edges,
-.graph-edges text,
 .nested-stage svg,
-.nested-stage svg text,
 .inspector-header,
 .empty-inspector,
 .explorer-header,
@@ -504,7 +517,6 @@ kbd {
 
 /* ───────────── Toolbar ───────────── */
 
-/* Top bar */
 .topbar {
   position: relative;
   z-index: 7;
@@ -740,6 +752,9 @@ kbd {
   opacity: 0.55;
   cursor: not-allowed;
 }
+.display-option input:disabled {
+  cursor: not-allowed;
+}
 .display-option:active {
   background: var(--fill-2);
 }
@@ -829,7 +844,6 @@ kbd {
 .edge.path-edge {
   stroke: var(--c-path);
   stroke-width: 3;
-  opacity: 1;
 }
 marker path {
   fill: context-stroke;
@@ -849,9 +863,6 @@ marker path {
   stroke: var(--surface);
   stroke-width: 4px;
   stroke-linejoin: round;
-}
-.call-edge + text {
-  pointer-events: none;
 }
 
 /* Instruction nodes */
@@ -997,7 +1008,6 @@ marker path {
   background: color-mix(in srgb, var(--c-fusion) 12%, var(--surface));
   color: var(--c-fusion);
   font: 600 11px/1.2 var(--font-ui);
-  touch-action: manipulation;
 }
 .node-expand.active,
 .node-expand:active {
@@ -1580,9 +1590,7 @@ marker path {
   padding-right: calc(12px + env(safe-area-inset-right, 0px));
 }
 .inspector-drawer .inspector-header h2 {
-  margin: 0;
   font-size: 15px;
-  font-weight: 600;
 }
 .inspector-drawer .inspector-content {
   padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
@@ -2258,10 +2266,22 @@ dialog textarea:focus {
   margin-left: auto;
 }
 .file-label {
+  position: relative;
   cursor: pointer;
 }
+/* Visually hidden, not display:none, so the file input stays keyboard reachable */
 .file-label input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  pointer-events: none;
+}
+.file-label:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 #import-error {
   max-width: 290px;
@@ -2284,9 +2304,6 @@ dialog textarea:focus {
   justify-content: center;
   align-items: flex-start;
   padding-top: 14vh;
-}
-.search-overlay[hidden] {
-  display: none;
 }
 .search-panel {
   width: min(560px, calc(100vw - 32px));
@@ -2319,6 +2336,9 @@ dialog textarea:focus {
   background: transparent;
   color: var(--text);
   font-size: 16px;
+}
+.search-field:focus-within {
+  box-shadow: inset 0 -2px 0 var(--focus);
 }
 .search-field input::-webkit-search-cancel-button {
   display: none;
@@ -2387,7 +2407,7 @@ dialog textarea:focus {
 }
 .notes-panel {
   width: min(600px, 100%);
-  max-height: 80vh;
+  max-height: 80dvh;
   overflow: auto;
   padding: 18px 22px;
   border: 1px solid var(--border);
@@ -2493,7 +2513,21 @@ dialog textarea:focus {
 
 /* ───────────── Responsive ───────────── */
 
-/* Inspector docks as a column once there is room for it */
+/* Inspector docks as a grid column (3rd next to the sidebar, 2nd without it) once there is room for it */
+@media (min-width: 701px) {
+  .app.inspector-open .inspector {
+    position: relative;
+    grid-row: 1;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    transform: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+}
+
 @media (min-width: 1101px) {
   .app.sidebar-collapsed.inspector-open {
     grid-template-columns: 0px minmax(0, 1fr) max(300px, min(var(--inspector-w, clamp(350px, 30vw, 430px)), calc(100vw - 360px)));
@@ -2506,16 +2540,7 @@ dialog textarea:focus {
     grid-template-rows: minmax(0, 1fr);
   }
   .app.inspector-open .inspector {
-    position: relative;
     grid-column: 3;
-    grid-row: 1;
-    inset: auto;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    transform: none;
-    box-shadow: none;
-    overflow: visible;
   }
 }
 
@@ -2573,23 +2598,11 @@ dialog textarea:focus {
     grid-template-rows: minmax(0, 1fr);
   }
   .app.inspector-open .inspector {
-    position: relative;
     grid-column: 2;
-    grid-row: 1;
-    inset: auto;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    transform: none;
-    box-shadow: none;
-    overflow: visible;
   }
   .app.inspector-open .heading {
     flex-direction: column;
     align-items: stretch;
-  }
-  .app.inspector-open .heading-controls {
-    align-items: flex-end;
   }
   .app.inspector-open .view-actions {
     justify-content: flex-end;
@@ -2727,6 +2740,16 @@ dialog textarea:focus {
   }
   .app {
     min-height: 0;
+  }
+  /* Touch targets: the 26px desktop controls match the 36px used by the other phone controls */
+  .graph-controls select,
+  .graph-controls button,
+  .explorer-tabs button {
+    height: 36px;
+  }
+  .explorer-breadcrumb button,
+  .explorer-detail button {
+    min-height: 36px;
   }
 }
 

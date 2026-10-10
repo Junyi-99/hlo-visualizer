@@ -14,17 +14,20 @@ for scripts/extract_memory_truth.py. Compilation is not byte-identical across ru
 the examples and the memory ground truth from one run.
 The files in examples/tpu-v6e were produced on a v6e-1 with JAX 0.11.2.
 """
+
+import glob
+import json
 import os
+import shutil
 import sys
 import traceback
-import json
-import glob
-import shutil
 
 out = sys.argv[1] if len(sys.argv) > 1 else "hlo-out"
 offline_topology = os.environ.get("TPU_OFFLINE_TOPOLOGY")
 llo_dump_dir = os.environ.get("LLO_DUMP_DIR")
-os.environ["XLA_FLAGS"] = f"{os.environ.get('XLA_FLAGS', '')} --xla_dump_to={out}/xla_dump --xla_dump_hlo_as_text".strip()
+os.environ["XLA_FLAGS"] = (
+    f"{os.environ.get('XLA_FLAGS', '')} --xla_dump_to={out}/xla_dump --xla_dump_hlo_as_text".strip()
+)
 
 import jax
 import jax.numpy as jnp
@@ -48,10 +51,16 @@ def program(*args, **jit_kwargs):
     def register(fn):
         programs[fn.__name__] = (fn, args, jit_kwargs)
         return fn
+
     return register
 
 
-@program(arr((256, 512), bf16), arr((512, 1024), bf16), arr((1024,), bf16), arr((1024, 128), bf16))
+@program(
+    arr((256, 512), bf16),
+    arr((512, 1024), bf16),
+    arr((1024,), bf16),
+    arr((1024, 128), bf16),
+)
 def mlp(x, w1, b1, w2):
     h = jax.nn.gelu(x @ w1 + b1)
     return jax.nn.softmax((h @ w2).astype(f32), axis=-1)
@@ -59,8 +68,11 @@ def mlp(x, w1, b1, w2):
 
 @program(arr((8, 32, 32, 16)), arr((3, 3, 16, 32)))
 def conv_pool(x, k):
-    y = lax.conv_general_dilated(x, k, (1, 1), "SAME", dimension_numbers=("NHWC", "HWIO", "NHWC"))
-    mean = y.mean(axis=(0, 1, 2)); var = y.var(axis=(0, 1, 2))
+    y = lax.conv_general_dilated(
+        x, k, (1, 1), "SAME", dimension_numbers=("NHWC", "HWIO", "NHWC")
+    )
+    mean = y.mean(axis=(0, 1, 2))
+    var = y.var(axis=(0, 1, 2))
     y = jax.nn.relu((y - mean) * lax.rsqrt(var + 1e-5))
     mx = lax.reduce_window(y, -jnp.inf, lax.max, (1, 2, 2, 1), (1, 2, 2, 1), "VALID")
     avg = lax.reduce_window(y, 0.0, lax.add, (1, 2, 2, 1), (1, 2, 2, 1), "VALID") / 4
@@ -70,14 +82,23 @@ def conv_pool(x, k):
 @program(arr((8, 32, 32, 16)), arr((3, 3, 16, 32)))
 def conv_grad(x, k):
     def loss(x, k):
-        y = lax.conv_general_dilated(x, k, (2, 2), [(1, 1), (1, 1)], rhs_dilation=(1, 1),
-                                     dimension_numbers=("NHWC", "HWIO", "NHWC"))
+        y = lax.conv_general_dilated(
+            x,
+            k,
+            (2, 2),
+            [(1, 1), (1, 1)],
+            rhs_dilation=(1, 1),
+            dimension_numbers=("NHWC", "HWIO", "NHWC"),
+        )
         y = lax.reduce_window(y, -jnp.inf, lax.max, (1, 2, 2, 1), (1, 2, 2, 1), "VALID")
-        return (y ** 2).sum()
+        return (y**2).sum()
+
     return jax.grad(loss, argnums=(0, 1))(x, k)
 
 
-@program(arr((2, 4, 128, 64), bf16), arr((2, 4, 128, 64), bf16), arr((2, 4, 128, 64), bf16))
+@program(
+    arr((2, 4, 128, 64), bf16), arr((2, 4, 128, 64), bf16), arr((2, 4, 128, 64), bf16)
+)
 def attention(q, k, v):
     s = jnp.einsum("bhqd,bhkd->bhqk", q, k).astype(f32) / 8.0
     mask = jnp.arange(128)[:, None] >= jnp.arange(128)[None, :]
@@ -96,6 +117,7 @@ def scan_rnn(xs, w):
     def step(h, x):
         h = jnp.tanh(h @ w + x)
         return h, h.sum()
+
     return lax.scan(step, jnp.zeros((64,)), xs)
 
 
@@ -126,13 +148,23 @@ def dynamic_slices(x, i):
 
 @program(arr((8, 1000)))
 def sort_topk(x):
-    return jnp.sort(x, axis=-1), jnp.argsort(x, axis=-1), lax.top_k(x, 5), jnp.argmax(x, axis=-1), jnp.cumsum(x, axis=-1)
+    return (
+        jnp.sort(x, axis=-1),
+        jnp.argsort(x, axis=-1),
+        lax.top_k(x, 5),
+        jnp.argmax(x, axis=-1),
+        jnp.cumsum(x, axis=-1),
+    )
 
 
 @program()
 def random_ops():
     k1, k2 = jax.random.split(key)
-    return jax.random.normal(k1, (128, 128)), jax.random.randint(k2, (64,), 0, 10), jax.random.bernoulli(k2, 0.3, (32,))
+    return (
+        jax.random.normal(k1, (128, 128)),
+        jax.random.randint(k2, (64,), 0, 10),
+        jax.random.bernoulli(k2, 0.3, (32,)),
+    )
 
 
 @program(arr((64, 64)), arr((64, 64)))
@@ -140,12 +172,37 @@ def elementwise_zoo(x, y):
     xi = (x * 100).astype(jnp.int32)
     yi = (y * 100).astype(jnp.int32)
     return (
-        jnp.exp(x), jnp.log1p(jnp.abs(x)), jnp.expm1(x), lax.erf(x), jax.nn.sigmoid(x), jnp.arctan2(x, y),
-        jnp.power(jnp.abs(x), y), jnp.remainder(x, 1.5), jnp.floor(x), jnp.ceil(x), jnp.round(x), jnp.sign(x),
-        jnp.clip(x, -0.5, 0.5), jnp.isfinite(x / y), jnp.cbrt(x), lax.reduce_precision(x, 5, 10),
-        xi & yi, xi | yi, xi ^ yi, ~xi, xi << 2, xi >> 1, lax.shift_right_logical(xi, 3),
-        lax.population_count(xi), lax.clz(xi), lax.bitcast_convert_type(x, jnp.int32),
-        x.astype(jnp.int8), x.astype(jnp.float16), (x > y) & (x < 1), jnp.maximum(x, y), jnp.minimum(xi, yi),
+        jnp.exp(x),
+        jnp.log1p(jnp.abs(x)),
+        jnp.expm1(x),
+        lax.erf(x),
+        jax.nn.sigmoid(x),
+        jnp.arctan2(x, y),
+        jnp.power(jnp.abs(x), y),
+        jnp.remainder(x, 1.5),
+        jnp.floor(x),
+        jnp.ceil(x),
+        jnp.round(x),
+        jnp.sign(x),
+        jnp.clip(x, -0.5, 0.5),
+        jnp.isfinite(x / y),
+        jnp.cbrt(x),
+        lax.reduce_precision(x, 5, 10),
+        xi & yi,
+        xi | yi,
+        xi ^ yi,
+        ~xi,
+        xi << 2,
+        xi >> 1,
+        lax.shift_right_logical(xi, 3),
+        lax.population_count(xi),
+        lax.clz(xi),
+        lax.bitcast_convert_type(x, jnp.int32),
+        x.astype(jnp.int8),
+        x.astype(jnp.float16),
+        (x > y) & (x < 1),
+        jnp.maximum(x, y),
+        jnp.minimum(xi, yi),
     )
 
 
@@ -170,6 +227,7 @@ def remat_grad(x, w):
     @jax.checkpoint
     def layer(x):
         return jnp.tanh(x @ w)
+
     loss = lambda w: layer(layer(x)).mean()
     return jax.value_and_grad(loss)(w)
 
@@ -178,14 +236,25 @@ def remat_grad(x, w):
 def pallas_add(x, y):
     def kernel(x_ref, y_ref, o_ref):
         o_ref[...] = x_ref[...] + y_ref[...] * 2
-    return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype))(x, y)
+
+    return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype))(
+        x, y
+    )
 
 
 @program(arr((1, 64)))
 def collectives(x):
     devices = topology.devices[:1] if offline_topology else None
-    f = jax.pmap(lambda v: (lax.psum(v, "i"), lax.pmax(v, "i"), lax.all_gather(v, "i"), lax.axis_index("i")),
-                 axis_name="i", devices=devices)
+    f = jax.pmap(
+        lambda v: (
+            lax.psum(v, "i"),
+            lax.pmax(v, "i"),
+            lax.all_gather(v, "i"),
+            lax.axis_index("i"),
+        ),
+        axis_name="i",
+        devices=devices,
+    )
     return f(x)
 
 
@@ -204,7 +273,9 @@ def donated_update(state, delta):
 @program(jnp.arange(96, dtype=jnp.int8).reshape(8, 12), arr((8, 12), bf16))
 def int8_quant(q, scale):
     w = q.astype(bf16) * scale
-    return jnp.einsum("ij,kj->ik", w, w, preferred_element_type=f32), lax.iota(jnp.int32, 12)
+    return jnp.einsum("ij,kj->ik", w, w, preferred_element_type=f32), lax.iota(
+        jnp.int32, 12
+    )
 
 
 def _inner(x):
@@ -222,22 +293,36 @@ def nested_calls(x):
 
 if offline_topology:
     from jax.experimental import topologies
-    from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
+    from jax.sharding import Mesh, NamedSharding
+    from jax.sharding import PartitionSpec as P
 
     topology_name = "v6e:1x1" if offline_topology == "v6e:1" else offline_topology
-    topology_options = {"chips_per_host_bounds": (1, 1, 1)} if offline_topology == "v6e:1" else {}
-    topology = topologies.get_topology_desc(platform="tpu", topology_name=topology_name, **topology_options)
+    topology_options = (
+        {"chips_per_host_bounds": (1, 1, 1)} if offline_topology == "v6e:1" else {}
+    )
+    topology = topologies.get_topology_desc(
+        platform="tpu", topology_name=topology_name, **topology_options
+    )
     mesh = Mesh(np.asarray(topology.devices), ("devices",))
-    sharding = NamedSharding(mesh, P())  # Replicate the existing single-device examples on the target slice.
-    single_sharding = NamedSharding(Mesh(np.asarray(topology.devices[:1]), ("devices",)), P())
+    sharding = NamedSharding(
+        mesh, P()
+    )  # Replicate the existing single-device examples on the target slice.
+    single_sharding = NamedSharding(
+        Mesh(np.asarray(topology.devices[:1]), ("devices",)), P()
+    )
 
 
 def compile_args(name, args):
     if not offline_topology:
         return args
     # Pallas kernels cannot be automatically partitioned; the original collectives example pmaps over one device.
-    target_sharding = single_sharding if name in {"pallas_add", "collectives"} else sharding
-    return tuple(jax.ShapeDtypeStruct(arg.shape, arg.dtype, sharding=target_sharding) for arg in args)
+    target_sharding = (
+        single_sharding if name in {"pallas_add", "collectives"} else sharding
+    )
+    return tuple(
+        jax.ShapeDtypeStruct(arg.shape, arg.dtype, sharding=target_sharding)
+        for arg in args
+    )
 
 
 failed = []
@@ -248,30 +333,62 @@ for name, (fn, args, jit_kwargs) in programs.items():
     if only_programs and name not in only_programs:
         continue
     try:
-        before_llo = set(glob.glob(f"{llo_dump_dir}/*-final_bundles.txt")) if llo_dump_dir else set()
+        before_llo = (
+            set(glob.glob(f"{llo_dump_dir}/*-final_bundles.txt"))
+            if llo_dump_dir
+            else set()
+        )
         options = dict(jit_kwargs)
         if offline_topology and not args:
             options["device"] = topology.devices[0]
         lowered = jax.jit(fn, **options).lower(*compile_args(name, args))
         with open(f"{out}/{name}.before.hlo", "w") as f:
-            f.write(lowered.as_text(dialect="hlo", debug_info=True))  # keep metadata (op_name, source lines)
+            f.write(
+                lowered.as_text(dialect="hlo", debug_info=True)
+            )  # keep metadata (op_name, source lines)
         with open(f"{out}/{name}.after.hlo", "w") as f:
             f.write(lowered.compile().as_text())
         if llo_dump_dir:
-            new_llo = sorted(set(glob.glob(f"{llo_dump_dir}/*-final_bundles.txt")) - before_llo)
-            new_llo = [path for path in new_llo if not path.endswith("schedule-analysis_final_bundles.txt")]
+            new_llo = sorted(
+                set(glob.glob(f"{llo_dump_dir}/*-final_bundles.txt")) - before_llo
+            )
+            new_llo = [
+                path
+                for path in new_llo
+                if not path.endswith("schedule-analysis_final_bundles.txt")
+            ]
             target = f"{out}/llo/{name}"
             os.makedirs(target, exist_ok=True)
             for path in new_llo:
                 shutil.copy2(path, target)
             llo_files[name] = [os.path.basename(path) for path in new_llo]
         passed.append(name)
-        print("ok", name, f"({len(llo_files.get(name, []))} LLO programs)" if llo_dump_dir else "", flush=True)
-    except Exception:
+        print(
+            "ok",
+            name,
+            f"({len(llo_files.get(name, []))} LLO programs)" if llo_dump_dir else "",
+            flush=True,
+        )
+    except Exception:  # noqa: BLE001 -- record the failure and keep compiling the other programs
         failed.append(name)
         print("FAIL", name, flush=True)
         traceback.print_exc(limit=3)
 with open(f"{out}/manifest.json", "w") as f:
-    json.dump({"jax": jax.__version__, "topology": offline_topology, "passed": passed, "failed": failed,
-               "llo_files": llo_files}, f, indent=2)
-print("jax", jax.__version__, offline_topology or jax.devices()[0].device_kind, "failed:", failed)
+    json.dump(
+        {
+            "jax": jax.__version__,
+            "topology": offline_topology,
+            "passed": passed,
+            "failed": failed,
+            "llo_files": llo_files,
+        },
+        f,
+        indent=2,
+    )
+print(
+    "jax",
+    jax.__version__,
+    offline_topology or jax.devices()[0].device_kind,
+    "failed:",
+    failed,
+)

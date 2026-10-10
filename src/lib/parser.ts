@@ -46,7 +46,7 @@ export function splitTopLevel(text: string): string[] {
 }
 
 // Index of the ")" that closes the "(" at `open`, or -1 when it is never closed.
-function closingParen(text: string, open: number): number {
+export function closingParen(text: string, open: number): number {
   let depth = 0;
   for (let i = open; i < text.length; i++) {
     if (text[i] === '(') depth++;
@@ -61,7 +61,7 @@ export function leadingShape(type: string): string | null {
 }
 
 // Top-level element types of a tuple type "(a, b, …)", or null when the type is not a tuple.
-export function tupleSlots(type: string): string[] | null {
+function tupleSlots(type: string): string[] | null {
   if (!type.startsWith('(')) return null;
   const end = closingParen(type, 0);
   return end < 0 ? null : splitTopLevel(type.slice(1, end));
@@ -298,7 +298,7 @@ export function nodeCategory(node: HloNode): string {
 
 // Data and control dependencies of a node, by name.
 export const predecessors = (node: HloNode) => [...node.operands, ...node.controlPredecessors];
-export const successors = (node: HloNode) => [...node.users, ...node.controlSuccessors];
+const successors = (node: HloNode) => [...node.users, ...node.controlSuccessors];
 
 export function reachable(computation: Computation, startName: string, direction: 'up' | 'down'): Set<string> {
   const found = new Set<string>();

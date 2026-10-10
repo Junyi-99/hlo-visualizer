@@ -1,4 +1,4 @@
-import { computationLinks, splitTopLevel } from './parser.ts';
+import { computationLinks, leadingShape, splitTopLevel } from './parser.ts';
 import type { Computation, HloModule, HloNode } from './types';
 import { memorySpaceLabel, shapeMemorySpace } from './memory-space.ts';
 
@@ -25,14 +25,13 @@ function shapeLocations(shape: string, path: string | null): MemoryLocation[] {
     });
   }
 
-  const isArray = /^[a-z][\w]*\[[^\]]*\]/.test(trimmed);
-  if (!isArray || trimmed.startsWith('token[')) return []; // tokens hold no data
+  if (!leadingShape(trimmed) || trimmed.startsWith('token[')) return []; // tokens hold no data
 
   const { space, explicit } = shapeMemorySpace(trimmed);
   return [{ path, space, explicit, label: memorySpaceLabel(space) }];
 }
 
-export function memoryLocations(type: string): MemoryLocation[] {
+function memoryLocations(type: string): MemoryLocation[] {
   return shapeLocations(type, null);
 }
 
@@ -69,7 +68,7 @@ export function bufferStatus(module: HloModule, computation: Computation, node: 
 }
 
 // Memory locations to show for a node, or [] when the HLO text cannot tell us one.
-// Checked against XLA's buffer assignment for every compiled example (memory-location.test.js).
+// Checked against XLA's buffer assignment for every compiled example (examples/tpu-v6e/*.after.memory.json).
 export function nodeMemoryLocations(module: HloModule, computation: Computation, node: HloNode): MemoryLocation[] {
   return bufferStatus(module, computation, node) === 'buffer' ? memoryLocations(node.type) : [];
 }

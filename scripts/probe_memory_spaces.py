@@ -4,6 +4,7 @@ Puts one Pallas operand in SMEM and prints the compiled HLO: XLA copies that ope
 before the kernel. (S(2) = SFLAG comes from the copy-start context element; see src/lib/memory-space.ts.)
 Run on a TPU VM: python scripts/probe_memory_spaces.py
 """
+
 import re
 
 import jax
@@ -17,12 +18,23 @@ def kernel(s_ref, x_ref, o_ref):
 
 
 def scale(s, x):
-    return pl.pallas_call(kernel, out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype),
-                          in_specs=[pl.BlockSpec(memory_space=pltpu.SMEM), pl.BlockSpec(memory_space=pltpu.VMEM)],
-                          out_specs=pl.BlockSpec(memory_space=pltpu.VMEM))(s, x)
+    return pl.pallas_call(
+        kernel,
+        out_shape=jax.ShapeDtypeStruct(x.shape, x.dtype),
+        in_specs=[
+            pl.BlockSpec(memory_space=pltpu.SMEM),
+            pl.BlockSpec(memory_space=pltpu.VMEM),
+        ],
+        out_specs=pl.BlockSpec(memory_space=pltpu.VMEM),
+    )(s, x)
 
 
-text = jax.jit(scale).lower(jnp.array([3.0], jnp.float32), jnp.ones((8, 128), jnp.float32)).compile().as_text()
+text = (
+    jax.jit(scale)
+    .lower(jnp.array([3.0], jnp.float32), jnp.ones((8, 128), jnp.float32))
+    .compile()
+    .as_text()
+)
 for line in text.splitlines():
     if re.search(r"S\(\d+\)|custom-call", line):
         print(re.sub(r", (backend_config|metadata)=.*", "", line.strip()))

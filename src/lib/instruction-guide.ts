@@ -1,6 +1,6 @@
 import type { Computation, GuidePart, HloModule, HloNode, InstructionGuide, ResultGroup, TypeDetail, TypeSlot } from './types';
 import { extractHloMetadata } from './metadata.ts';
-import { splitTopLevel } from './parser.ts';
+import { closingParen, splitTopLevel } from './parser.ts';
 import { attributeKey, explainAttribute, opDescription } from './hlo-reference.ts';
 import { bufferStatus, tupleElements, type BufferStatus } from './memory-location.ts';
 import { memorySpaceLabel, shapeMemorySpace, shapeMemoryText } from './memory-space.ts';
@@ -505,12 +505,8 @@ function splitInstruction(node: HloNode) {
   if (!prefix || opAt < 0) return null;
 
   const argsStart = opAt + node.op.length + 2;
-  let depth = 1,
-    argsEnd = argsStart;
-  for (; argsEnd < raw.length; argsEnd++) {
-    if (raw[argsEnd] === '(') depth++;
-    else if (raw[argsEnd] === ')' && --depth === 0) break;
-  }
+  const argsEnd = closingParen(raw, argsStart - 1);
+  if (argsEnd < 0) return null;
 
   const [, root = '', name, equals] = prefix;
   return {

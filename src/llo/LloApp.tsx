@@ -4,7 +4,7 @@ import sample from './sample.llo?raw';
 import { Icon } from '../components/Icon';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStoredState } from '../hooks/useStoredState';
-import { lloExamples } from './examples';
+import { lloExamples, type LloExample } from './examples';
 import { definitionOf, parseLlo, units, type LloInstruction, type LloProgram, type Unit } from './parser';
 import './llo.css';
 
@@ -19,8 +19,8 @@ const descriptions: Record<Unit, string> = {
   OTHER: 'Compiler operation or instruction without a recognized unit'
 };
 
-const explanation = (op: string) => {
-  const name = op.toLowerCase();
+const explanation = ({ opcode, unit }: LloInstruction) => {
+  const name = opcode.toLowerCase();
   if (name.startsWith('vmatpush')) return 'Push matrix operand data into the MXU.';
   if (name.startsWith('vmatmul')) return 'Issue a matrix multiplication on the MXU.';
   if (name.startsWith('vpop')) return 'Read a result from a hardware accumulator or transpose unit.';
@@ -29,7 +29,7 @@ const explanation = (op: string) => {
   if (name.startsWith('vld')) return 'Load a vector from VMEM.';
   if (name.startsWith('vst')) return 'Store a vector in VMEM.';
   if (name.startsWith('vxpose')) return 'Transpose or rearrange vector lanes with the XLU.';
-  return descriptions[op.startsWith('s') ? 'SCALAR' : 'OTHER'];
+  return descriptions[unit];
 };
 
 function InstructionChip({
@@ -90,7 +90,7 @@ function InstructionDetails({
           </button>
         )}
       </div>
-      <p>{explanation(selected.opcode)}</p>
+      <p>{explanation(selected)}</p>
       <div className="llo-inspector-section">
         <div className="eyebrow">LOCATION</div>
         <div className="llo-detail">
@@ -273,15 +273,11 @@ export default function LloApp() {
       setActiveUnits(new Set(units));
     }
     if (instruction.region !== regionName) setRegionName(instruction.region);
-    if (instruction.bundle) {
-      const position =
-        program.regions.find(item => item.name === instruction.region)?.bundles.findIndex(item => item.address === instruction.bundle) ??
-        -1;
-      if (position >= 0) setRowLimit(limit => Math.max(limit, position + 1));
-    } else {
-      const position = program.regions.find(item => item.name === instruction.region)?.instructions.indexOf(instruction) ?? -1;
-      if (position >= 0) setRowLimit(limit => Math.max(limit, position + 1));
-    }
+    const target = program.regions.find(item => item.name === instruction.region);
+    const position = instruction.bundle
+      ? (target?.bundles.findIndex(item => item.address === instruction.bundle) ?? -1)
+      : (target?.instructions.indexOf(instruction) ?? -1);
+    if (position >= 0) setRowLimit(limit => Math.max(limit, position + 1));
     setSelectedId(instruction.id);
     requestAnimationFrame(() => rowRefs.current.get(instruction.id)?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
   };
@@ -303,33 +299,34 @@ export default function LloApp() {
     else url.searchParams.delete('example');
     history.replaceState(null, '', url);
   }, []);
+  const loadExample = useCallback(
+    (example: LloExample) => void example.load().then(source => load(source, `${example.program} · ${example.topology}`, example.id)),
+    [load]
+  );
   useEffect(() => {
     const id = new URLSearchParams(location.search).get('example');
     const example = lloExamples.find(item => item.id === id);
-    if (example) void example.load().then(source => load(source, `${example.program} · ${example.topology}`, example.id));
-  }, [load]);
+    if (example) loadExample(example);
+  }, [loadExample]);
+  const openFile = async (file: File) => {
+    try {
+      load(await file.text(), file.name);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+      setImportOpen(true);
+    }
+  };
   const chooseFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    try {
-      load(await file.text(), file.name);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-      setImportOpen(true);
-    }
+    await openFile(file);
     event.target.value = '';
   };
-  const onDrop = async (event: DragEvent<HTMLDivElement>) => {
+  const onDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragging(false);
     const file = event.dataTransfer.files[0];
-    if (!file) return;
-    try {
-      load(await file.text(), file.name);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-      setImportOpen(true);
-    }
+    if (file) void openFile(file);
   };
   const toggleUnit = (unit: Unit) =>
     setActiveUnits(previous => {
@@ -430,7 +427,7 @@ export default function LloApp() {
               value={exampleId ?? ''}
               onChange={event => {
                 const example = lloExamples.find(item => item.id === event.target.value);
-                if (example) void example.load().then(source => load(source, `${example.program} · ${example.topology}`, example.id));
+                if (example) loadExample(example);
               }}
             >
               <option value="" disabled>

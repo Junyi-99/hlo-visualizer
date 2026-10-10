@@ -508,7 +508,7 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
       {failed && (
         <div className="layout-status" role="status">
           Could not arrange graph.{' '}
-          <button type="button" onClick={retry}>
+          <button type="button" className="subtle-button" onClick={retry}>
             Retry
           </button>
         </div>
@@ -517,8 +517,10 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
       <div
         ref={scrollerRef}
         className="graph-scroller overscroll-contain"
+        role="region"
         tabIndex={0}
         aria-label="Graph canvas: + and - to zoom, 0 to fit"
+        aria-keyshortcuts="+ - 0"
         onKeyDown={handleZoomKey}
         onPointerDown={startPan}
         onPointerMove={movePan}
@@ -771,7 +773,7 @@ function NodeCard({
         )}
         {copyGroup && <span className="copy-group-members">copy-start + copy-done</span>}
         {ports?.map((port, index) => (
-          <span key={index} className="node-port" style={{ left: port.x - 4, top: port.y - 4 }} />
+          <span key={index} className="node-port" aria-hidden="true" style={{ left: port.x - 4, top: port.y - 4 }} />
         ))}
       </button>
 
@@ -877,7 +879,13 @@ function GraphControls({
       >
         {focused ? 'Show all' : 'View'}
       </button>
-      <button type="button" disabled={!selected} className={pathPicking ? 'active' : ''} onClick={onTogglePathPicking}>
+      <button
+        type="button"
+        disabled={!selected}
+        aria-pressed={pathPicking}
+        className={pathPicking ? 'active' : ''}
+        onClick={onTogglePathPicking}
+      >
         Find path
       </button>
       {hasPathTarget && (

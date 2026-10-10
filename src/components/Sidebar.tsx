@@ -3,7 +3,7 @@ import { Icon, type IconName } from './Icon';
 import { useComputationRoles } from '../hooks/useComputationRoles';
 
 interface SidebarProps {
-  module: HloModule | null;
+  module: HloModule;
   current: string | null;
   collapsed: boolean;
   onOverview: () => void;
@@ -50,11 +50,10 @@ function ComputationItem({ active, overview = false, icon, title, detail, onClic
 export function Sidebar({ module, current, collapsed, onOverview, onComputation }: SidebarProps) {
   const roles = useComputationRoles(module);
 
-  const computations = module?.computations ?? [];
+  const computations = module.computations;
   const entryFirst = [...computations].sort((a, b) => Number(b.entry) - Number(a.entry));
   const instructionCount = computations.reduce((total, c) => total + c.nodes.length, 0);
-  const summary =
-    module && `${computations.length} ${computations.length === 1 ? 'computation' : 'computations'} · ${instructionCount} instructions`;
+  const summary = `${computations.length} ${computations.length === 1 ? 'computation' : 'computations'} · ${instructionCount} instructions`;
 
   return (
     <aside className="sidebar" id="hlo-sidebar" inert={collapsed}>
@@ -70,7 +69,7 @@ export function Sidebar({ module, current, collapsed, onOverview, onComputation 
 
       <div className="sidebar-section module-section">
         <div className="eyebrow">MODULE</div>
-        <h1>{module?.name || 'Loading…'}</h1>
+        <h1>{module.name}</h1>
         <div className="muted">{summary}</div>
       </div>
 
@@ -110,7 +109,7 @@ export function Sidebar({ module, current, collapsed, onOverview, onComputation 
         <div className="legend">
           {legend.map(label => (
             <span key={label}>
-              <i className={`dot ${label.toLowerCase()}`} />
+              <i className={`dot ${label.toLowerCase()}`} aria-hidden="true" />
               {label}
             </span>
           ))}

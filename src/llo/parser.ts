@@ -43,7 +43,6 @@ export interface LloProgram {
   regions: LloRegion[];
   instructions: LloInstruction[];
   warnings: string[];
-  source: string;
 }
 
 export const units: Unit[] = ['MXU', 'XLU', 'DMA', 'VLOAD', 'VSTORE', 'VPU', 'SCALAR', 'OTHER'];
@@ -104,7 +103,7 @@ function bundleStatements(body: string): { raw: string; lineOffset: number }[] {
 }
 
 export function parseLlo(source: string): LloProgram {
-  const program: LloProgram = { regions: [], instructions: [], warnings: [], source };
+  const program: LloProgram = { regions: [], instructions: [], warnings: [] };
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
   let region: LloRegion | null = null;
   let bundle: LloBundle | null = null;
@@ -218,12 +217,11 @@ export function parseLlo(source: string): LloProgram {
     }
     if (line === '}' || line === '{' || line.startsWith('#') || line.startsWith('/*')) continue;
     if (!region && !/^%[\w.$-]+\s*=/.test(line)) continue;
-    const content = line;
-    if (content && !addInstruction(content, index + 1)) {
+    if (!addInstruction(line, index + 1)) {
       // Wrapped operands continue the preceding instruction. Keep their exact text in the inspector.
       const previous = program.instructions.at(-1);
       if (previous && previous.region === region?.name) {
-        previous.raw += `\n${content}`;
+        previous.raw += `\n${line}`;
         const code = withoutComments(previous.raw);
         previous.references = unique(code.matchAll(/%[\w.$-]+/g)).filter(ref => ref !== previous.output);
         previous.allocations = unique(code.matchAll(/#allocation[\w.-]*/g));

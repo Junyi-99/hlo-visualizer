@@ -19,13 +19,13 @@ export interface RoutedLayout extends GraphLayout {
   edges: RoutedEdge[];
 }
 
-export interface LayoutNode {
+interface LayoutNode {
   name: string;
   width: number;
   height: number;
 }
 
-export interface LayoutEdge {
+interface LayoutEdge {
   source: string;
   target: string;
   control?: boolean;
@@ -134,7 +134,7 @@ export function overviewGraph(module: HloModule) {
 
 // ELK spline routes are cubic Bézier controls in triples after the start point. Keeping
 // them makes cross-layer edges follow their planned lanes instead of one curve across cards.
-export function curvePoints(points: Point[], direction: LayoutDirection, arrowInset = 5): Point[] {
+function curvePoints(points: Point[], direction: LayoutDirection, arrowInset = 5): Point[] {
   // A straight route has no controls; its endpoint handles are set below.
   if (points.length === 2) points = [points[0], points[0], points[1], points[1]];
   if (points.length < 4 || (points.length - 1) % 3 !== 0) return [];

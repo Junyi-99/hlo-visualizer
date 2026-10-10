@@ -301,7 +301,7 @@ export function Toolbar({
           </a>
           <ThemeButton />
           <ExampleSelect exampleId={exampleId} onExample={onExample} />
-          <button className="search-button" type="button" title="Search nodes (/)" onClick={onSearch}>
+          <button className="search-button" type="button" title="Search nodes (/)" aria-label="Search nodes" onClick={onSearch}>
             <Icon name="search" />
             <span className="search-label">Search nodes</span>
             <kbd>/</kbd>

@@ -193,7 +193,7 @@ export default function App() {
             onComputation={showComputation}
           />
           <div className="bottom-bar">
-            <div>{status}</div>
+            <div role="status">{status}</div>
             <div>
               {module.warnings.length ? (
                 <button type="button" className="parse-notes-button" onClick={() => setNotesOpen(true)}>
@@ -243,10 +243,18 @@ function ParseNotesDialog({ warnings, onClose }: { warnings: string[]; onClose: 
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="notes-panel" role="dialog" aria-modal="true" aria-label="Parse notes">
+      <div
+        className="notes-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Parse notes"
+        onKeyDown={event => {
+          if (event.key === 'Escape') onClose();
+        }}
+      >
         <header>
           <strong>Parse notes</strong>
-          <button className="icon-button" type="button" aria-label="Close parse notes" onClick={onClose}>
+          <button className="icon-button" type="button" aria-label="Close parse notes" autoFocus onClick={onClose}>
             <Icon name="close" />
           </button>
         </header>

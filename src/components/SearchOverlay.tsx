@@ -51,6 +51,7 @@ export function SearchOverlay({ module, useOpName, showLastNameOnly, onClose, on
           <input
             ref={inputRef}
             type="search"
+            aria-label="Search nodes or operations"
             placeholder="Search nodes or operations…"
             autoComplete="off"
             autoCapitalize="none"

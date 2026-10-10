@@ -2,7 +2,7 @@
 // Regenerate with scripts/dump_hlo.py on a TPU VM.
 const files = import.meta.glob('../../examples/*/*.hlo', { query: '?raw', import: 'default' }) as Record<string, () => Promise<string>>;
 
-export interface HloExample {
+interface HloExample {
   id: string;
   program: string;
   stage: 'after' | 'before';
