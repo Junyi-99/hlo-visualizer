@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
+import { Drawer } from 'vaul';
 import sample from './sample.llo?raw';
 import { Icon } from '../components/Icon';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStoredState } from '../hooks/useStoredState';
 import { lloExamples } from './examples';
 import { definitionOf, parseLlo, units, type LloInstruction, type LloProgram, type Unit } from './parser';
@@ -52,25 +54,17 @@ function InstructionChip({
   );
 }
 
-function Inspector({
+function InstructionDetails({
   program,
   selected,
   onSelect,
   onClose
 }: {
   program: LloProgram;
-  selected: LloInstruction | null;
+  selected: LloInstruction;
   onSelect: (instruction: LloInstruction) => void;
-  onClose: () => void;
+  onClose?: () => void;
 }) {
-  if (!selected)
-    return (
-      <aside className="llo-inspector llo-inspector-empty">
-        <div className="eyebrow">INSPECTOR</div>
-        <h2>Select an instruction</h2>
-        <p>Inspect the exact LLO text, register producers, memory allocations, and its place in a bundle.</p>
-      </aside>
-    );
   const region = program.regions.find(item => item.name === selected.region);
   const consumers = selected.output
     ? program.instructions.filter(
@@ -82,7 +76,7 @@ function Inspector({
       )
     : [];
   return (
-    <aside className="llo-inspector">
+    <>
       <div className="llo-inspector-head">
         <div>
           <div className="eyebrow">
@@ -90,9 +84,11 @@ function Inspector({
           </div>
           <h2>{selected.opcode}</h2>
         </div>
-        <button className="llo-close" type="button" aria-label="Close inspector" onClick={onClose}>
-          ×
-        </button>
+        {onClose && (
+          <button className="llo-close" type="button" aria-label="Close inspector" onClick={onClose}>
+            ×
+          </button>
+        )}
       </div>
       <p>{explanation(selected.opcode)}</p>
       <div className="llo-inspector-section">
@@ -159,6 +155,64 @@ function Inspector({
           </div>
           {consumers.length > 30 && <small>Showing first 30 of {consumers.length}</small>}
         </div>
+      )}
+    </>
+  );
+}
+
+function Inspector({
+  program,
+  selected,
+  onSelect,
+  onClose
+}: {
+  program: LloProgram;
+  selected: LloInstruction | null;
+  onSelect: (instruction: LloInstruction) => void;
+  onClose: () => void;
+}) {
+  const isPhone = useMediaQuery('(max-width: 700px)');
+  const [lastSelected, setLastSelected] = useState(selected);
+  if (selected && selected !== lastSelected) setLastSelected(selected);
+
+  if (isPhone) {
+    const shown = selected ?? lastSelected;
+    return (
+      <Drawer.Root
+        open={!!selected}
+        onOpenChange={open => {
+          if (!open) onClose();
+        }}
+      >
+        <Drawer.Portal>
+          <Drawer.Overlay className="drawer-overlay" />
+          <Drawer.Content className="inspector-drawer llo-inspector-drawer" aria-describedby={undefined}>
+            <div className="drawer-handle" aria-hidden="true" />
+            <div className="llo-sheet-header">
+              <Drawer.Title>Instruction details</Drawer.Title>
+              <button className="llo-close" type="button" aria-label="Close instruction details" onClick={onClose}>
+                ×
+              </button>
+            </div>
+            <div className="llo-inspector llo-sheet-content overscroll-contain">
+              {shown && <InstructionDetails key={shown.id} program={program} selected={shown} onSelect={onSelect} />}
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+    );
+  }
+
+  return (
+    <aside className={`llo-inspector${selected ? '' : ' llo-inspector-empty'}`}>
+      {selected ? (
+        <InstructionDetails program={program} selected={selected} onSelect={onSelect} onClose={onClose} />
+      ) : (
+        <>
+          <div className="eyebrow">INSPECTOR</div>
+          <h2>Select an instruction</h2>
+          <p>Inspect the exact LLO text, register producers, memory allocations, and its place in a bundle.</p>
+        </>
       )}
     </aside>
   );
@@ -284,6 +338,11 @@ export default function LloApp() {
       else next.add(unit);
       return next;
     });
+  const chooseRegion = (name: string) => {
+    setRegionName(name);
+    setSelectedId(null);
+    setRowLimit(200);
+  };
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
     setTheme(next);
@@ -329,11 +388,7 @@ export default function LloApp() {
                 key={item.name}
                 type="button"
                 className={item.name === region?.name ? 'active' : ''}
-                onClick={() => {
-                  setRegionName(item.name);
-                  setSelectedId(null);
-                  setRowLimit(200);
-                }}
+                onClick={() => chooseRegion(item.name)}
               >
                 <strong>{item.label}</strong>
                 <small>{item.bundles.length ? `${item.bundles.length} bundles` : `${item.instructions.length} instructions`}</small>
@@ -420,6 +475,23 @@ export default function LloApp() {
                 ? 'Each row is one VLIW bundle. Columns group its instructions by hardware unit.'
                 : 'This pass has no bundle addresses. Instructions appear in source order.'}
             </p>
+            <div className="llo-mobile-navigation">
+              {program.regions.length > 1 && (
+                <select
+                  className="llo-mobile-region"
+                  aria-label="Choose LLO region"
+                  value={region?.name ?? ''}
+                  onChange={event => chooseRegion(event.target.value)}
+                >
+                  {program.regions.map(item => (
+                    <option key={item.name} value={item.name}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <a href="?">← HLO Visualizer</a>
+            </div>
           </div>
           <div className="llo-summary">
             <span>
