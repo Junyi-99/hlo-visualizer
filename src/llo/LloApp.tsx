@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEv
 import { Drawer } from 'vaul';
 import sample from './sample.llo?raw';
 import { AppSidebar, SidebarToggle } from '../components/AppSidebar';
+import { GuideRow } from '../components/Inspector';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStoredState } from '../hooks/useStoredState';
 import { findLloExample, lloExamples, lloTopologies, type LloExample } from './examples';
+import { lloGuide } from './instruction-guide';
 import { definitionOf, parseLlo, units, type LloInstruction, type LloProgram, type Unit } from './parser';
 import './llo.css';
 
@@ -19,18 +21,40 @@ const descriptions: Record<Unit, string> = {
   OTHER: 'Compiler operation or instruction without a recognized unit'
 };
 
-const explanation = ({ opcode, unit }: LloInstruction) => {
-  const name = opcode.toLowerCase();
-  if (name.startsWith('vmatpush')) return 'Push matrix operand data into the MXU.';
-  if (name.startsWith('vmatmul')) return 'Issue a matrix multiplication on the MXU.';
-  if (name.startsWith('vpop')) return 'Read a result from a hardware accumulator or transpose unit.';
-  if (name.startsWith('dma.done')) return 'Wait for an earlier DMA transfer to finish.';
-  if (name.startsWith('dma.')) return 'Start or manage an asynchronous data transfer.';
-  if (name.startsWith('vld')) return 'Load a vector from VMEM.';
-  if (name.startsWith('vst')) return 'Store a vector in VMEM.';
-  if (name.startsWith('vxpose')) return 'Transpose or rearrange vector lanes with the XLU.';
-  return descriptions[unit];
-};
+const partKey = (target: EventTarget) =>
+  target instanceof Element ? (target.closest<HTMLElement>('[data-part]')?.dataset.part ?? null) : null;
+
+// The instruction text with each part wrapped in a span; hovering or clicking a part highlights its explanation row.
+function LloCode({ html, activePart, activate }: { html: string; activePart: string | null; activate: (key: string | null) => void }) {
+  const ref = useRef<HTMLPreElement>(null);
+
+  useEffect(() => {
+    ref.current?.querySelectorAll<HTMLElement>('[data-part]').forEach(element => {
+      element.classList.toggle('active-part', element.dataset.part === activePart);
+    });
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- new html replaces the spans, so re-apply highlights
+  }, [html, activePart]);
+
+  return (
+    <pre
+      ref={ref}
+      className="llo-code"
+      dangerouslySetInnerHTML={{ __html: html }}
+      onMouseOver={event => activate(partKey(event.target))}
+      onMouseOut={() => activate(null)}
+      onFocus={event => activate(partKey(event.target))}
+      onBlur={() => activate(null)}
+      onClick={event => {
+        const key = partKey(event.target);
+        activate(key);
+        if (key)
+          ref.current?.parentElement
+            ?.querySelector(`.guide-row[data-part="${key}"]`)
+            ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }}
+    />
+  );
+}
 
 function InstructionChip({
   instruction,
@@ -65,6 +89,8 @@ function InstructionDetails({
   onSelect: (instruction: LloInstruction) => void;
   onClose?: () => void;
 }) {
+  const [activePart, setActivePart] = useState<string | null>(null);
+  const guide = lloGuide(selected);
   const region = program.regions.find(item => item.name === selected.region);
   const consumers = selected.output
     ? program.instructions.filter(
@@ -90,17 +116,27 @@ function InstructionDetails({
           </button>
         )}
       </div>
-      <p>{explanation(selected)}</p>
+      <p>{guide.summary}</p>
       <div className="llo-inspector-section">
         <div className="eyebrow">LOCATION</div>
         <div className="llo-detail">
           {region?.label || selected.region}
           {selected.bundle ? ` · bundle ${selected.bundle}` : ' · unscheduled'}
+          {selected.depth > 0 && ` · loop depth ${selected.depth}`}
         </div>
       </div>
       <div className="llo-inspector-section">
         <div className="eyebrow">EXACT INSTRUCTION</div>
-        <pre>{selected.raw}</pre>
+        <LloCode html={guide.html} activePart={activePart} activate={setActivePart} />
+        <div className="guide-heading">Explanation</div>
+        <div className="guide-list">
+          {guide.parts.map(part => (
+            <GuideRow key={part.key} part={part} active={activePart === part.key} activate={key => setActivePart(key)} />
+          ))}
+        </div>
+        <div className="guide-sources">
+          Opcode and modifier meanings are inferred from TPU dumps and Google’s published TPU material; the ISA itself is not public.
+        </div>
       </div>
       {selected.references.length > 0 && (
         <div className="llo-inspector-section">

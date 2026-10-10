@@ -485,7 +485,15 @@ function HloCode({
   );
 }
 
-function GuideRow({ part, active, activate }: { part: GuidePart; active: boolean; activate: Activate }) {
+export function GuideRow({
+  part,
+  active,
+  activate
+}: {
+  part: Pick<GuidePart, 'key' | 'label' | 'text'>;
+  active: boolean;
+  activate: Activate;
+}) {
   const color = partColor(part.key);
   const style = color ? ({ '--part': color } as React.CSSProperties) : undefined;
 

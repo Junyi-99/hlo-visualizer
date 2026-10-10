@@ -10,11 +10,14 @@ export interface LloInstruction {
   allocations: string[];
   unit: Unit;
   bundle: string | null;
+  // Loop nesting of the bundle, from the `>` markers after its address.
+  depth: number;
   region: string;
 }
 
 interface LloBundle {
   address: string;
+  depth: number;
   instructions: LloInstruction[];
   region: string;
 }
@@ -147,6 +150,7 @@ export function parseLlo(source: string): LloProgram {
       allocations: unique(code.matchAll(/#allocation[\w.-]*/g)),
       unit: instructionUnit(match[2]),
       bundle: bundle?.address ?? null,
+      depth: bundle?.depth ?? 0,
       region: current.name
     };
     current.instructions.push(instruction);
@@ -216,13 +220,13 @@ export function parseLlo(source: string): LloProgram {
       });
       continue;
     }
-    const bundleMatch = /^(0x[\da-fA-F]+|\d+)\s*:\s*\{(.*)$/.exec(line);
+    const bundleMatch = /^(0x[\da-fA-F]+|\d+)\s*:\s*(>*)\s*\{(.*)$/.exec(line);
     if (bundleMatch) {
       const current = ensureRegion();
-      bundle = { address: bundleMatch[1], region: current.name, instructions: [] };
+      bundle = { address: bundleMatch[1], depth: bundleMatch[2].length, region: current.name, instructions: [] };
       current.bundles.push(bundle);
       pendingBundle = { body: '', depth: 1, comment: false, line: index + 1 };
-      consumeBundle(bundleMatch[2]);
+      consumeBundle(bundleMatch[3]);
       continue;
     }
     if (line === '}' || line === '{' || line.startsWith('#') || line.startsWith('/*')) continue;

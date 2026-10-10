@@ -538,6 +538,9 @@
 .llo-detail {
   overflow-wrap: anywhere;
 }
+.llo-inspector .guide-heading {
+  margin-top: 14px;
+}
 .llo-inspector pre {
   margin: 0;
   padding: 12px;
