@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import sampleHlo from '../sample.hlo?raw';
 import { GraphCanvas, type GraphHandle } from './components/GraphCanvas';
 import { Icon } from './components/Icon';
@@ -9,7 +9,7 @@ import { Sidebar } from './components/Sidebar';
 import { Toolbar } from './components/Toolbar';
 import { useStoredState } from './hooks/useStoredState';
 import { groupCopyPairs } from './lib/copy-grouping';
-import { findExample } from './lib/examples';
+import { examples, exampleSource, findExample } from './lib/examples';
 import { lloExamples, type LloExample } from './llo/examples';
 import { clampZoom, type LayoutMode } from './lib/graph-layout';
 import { parseHlo, reachable } from './lib/parser';
@@ -55,6 +55,7 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [sourceOpen, setSourceOpen] = useState(false);
 
   const graphRef = useRef<GraphHandle>(null);
   // ?node=<name> from a cross link opens that instruction once its example has loaded.
@@ -94,6 +95,7 @@ export default function App() {
     setHistory([]);
     setImportOpen(false);
     setNotesOpen(false);
+    setSourceOpen(false);
     setZoom(1);
     setExampleId(example);
     syncExampleParam(example);
@@ -181,6 +183,9 @@ export default function App() {
   const compiledId = exampleId?.replace(/\.before$/, '.after');
   const lloHref = nodeLloHref ?? lloLink(lloExamples.find(item => item.default && item.hloExample === compiledId)) ?? '?view=llo';
 
+  const example = examples.find(item => item.id === exampleId);
+  const source = example ? exampleSource(example.program) : null;
+
   const status = node
     ? `%${node.name} · ${upstreamCount} upstream · ${downstreamCount} downstream`
     : computation
@@ -195,6 +200,7 @@ export default function App() {
           current={current}
           collapsed={sidebarCollapsed}
           lloHref={lloHref}
+          onShowSource={source && (() => setSourceOpen(true))}
           onOverview={() => showComputation(null)}
           onComputation={showComputation}
         />
@@ -207,6 +213,7 @@ export default function App() {
             sidebarCollapsed={sidebarCollapsed}
             onToggleSidebar={() => setSidebarCollapsed(value => !value)}
             lloHref={lloHref}
+            onShowSource={source && (() => setSourceOpen(true))}
           />
           <GraphCanvas
             {...viewProps}
@@ -254,13 +261,38 @@ export default function App() {
           }}
         />
       )}
-      {importOpen && <ImportDialog onClose={() => setImportOpen(false)} onLoad={source => loadText(source)} />}
-      {notesOpen && <ParseNotesDialog warnings={module.warnings} onClose={() => setNotesOpen(false)} />}
+      {importOpen && <ImportDialog onClose={() => setImportOpen(false)} onLoad={text => loadText(text)} />}
+      {notesOpen && (
+        <Dialog title="Parse notes" onClose={() => setNotesOpen(false)}>
+          <p>Some input could not be represented exactly. Check these lines before relying on the graph.</p>
+          <ul>
+            {module.warnings.map((warning, index) => (
+              <li key={index}>{warning}</li>
+            ))}
+          </ul>
+        </Dialog>
+      )}
+      {sourceOpen && example && source && (
+        <Dialog title={`${example.program} · JAX source`} wide onClose={() => setSourceOpen(false)}>
+          <p>
+            Compiled on TPU {example.topology} with <code>jax.jit</code> from{' '}
+            <a
+              href={`https://github.com/Junyi-99/hlo-visualizer/blob/main/scripts/dump_hlo.py#L${source.line}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              scripts/dump_hlo.py:{source.line}
+            </a>
+            .
+          </p>
+          <pre>{source.code}</pre>
+        </Dialog>
+      )}
     </>
   );
 }
 
-function ParseNotesDialog({ warnings, onClose }: { warnings: string[]; onClose: () => void }) {
+function Dialog({ title, wide, onClose, children }: { title: string; wide?: boolean; onClose: () => void; children: ReactNode }) {
   return (
     <div
       className="notes-overlay"
@@ -270,26 +302,21 @@ function ParseNotesDialog({ warnings, onClose }: { warnings: string[]; onClose: 
       }}
     >
       <div
-        className="notes-panel"
+        className={`notes-panel${wide ? ' wide' : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Parse notes"
+        aria-label={title}
         onKeyDown={event => {
           if (event.key === 'Escape') onClose();
         }}
       >
         <header>
-          <strong>Parse notes</strong>
-          <button className="icon-button" type="button" aria-label="Close parse notes" autoFocus onClick={onClose}>
+          <strong>{title}</strong>
+          <button className="icon-button" type="button" aria-label={`Close ${title}`} autoFocus onClick={onClose}>
             <Icon name="close" />
           </button>
         </header>
-        <p>Some input could not be represented exactly. Check these lines before relying on the graph.</p>
-        <ul>
-          {warnings.map((warning, index) => (
-            <li key={index}>{warning}</li>
-          ))}
-        </ul>
+        {children}
       </div>
     </div>
   );

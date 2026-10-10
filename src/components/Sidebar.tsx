@@ -8,6 +8,7 @@ interface SidebarProps {
   current: string | null;
   collapsed: boolean;
   lloHref: string;
+  onShowSource: (() => void) | null;
   onOverview: () => void;
   onComputation: (name: string) => void;
 }
@@ -49,7 +50,7 @@ function ComputationItem({ active, overview = false, icon, title, detail, onClic
   );
 }
 
-export function Sidebar({ module, current, collapsed, lloHref, onOverview, onComputation }: SidebarProps) {
+export function Sidebar({ module, current, collapsed, lloHref, onShowSource, onOverview, onComputation }: SidebarProps) {
   const roles = useComputationRoles(module);
 
   const computations = module.computations;
@@ -70,6 +71,11 @@ export function Sidebar({ module, current, collapsed, lloHref, onOverview, onCom
         <div className="eyebrow">MODULE</div>
         <h1>{module.name}</h1>
         <div className="muted">{summary}</div>
+        {onShowSource && (
+          <button type="button" className="link-button" onClick={onShowSource}>
+            Show JAX source
+          </button>
+        )}
       </div>
 
       <div className="sidebar-section">

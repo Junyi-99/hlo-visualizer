@@ -1241,6 +1241,17 @@ marker path {
   font-size: 12px;
   font-weight: 600;
 }
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+.module-section .link-button {
+  margin-top: 8px;
+}
 
 /* ───────────── Computation explorer ───────────── */
 
@@ -2445,6 +2456,23 @@ dialog textarea:focus {
   line-height: 1.5;
   color: var(--text-2);
 }
+.notes-panel.wide {
+  width: min(760px, 100%);
+}
+.notes-panel pre {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--fill);
+  font: 12px/1.6 var(--font-mono);
+  overflow: auto;
+}
+.notes-panel code {
+  font: 12px var(--font-mono);
+}
+.notes-panel a {
+  color: var(--accent);
+}
 .notes-panel ul {
   padding-left: 20px;
   font: 12px/1.7 var(--font-mono);
@@ -2590,7 +2618,7 @@ dialog textarea:focus {
   }
   .mobile-navigation {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 12px;
     margin-top: 12px;
@@ -2599,6 +2627,9 @@ dialog textarea:focus {
     color: var(--accent);
     font-weight: 600;
     text-decoration: none;
+  }
+  .mobile-navigation .link-button {
+    font-size: inherit;
   }
   #mobile-computations {
     width: 100%;

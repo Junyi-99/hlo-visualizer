@@ -36,6 +36,7 @@ interface ToolbarProps {
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
   lloHref: string;
+  onShowSource: (() => void) | null;
 }
 
 const MEMORY_LOCATION_UNAVAILABLE =
@@ -259,6 +260,7 @@ export function Toolbar({
   sidebarCollapsed,
   onToggleSidebar,
   lloHref,
+  onShowSource,
   ...viewActionProps
 }: ToolbarProps) {
   const roles = useComputationRoles(module);
@@ -322,6 +324,11 @@ export function Toolbar({
                 </option>
               ))}
             </select>
+            {onShowSource && (
+              <button type="button" className="link-button" onClick={onShowSource}>
+                Source
+              </button>
+            )}
             <a href={lloHref}>LLO Visualizer →</a>
           </div>
         </div>
