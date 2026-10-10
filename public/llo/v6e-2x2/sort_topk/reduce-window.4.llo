@@ -1,0 +1,224 @@
+// sort_topk · v6e:2x2 · 1791619920105628134-reduce-window.4-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s62797_s0 = inlined_call_operand.vmem [shape: f32[8,8,128], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s62798_s1 = inlined_call_operand.<no memory space> [shape: f32[], index: 1, kind: input, shape index: {}] /* operand 1 */  ;;  %s62799_s2 = inlined_call_operand.vmem [shape: f32[8,8,128], index: 2, kind: output, shape index: {}] /* operand 2 */ } /* entry bundle: %reduce-window.4 = reduce-window(%copy.1, %constant.32.clone) */
+   0x1   :  { %v62737_v0 = vstv %s62798_s1 }
+   0x2   :  { %s62739_s1 = smov 0 /* copy for cssa */  ;;  %s62741_s11 = smov 0 /* copy for cssa */ } /* Start region 1 :: Start region 14740 */
+   0x3   :  { %s62743_s12 = smov 0 /* copy for cssa */ } /* End region 14740 */
+   0x4 LB: > { %s62659_s13 = sadd.s32 4294967295, %s62717_s12 /* iteration index, stage = 1 */  ;;  %s28_s14 = sadd.s32 1, %s62713_s11  ;;  %s62717_s12 = sphi %s62743_s12, %s9_s12 /* phi copy :: iteration index, stage = 0 :: iteration index, stage = 0 */  ;;  %s62713_s11 = sphi %s62741_s11, %s62801_s11 /* copy for cssa :: phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 :: phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 */  ;;  %s62709_s1 = sphi %s62739_s1, %s62800_s1 /* phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 1 iter bound = 0 */ } /* Start region 14745 :: Start region 13 :: Start region 14 :: Start region 15 */
+   0x5   : > { %p30_p0 = scmp.ge.s32.totalorder %s28_s14, 8  ;;  %p62661_p1 = scmp.ge.s32.totalorder %s62717_s12, 8 }
+   0x6   : > { %s44_s15 = sand.u32 (!%p62661_p1), 1, %s62717_s12 /* smod.u32 w/div 2 */  ;;  %s62663_s16 = sshll.u32 (!%p62661_p1), %s62713_s11, 3 }
+   0x7   : > { %s62803_s14 = smov (%p30_p0, %s28_s14), 0 /* copy for cssa :: iteration index, stage = 0 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 */  ;;  %42 = sbr.rel (%p62661_p1) target = $region16 } /* End region 13 */
+   0x8   : > { %s62662_s17 = sshll.u32 (!%p62661_p1), %s44_s15, 3  ;;  %s50_s20 = scalar_lea.vmem (!%p62661_p1), %s62797_s0, %s62663_s16 }
+   0x9   : > { %s46_s21 = scalar_lea.vmem (!%p62661_p1), [#allocation0], %s62662_s17 }
+   0xa   :  {}
+   0xb   :  {} /* End region 14 */
+   0xc   : > { %v79_v1 = vld [vmem:[%s50_s20] sm:$0xff] }
+   0xd   : > { %80 = vst [vmem:[%s46_s21] sm:$0xff] /*vst_source=*/%v79_v1 } /* End region 15 */
+   0xe PF: > { %p62664_p2 = scmp.ge.s32.totalorder %s62717_s12, 1  ;;  %p85_p3 = scmp.lt.s32.totalorder %s62717_s12, 9 } /* Start/End empty region 16 :: Start region 51 :: Start region 52 */
+   0xf   : > { %p86_p4 = pnand %p62664_p2, %p85_p3 } /* End region 51 */
+  0x10   : > { %89 = sbr.rel (%p86_p4) target = $region54 }
+  0x11   :  {}
+  0x12   :  {}
+  0x13   :  {}
+  0x14   :  {} /* End region 52 */
+  0x15   : > { %s92_s22 = sand.u32 1, %s62659_s13 /* smod.u32 w/div 2 */  ;;  %211 = vst [vmem:[#allocation4 + $0x30] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %213 = vst [vmem:[#allocation4] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %s62668_s25 = sshll.u32 %s62709_s1, 3 } /* Start region 53 */
+  0x16   : > { %215 = vst [vmem:[#allocation4 + $0x58] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %217 = vst [vmem:[#allocation4 + $0x18] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %s62665_s23 = sshll.u32 %s92_s22, 3  ;;  %s56269_s28 = scalar_lea.vmem %s62799_s2, %s62668_s25 }
+  0x17   : > { %219 = vst [vmem:[#allocation4 + $0x50] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %221 = vst [vmem:[#allocation4 + $0x68] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %s94_s24 = scalar_lea.vmem [#allocation0], %s62665_s23 }
+  0x18   : > { %223 = vst [vmem:[#allocation4 + $0x8] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %225 = vst [vmem:[#allocation4 + $0x48] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %v156_v2 = vld [vmem:[%s94_s24] sm:$0xff] }
+  0x19   : > { %227 = vst [vmem:[#allocation4 + $0x40] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %229 = vst [vmem:[#allocation4 + $0x20] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %v159_v3 = vadd.f32 %v156_v2, %v62737_v0 }
+  0x1a   : > { %231 = vst [vmem:[#allocation4 + $0x10] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %233 = vst [vmem:[#allocation4 + $0x38] sm:$0xff] /*vst_source=*/%v62737_v0 }
+  0x1b   : > { %235 = vst [vmem:[#allocation4 + $0x60] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %237 = vst [vmem:[#allocation4 + $0x70] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %163 = vxpose.xlu0.b32.start.end [1/1] (short) /*vx=*/%v159_v3, /*width=*/128 }
+  0x1c   : > { %239 = vst [vmem:[#allocation4 + $0x78] sm:$0xff] /*vst_source=*/%v62737_v0  ;;  %241 = vst [vmem:[#allocation4 + $0x28] sm:$0xff] /*vst_source=*/%v62737_v0 }
+  0x1d   : > { %v164_v4 = vpop.trf.xlu0 }
+  0x1e   : > { %180 = vst [vmem:[#allocation3] sm:$0xff] /*vst_source=*/%v164_v4 }
+  0x1f   : > { %v165_v5 = vpop.trf.xlu0 }
+  0x20   : > { %182 = vst [vmem:[#allocation3 + $0x8] sm:$0xff] /*vst_source=*/%v165_v5 }
+  0x21   : > { %v166_v6 = vpop.trf.xlu0  ;;  %v242_v7 = vld [vmem:[#allocation3] ss:$0 sm:$0xff]  ;;  %v254_v9 = vld [vmem:[#allocation3 + $0x1] ss:$0 sm:$0xff]  ;;  %v272_v11 = vld [vmem:[#allocation3 + $0x2] ss:$0 sm:$0xff] }
+  0x22   : > { %184 = vst [vmem:[#allocation3 + $0x10] sm:$0xff] /*vst_source=*/%v166_v6  ;;  %v245_v8 = vadd.f32 %v242_v7, %v62737_v0  ;;  %v296_v14 = vld [vmem:[#allocation3 + $0x3] ss:$0 sm:$0xff]  ;;  %v326_v16 = vld [vmem:[#allocation3 + $0x4] ss:$0 sm:$0xff] }
+  0x23   : > { %v362_v19 = vld [vmem:[#allocation3 + $0x5] ss:$0 sm:$0xff]  ;;  %v404_v21 = vld [vmem:[#allocation3 + $0x6] ss:$0 sm:$0xff]  ;;  %v452_v24 = vld [vmem:[#allocation3 + $0x7] ss:$0 sm:$0xff] }
+  0x24   : > { %247 = vst [vmem:[#allocation4 + $0x30] sm:$0x1] /*vst_source=*/%v245_v8  ;;  %v257_v10 = vadd.f32 %v254_v9, %v245_v8 }
+  0x25   : > { %v167_v12 = vpop.trf.xlu0  ;;  %v507_v25 = vld [vmem:[#allocation3 + $0x8] ss:$0 sm:$0xff]  ;;  %v569_v29 = vld [vmem:[#allocation3 + $0x9] ss:$0 sm:$0xff]  ;;  %v638_v31 = vld [vmem:[#allocation3 + $0xa] ss:$0 sm:$0xff] }
+  0x26   : > { %259 = vst [vmem:[#allocation4 + $0x30] sm:$0x2] /*vst_source=*/%v257_v10  ;;  %v275_v13 = vadd.f32 %v272_v11, %v257_v10  ;;  %186 = vst [vmem:[#allocation3 + $0x18] sm:$0xff] /*vst_source=*/%v167_v12  ;;  %v714_v34 = vld [vmem:[#allocation3 + $0xb] ss:$0 sm:$0xff] }
+  0x27   : > { %v797_v37 = vld [vmem:[#allocation3 + $0xc] ss:$0 sm:$0xff]  ;;  %v887_v40 = vld [vmem:[#allocation3 + $0xd] ss:$0 sm:$0xff]  ;;  %v984_v42 = vld [vmem:[#allocation3 + $0xe] ss:$0 sm:$0xff] }
+  0x28   : > { %277 = vst [vmem:[#allocation4 + $0x30] sm:$0x4] /*vst_source=*/%v275_v13  ;;  %v299_v15 = vadd.f32 %v296_v14, %v275_v13  ;;  %v1088_v45 = vld [vmem:[#allocation3 + $0xf] ss:$0 sm:$0xff] }
+  0x29   : > { %v168_v17 = vpop.trf.xlu0  ;;  %v1198_v46 = vld [vmem:[#allocation3 + $0x10] ss:$0 sm:$0xff]  ;;  %v1315_v50 = vld [vmem:[#allocation3 + $0x11] ss:$0 sm:$0xff]  ;;  %v1439_v52 = vld [vmem:[#allocation3 + $0x12] ss:$0 sm:$0xff] }
+  0x2a   : > { %301 = vst [vmem:[#allocation4 + $0x30] sm:$0x8] /*vst_source=*/%v299_v15  ;;  %v329_v18 = vadd.f32 %v326_v16, %v299_v15  ;;  %188 = vst [vmem:[#allocation3 + $0x20] sm:$0xff] /*vst_source=*/%v168_v17  ;;  %v1570_v55 = vld [vmem:[#allocation3 + $0x13] ss:$0 sm:$0xff] }
+  0x2b   : > { %v1708_v58 = vld [vmem:[#allocation3 + $0x14] ss:$0 sm:$0xff]  ;;  %v1853_v61 = vld [vmem:[#allocation3 + $0x15] ss:$0 sm:$0xff]  ;;  %v2005_v63 = vld [vmem:[#allocation3 + $0x16] ss:$0 sm:$0xff] }
+  0x2c   : > { %331 = vst [vmem:[#allocation4 + $0x30] sm:$0x10] /*vst_source=*/%v329_v18  ;;  %v365_v20 = vadd.f32 %v362_v19, %v329_v18  ;;  %v2164_v2 = vld [vmem:[#allocation3 + $0x17] ss:$0 sm:$0xff] }
+  0x2d   : > { %v169_v22 = vpop.trf.xlu0  ;;  %v2329_v3 = vld [vmem:[#allocation3 + $0x18] ss:$0 sm:$0xff]  ;;  %v2501_v6 = vld [vmem:[#allocation3 + $0x19] ss:$0 sm:$0xff]  ;;  %v2680_v8 = vld [vmem:[#allocation3 + $0x1a] ss:$0 sm:$0xff] }
+  0x2e   : > { %367 = vst [vmem:[#allocation4 + $0x30] sm:$0x20] /*vst_source=*/%v365_v20  ;;  %v407_v23 = vadd.f32 %v404_v21, %v365_v20  ;;  %190 = vst [vmem:[#allocation3 + $0x28] sm:$0xff] /*vst_source=*/%v169_v22  ;;  %v2866_v10 = vld [vmem:[#allocation3 + $0x1b] ss:$0 sm:$0xff] }
+  0x2f   : > { %v3059_v13 = vld [vmem:[#allocation3 + $0x1c] ss:$0 sm:$0xff]  ;;  %v3259_v16 = vld [vmem:[#allocation3 + $0x1d] ss:$0 sm:$0xff]  ;;  %v3466_v18 = vld [vmem:[#allocation3 + $0x1e] ss:$0 sm:$0xff] }
+  0x30   : > { %409 = vst [vmem:[#allocation4 + $0x30] sm:$0x40] /*vst_source=*/%v407_v23  ;;  %v455_v26 = vadd.f32 %v452_v24, %v407_v23  ;;  %v3680_v20 = vld [vmem:[#allocation3 + $0x1f] ss:$0 sm:$0xff] }
+  0x31   : > { %v170_v27 = vpop.trf.xlu0  ;;  %v3900_v21 = vld [vmem:[#allocation3 + $0x20] ss:$0 sm:$0xff]  ;;  %v4127_v24 = vld [vmem:[#allocation3 + $0x21] ss:$0 sm:$0xff] }
+  0x32   : > { %457 = vst [vmem:[#allocation4 + $0x30] sm:$0x80] /*vst_source=*/%v455_v26  ;;  %v510_v28 = vadd.f32 %v507_v25, %v455_v26  ;;  %192 = vst [vmem:[#allocation3 + $0x30] sm:$0xff] /*vst_source=*/%v170_v27  ;;  %v4361_v26 = vld [vmem:[#allocation3 + $0x22] ss:$0 sm:$0xff] }
+  0x33   : > { %512 = vst [vmem:[#allocation4] sm:$0x1] /*vst_source=*/%v510_v28  ;;  %v572_v30 = vadd.f32 %v569_v29, %v510_v28  ;;  %v4602_v28 = vld [vmem:[#allocation3 + $0x23] ss:$0 sm:$0xff] }
+  0x34   : > { %v171_v32 = vpop.trf.xlu0 }
+  0x35   : > { %574 = vst [vmem:[#allocation4] sm:$0x2] /*vst_source=*/%v572_v30  ;;  %v641_v33 = vadd.f32 %v638_v31, %v572_v30  ;;  %194 = vst [vmem:[#allocation3 + $0x38] sm:$0xff] /*vst_source=*/%v171_v32  ;;  %v4850_v31 = vld [vmem:[#allocation3 + $0x24] ss:$0 sm:$0xff] }
+  0x36   : > { %643 = vst [vmem:[#allocation4] sm:$0x4] /*vst_source=*/%v641_v33  ;;  %v717_v35 = vadd.f32 %v714_v34, %v641_v33  ;;  %v5105_v34 = vld [vmem:[#allocation3 + $0x25] ss:$0 sm:$0xff] }
+  0x37   : > { %v56198_v36 = vld [vmem:[#allocation4 + $0x30] sm:$0xff]  ;;  %v172_v38 = vpop.trf.xlu0 }
+  0x38   : > { %56229 = vxpose.xlu0.b32.start [1/16] (narrow) /*vx=*/%v56198_v36, /*width=*/8  ;;  %719 = vst [vmem:[#allocation4] sm:$0x8] /*vst_source=*/%v717_v35  ;;  %v800_v39 = vadd.f32 %v797_v37, %v717_v35  ;;  %196 = vst [vmem:[#allocation3 + $0x40] sm:$0xff] /*vst_source=*/%v172_v38  ;;  %v5367_v36 = vld [vmem:[#allocation3 + $0x26] ss:$0 sm:$0xff] }
+  0x39   : > { %v5636_v38 = vld [vmem:[#allocation3 + $0x27] ss:$0 sm:$0xff] }
+  0x3a   : > { %802 = vst [vmem:[#allocation4] sm:$0x10] /*vst_source=*/%v800_v39  ;;  %v890_v41 = vadd.f32 %v887_v40, %v800_v39  ;;  %v5911_v39 = vld [vmem:[#allocation3 + $0x28] ss:$0 sm:$0xff] }
+  0x3b   : > { %v173_v43 = vpop.trf.xlu0 }
+  0x3c   : > { %892 = vst [vmem:[#allocation4] sm:$0x20] /*vst_source=*/%v890_v41  ;;  %v987_v44 = vadd.f32 %v984_v42, %v890_v41  ;;  %198 = vst [vmem:[#allocation3 + $0x48] sm:$0xff] /*vst_source=*/%v173_v43  ;;  %v6193_v42 = vld [vmem:[#allocation3 + $0x29] ss:$0 sm:$0xff] }
+  0x3d   : > { %989 = vst [vmem:[#allocation4] sm:$0x40] /*vst_source=*/%v987_v44  ;;  %v1091_v47 = vadd.f32 %v1088_v45, %v987_v44  ;;  %v6482_v44 = vld [vmem:[#allocation3 + $0x2a] ss:$0 sm:$0xff] }
+  0x3e   : > { %v174_v48 = vpop.trf.xlu0 }
+  0x3f   : > { %1093 = vst [vmem:[#allocation4] sm:$0x80] /*vst_source=*/%v1091_v47  ;;  %v1201_v49 = vadd.f32 %v1198_v46, %v1091_v47  ;;  %200 = vst [vmem:[#allocation3 + $0x50] sm:$0xff] /*vst_source=*/%v174_v48  ;;  %v6778_v46 = vld [vmem:[#allocation3 + $0x2b] ss:$0 sm:$0xff] }
+  0x40   : > { %1203 = vst [vmem:[#allocation4 + $0x58] sm:$0x1] /*vst_source=*/%v1201_v49  ;;  %v1318_v51 = vadd.f32 %v1315_v50, %v1201_v49  ;;  %v7081_v49 = vld [vmem:[#allocation3 + $0x2c] ss:$0 sm:$0xff] }
+  0x41   : > { %v175_v53 = vpop.trf.xlu0 }
+  0x42   : > { %1320 = vst [vmem:[#allocation4 + $0x58] sm:$0x2] /*vst_source=*/%v1318_v51  ;;  %v1442_v54 = vadd.f32 %v1439_v52, %v1318_v51  ;;  %202 = vst [vmem:[#allocation3 + $0x58] sm:$0xff] /*vst_source=*/%v175_v53  ;;  %v7391_v52 = vld [vmem:[#allocation3 + $0x2d] ss:$0 sm:$0xff] }
+  0x43   : > { %1444 = vst [vmem:[#allocation4 + $0x58] sm:$0x4] /*vst_source=*/%v1442_v54  ;;  %v1573_v56 = vadd.f32 %v1570_v55, %v1442_v54  ;;  %v7708_v54 = vld [vmem:[#allocation3 + $0x2e] ss:$0 sm:$0xff] }
+  0x44   : > { %v56200_v57 = vld [vmem:[#allocation4] sm:$0xff]  ;;  %v176_v60 = vpop.trf.xlu0 }
+  0x45   : > { %56230 = vxpose.xlu0.b32.cont [2/16] (narrow) /*vx=*/%v56200_v57, /*width=*/8  ;;  %1575 = vst [vmem:[#allocation4 + $0x58] sm:$0x8] /*vst_source=*/%v1573_v56  ;;  %v1711_v59 = vadd.f32 %v1708_v58, %v1573_v56  ;;  %204 = vst [vmem:[#allocation3 + $0x60] sm:$0xff] /*vst_source=*/%v176_v60  ;;  %v8032_v56 = vld [vmem:[#allocation3 + $0x2f] ss:$0 sm:$0xff] }
+  0x46   : > { %v8362_v57 = vld [vmem:[#allocation3 + $0x30] ss:$0 sm:$0xff]  ;;  %v8699_v60 = vld [vmem:[#allocation3 + $0x31] ss:$0 sm:$0xff] }
+  0x47   : > { %1713 = vst [vmem:[#allocation4 + $0x58] sm:$0x10] /*vst_source=*/%v1711_v59  ;;  %v1856_v62 = vadd.f32 %v1853_v61, %v1711_v59 }
+  0x48   : > { %v177_v15 = vpop.trf.xlu0 }
+  0x49   : > { %1858 = vst [vmem:[#allocation4 + $0x58] sm:$0x20] /*vst_source=*/%v1856_v62  ;;  %v2008_v1 = vadd.f32 %v2005_v63, %v1856_v62  ;;  %206 = vst [vmem:[#allocation3 + $0x68] sm:$0xff] /*vst_source=*/%v177_v15  ;;  %v9043_v62 = vld [vmem:[#allocation3 + $0x32] ss:$0 sm:$0xff] }
+  0x4a   : > { %2010 = vst [vmem:[#allocation4 + $0x58] sm:$0x40] /*vst_source=*/%v2008_v1  ;;  %v2167_v4 = vadd.f32 %v2164_v2, %v2008_v1  ;;  %v9394_v1 = vld [vmem:[#allocation3 + $0x33] ss:$0 sm:$0xff] }
+  0x4b   : > { %v178_v33 = vpop.trf.xlu0 }
+  0x4c   : > { %2169 = vst [vmem:[#allocation4 + $0x58] sm:$0x80] /*vst_source=*/%v2167_v4  ;;  %v2332_v5 = vadd.f32 %v2329_v3, %v2167_v4  ;;  %208 = vst [vmem:[#allocation3 + $0x70] sm:$0xff] /*vst_source=*/%v178_v33  ;;  %v9752_v4 = vld [vmem:[#allocation3 + $0x34] ss:$0 sm:$0xff] }
+  0x4d   : > { %v15485_v33 = vld [vmem:[#allocation3 + $0x42] ss:$0 sm:$0xff] }
+  0x4e   : > { %2334 = vst [vmem:[#allocation4 + $0x18] sm:$0x1] /*vst_source=*/%v2332_v5  ;;  %v2504_v7 = vadd.f32 %v2501_v6, %v2332_v5  ;;  %v10117_v6 = vld [vmem:[#allocation3 + $0x35] ss:$0 sm:$0xff] }
+  0x4f   : > { %v179_v51 = vpop.trf.xlu0 }
+  0x50   : > { %2506 = vst [vmem:[#allocation4 + $0x18] sm:$0x2] /*vst_source=*/%v2504_v7  ;;  %v2683_v9 = vadd.f32 %v2680_v8, %v2504_v7  ;;  %210 = vst [vmem:[#allocation3 + $0x78] sm:$0xff] /*vst_source=*/%v179_v51  ;;  %v10489_v8 = vld [vmem:[#allocation3 + $0x36] ss:$0 sm:$0xff] }
+  0x51   : > { %2685 = vst [vmem:[#allocation4 + $0x18] sm:$0x4] /*vst_source=*/%v2683_v9  ;;  %v2869_v11 = vadd.f32 %v2866_v10, %v2683_v9  ;;  %v10868_v10 = vld [vmem:[#allocation3 + $0x37] ss:$0 sm:$0xff] }
+  0x52   : > { %v56202_v12 = vld [vmem:[#allocation4 + $0x58] sm:$0xff] }
+  0x53   : > { %56231 = vxpose.xlu0.b32.cont [3/16] (narrow) /*vx=*/%v56202_v12, /*width=*/8  ;;  %2871 = vst [vmem:[#allocation4 + $0x18] sm:$0x8] /*vst_source=*/%v2869_v11  ;;  %v3062_v14 = vadd.f32 %v3059_v13, %v2869_v11  ;;  %v11253_v11 = vld [vmem:[#allocation3 + $0x38] ss:$0 sm:$0xff] }
+  0x54   : > { %3064 = vst [vmem:[#allocation4 + $0x18] sm:$0x10] /*vst_source=*/%v3062_v14  ;;  %v3262_v17 = vadd.f32 %v3259_v16, %v3062_v14  ;;  %v11645_v14 = vld [vmem:[#allocation3 + $0x39] ss:$0 sm:$0xff]  ;;  %v12044_v16 = vld [vmem:[#allocation3 + $0x3a] ss:$0 sm:$0xff] }
+  0x55   : > { %3264 = vst [vmem:[#allocation4 + $0x18] sm:$0x20] /*vst_source=*/%v3262_v17  ;;  %v3469_v19 = vadd.f32 %v3466_v18, %v3262_v17  ;;  %v12450_v18 = vld [vmem:[#allocation3 + $0x3b] ss:$0 sm:$0xff] }
+  0x56   : > { %3471 = vst [vmem:[#allocation4 + $0x18] sm:$0x40] /*vst_source=*/%v3469_v19  ;;  %v3683_v22 = vadd.f32 %v3680_v20, %v3469_v19 }
+  0x57   : > { %3685 = vst [vmem:[#allocation4 + $0x18] sm:$0x80] /*vst_source=*/%v3683_v22  ;;  %v3903_v23 = vadd.f32 %v3900_v21, %v3683_v22  ;;  %v12863_v21 = vld [vmem:[#allocation3 + $0x3c] ss:$0 sm:$0xff] }
+  0x58   : > { %3905 = vst [vmem:[#allocation4 + $0x50] sm:$0x1] /*vst_source=*/%v3903_v23  ;;  %v4130_v25 = vadd.f32 %v4127_v24, %v3903_v23  ;;  %v13283_v23 = vld [vmem:[#allocation3 + $0x3d] ss:$0 sm:$0xff] }
+  0x59   : > { %4132 = vst [vmem:[#allocation4 + $0x50] sm:$0x2] /*vst_source=*/%v4130_v25  ;;  %v4364_v27 = vadd.f32 %v4361_v26, %v4130_v25  ;;  %v13710_v25 = vld [vmem:[#allocation3 + $0x3e] ss:$0 sm:$0xff] }
+  0x5a   : > { %4366 = vst [vmem:[#allocation4 + $0x50] sm:$0x4] /*vst_source=*/%v4364_v27  ;;  %v4605_v29 = vadd.f32 %v4602_v28, %v4364_v27  ;;  %v14144_v27 = vld [vmem:[#allocation3 + $0x3f] ss:$0 sm:$0xff]  ;;  %v14584_v28 = vld [vmem:[#allocation3 + $0x40] ss:$0 sm:$0xff] }
+  0x5b   : > { %v56204_v30 = vld [vmem:[#allocation4 + $0x18] sm:$0xff] }
+  0x5c   : > { %56232 = vxpose.xlu0.b32.cont [4/16] (narrow) /*vx=*/%v56204_v30, /*width=*/8  ;;  %4607 = vst [vmem:[#allocation4 + $0x50] sm:$0x8] /*vst_source=*/%v4605_v29  ;;  %v4853_v32 = vadd.f32 %v4850_v31, %v4605_v29  ;;  %v15031_v31 = vld [vmem:[#allocation3 + $0x41] ss:$0 sm:$0xff] }
+  0x5d   : > { %4855 = vst [vmem:[#allocation4 + $0x50] sm:$0x10] /*vst_source=*/%v4853_v32  ;;  %v5108_v35 = vadd.f32 %v5105_v34, %v4853_v32 }
+  0x5e   : > { %5110 = vst [vmem:[#allocation4 + $0x50] sm:$0x20] /*vst_source=*/%v5108_v35  ;;  %v5370_v37 = vadd.f32 %v5367_v36, %v5108_v35  ;;  %v15946_v35 = vld [vmem:[#allocation3 + $0x43] ss:$0 sm:$0xff] }
+  0x5f   : > { %5372 = vst [vmem:[#allocation4 + $0x50] sm:$0x40] /*vst_source=*/%v5370_v37  ;;  %v5639_v40 = vadd.f32 %v5636_v38, %v5370_v37  ;;  %v16414_v38 = vld [vmem:[#allocation3 + $0x44] ss:$0 sm:$0xff] }
+  0x60   : > { %5641 = vst [vmem:[#allocation4 + $0x50] sm:$0x80] /*vst_source=*/%v5639_v40  ;;  %v5914_v41 = vadd.f32 %v5911_v39, %v5639_v40  ;;  %v16889_v40 = vld [vmem:[#allocation3 + $0x45] ss:$0 sm:$0xff] }
+  0x61   : > { %5916 = vst [vmem:[#allocation4 + $0x68] sm:$0x1] /*vst_source=*/%v5914_v41  ;;  %v6196_v43 = vadd.f32 %v6193_v42, %v5914_v41  ;;  %v17371_v42 = vld [vmem:[#allocation3 + $0x46] ss:$0 sm:$0xff] }
+  0x62   : > { %6198 = vst [vmem:[#allocation4 + $0x68] sm:$0x2] /*vst_source=*/%v6196_v43  ;;  %v6485_v45 = vadd.f32 %v6482_v44, %v6196_v43  ;;  %v17860_v44 = vld [vmem:[#allocation3 + $0x47] ss:$0 sm:$0xff] }
+  0x63   : > { %6487 = vst [vmem:[#allocation4 + $0x68] sm:$0x4] /*vst_source=*/%v6485_v45  ;;  %v6781_v47 = vadd.f32 %v6778_v46, %v6485_v45  ;;  %v18355_v45 = vld [vmem:[#allocation3 + $0x48] ss:$0 sm:$0xff] }
+  0x64   : > { %v56206_v48 = vld [vmem:[#allocation4 + $0x50] sm:$0xff] }
+  0x65   : > { %56233 = vxpose.xlu0.b32.cont [5/16] (narrow) /*vx=*/%v56206_v48, /*width=*/8  ;;  %6783 = vst [vmem:[#allocation4 + $0x68] sm:$0x8] /*vst_source=*/%v6781_v47  ;;  %v7084_v50 = vadd.f32 %v7081_v49, %v6781_v47  ;;  %v18857_v48 = vld [vmem:[#allocation3 + $0x49] ss:$0 sm:$0xff] }
+  0x66   : > { %7086 = vst [vmem:[#allocation4 + $0x68] sm:$0x10] /*vst_source=*/%v7084_v50  ;;  %v7394_v53 = vadd.f32 %v7391_v52, %v7084_v50  ;;  %v19366_v50 = vld [vmem:[#allocation3 + $0x4a] ss:$0 sm:$0xff]  ;;  %v19882_v52 = vld [vmem:[#allocation3 + $0x4b] ss:$0 sm:$0xff] }
+  0x67   : > { %7396 = vst [vmem:[#allocation4 + $0x68] sm:$0x20] /*vst_source=*/%v7394_v53  ;;  %v7711_v55 = vadd.f32 %v7708_v54, %v7394_v53 }
+  0x68   : > { %7713 = vst [vmem:[#allocation4 + $0x68] sm:$0x40] /*vst_source=*/%v7711_v55  ;;  %v8035_v58 = vadd.f32 %v8032_v56, %v7711_v55  ;;  %v20405_v55 = vld [vmem:[#allocation3 + $0x4c] ss:$0 sm:$0xff] }
+  0x69   : > { %8037 = vst [vmem:[#allocation4 + $0x68] sm:$0x80] /*vst_source=*/%v8035_v58  ;;  %v8365_v59 = vadd.f32 %v8362_v57, %v8035_v58  ;;  %v20935_v57 = vld [vmem:[#allocation3 + $0x4d] ss:$0 sm:$0xff] }
+  0x6a   : > { %8367 = vst [vmem:[#allocation4 + $0x8] sm:$0x1] /*vst_source=*/%v8365_v59  ;;  %v8702_v61 = vadd.f32 %v8699_v60, %v8365_v59  ;;  %v21472_v59 = vld [vmem:[#allocation3 + $0x4e] ss:$0 sm:$0xff] }
+  0x6b   : > { %8704 = vst [vmem:[#allocation4 + $0x8] sm:$0x2] /*vst_source=*/%v8702_v61  ;;  %v9046_v63 = vadd.f32 %v9043_v62, %v8702_v61  ;;  %v22016_v61 = vld [vmem:[#allocation3 + $0x4f] ss:$0 sm:$0xff]  ;;  %v22566_v62 = vld [vmem:[#allocation3 + $0x50] ss:$0 sm:$0xff] }
+  0x6c   : > { %9048 = vst [vmem:[#allocation4 + $0x8] sm:$0x4] /*vst_source=*/%v9046_v63  ;;  %v9397_v2 = vadd.f32 %v9394_v1, %v9046_v63 }
+  0x6d   : > { %v56208_v3 = vld [vmem:[#allocation4 + $0x68] sm:$0xff] }
+  0x6e   : > { %56234 = vxpose.xlu0.b32.cont [6/16] (narrow) /*vx=*/%v56208_v3, /*width=*/8  ;;  %9399 = vst [vmem:[#allocation4 + $0x8] sm:$0x8] /*vst_source=*/%v9397_v2  ;;  %v9755_v5 = vadd.f32 %v9752_v4, %v9397_v2  ;;  %v23123_v2 = vld [vmem:[#allocation3 + $0x51] ss:$0 sm:$0xff] }
+  0x6f   : > { %v23687_v4 = vld [vmem:[#allocation3 + $0x52] ss:$0 sm:$0xff] }
+  0x70   : > { %9757 = vst [vmem:[#allocation4 + $0x8] sm:$0x10] /*vst_source=*/%v9755_v5  ;;  %v10120_v7 = vadd.f32 %v10117_v6, %v9755_v5  ;;  %v24258_v6 = vld [vmem:[#allocation3 + $0x53] ss:$0 sm:$0xff] }
+  0x71   : > { %10122 = vst [vmem:[#allocation4 + $0x8] sm:$0x20] /*vst_source=*/%v10120_v7  ;;  %v10492_v9 = vadd.f32 %v10489_v8, %v10120_v7 }
+  0x72   : > { %10494 = vst [vmem:[#allocation4 + $0x8] sm:$0x40] /*vst_source=*/%v10492_v9  ;;  %v10871_v12 = vadd.f32 %v10868_v10, %v10492_v9  ;;  %v24836_v9 = vld [vmem:[#allocation3 + $0x54] ss:$0 sm:$0xff] }
+  0x73   : > { %10873 = vst [vmem:[#allocation4 + $0x8] sm:$0x80] /*vst_source=*/%v10871_v12  ;;  %v11256_v13 = vadd.f32 %v11253_v11, %v10871_v12  ;;  %v25421_v11 = vld [vmem:[#allocation3 + $0x55] ss:$0 sm:$0xff] }
+  0x74   : > { %11258 = vst [vmem:[#allocation4 + $0x48] sm:$0x1] /*vst_source=*/%v11256_v13  ;;  %v11648_v15 = vadd.f32 %v11645_v14, %v11256_v13  ;;  %v26013_v13 = vld [vmem:[#allocation3 + $0x56] ss:$0 sm:$0xff] }
+  0x75   : > { %11650 = vst [vmem:[#allocation4 + $0x48] sm:$0x2] /*vst_source=*/%v11648_v15  ;;  %v12047_v17 = vadd.f32 %v12044_v16, %v11648_v15  ;;  %v26612_v15 = vld [vmem:[#allocation3 + $0x57] ss:$0 sm:$0xff]  ;;  %v27217_v16 = vld [vmem:[#allocation3 + $0x58] ss:$0 sm:$0xff] }
+  0x76   : > { %12049 = vst [vmem:[#allocation4 + $0x48] sm:$0x4] /*vst_source=*/%v12047_v17  ;;  %v12453_v19 = vadd.f32 %v12450_v18, %v12047_v17 }
+  0x77   : > { %v56210_v20 = vld [vmem:[#allocation4 + $0x8] sm:$0xff] }
+  0x78   : > { %56235 = vxpose.xlu0.b32.cont [7/16] (narrow) /*vx=*/%v56210_v20, /*width=*/8  ;;  %12455 = vst [vmem:[#allocation4 + $0x48] sm:$0x8] /*vst_source=*/%v12453_v19  ;;  %v12866_v22 = vadd.f32 %v12863_v21, %v12453_v19  ;;  %v27829_v19 = vld [vmem:[#allocation3 + $0x59] ss:$0 sm:$0xff] }
+  0x79   : > { %v28448_v21 = vld [vmem:[#allocation3 + $0x5a] ss:$0 sm:$0xff] }
+  0x7a   : > { %12868 = vst [vmem:[#allocation4 + $0x48] sm:$0x10] /*vst_source=*/%v12866_v22  ;;  %v13286_v24 = vadd.f32 %v13283_v23, %v12866_v22  ;;  %v29074_v23 = vld [vmem:[#allocation3 + $0x5b] ss:$0 sm:$0xff] }
+  0x7b   : > { %13288 = vst [vmem:[#allocation4 + $0x48] sm:$0x20] /*vst_source=*/%v13286_v24  ;;  %v13713_v26 = vadd.f32 %v13710_v25, %v13286_v24 }
+  0x7c   : > { %13715 = vst [vmem:[#allocation4 + $0x48] sm:$0x40] /*vst_source=*/%v13713_v26  ;;  %v14147_v29 = vadd.f32 %v14144_v27, %v13713_v26  ;;  %v29707_v26 = vld [vmem:[#allocation3 + $0x5c] ss:$0 sm:$0xff] }
+  0x7d   : > { %14149 = vst [vmem:[#allocation4 + $0x48] sm:$0x80] /*vst_source=*/%v14147_v29  ;;  %v14587_v30 = vadd.f32 %v14584_v28, %v14147_v29  ;;  %v30347_v28 = vld [vmem:[#allocation3 + $0x5d] ss:$0 sm:$0xff] }
+  0x7e   : > { %14589 = vst [vmem:[#allocation4 + $0x40] sm:$0x1] /*vst_source=*/%v14587_v30  ;;  %v15034_v32 = vadd.f32 %v15031_v31, %v14587_v30  ;;  %v30994_v30 = vld [vmem:[#allocation3 + $0x5e] ss:$0 sm:$0xff] }
+  0x7f   : > { %15036 = vst [vmem:[#allocation4 + $0x40] sm:$0x2] /*vst_source=*/%v15034_v32  ;;  %v15488_v34 = vadd.f32 %v15485_v33, %v15034_v32  ;;  %v31648_v32 = vld [vmem:[#allocation3 + $0x5f] ss:$0 sm:$0xff]  ;;  %v32308_v33 = vld [vmem:[#allocation3 + $0x60] ss:$0 sm:$0xff] }
+  0x80   : > { %15490 = vst [vmem:[#allocation4 + $0x40] sm:$0x4] /*vst_source=*/%v15488_v34  ;;  %v15949_v36 = vadd.f32 %v15946_v35, %v15488_v34 }
+  0x81   : > { %v56212_v37 = vld [vmem:[#allocation4 + $0x48] sm:$0xff] }
+  0x82   : > { %56236 = vxpose.xlu0.b32.cont [8/16] (narrow) /*vx=*/%v56212_v37, /*width=*/8  ;;  %15951 = vst [vmem:[#allocation4 + $0x40] sm:$0x8] /*vst_source=*/%v15949_v36  ;;  %v16417_v39 = vadd.f32 %v16414_v38, %v15949_v36  ;;  %v32975_v36 = vld [vmem:[#allocation3 + $0x61] ss:$0 sm:$0xff] }
+  0x83   : > { %v33649_v38 = vld [vmem:[#allocation3 + $0x62] ss:$0 sm:$0xff] }
+  0x84   : > { %16419 = vst [vmem:[#allocation4 + $0x40] sm:$0x10] /*vst_source=*/%v16417_v39  ;;  %v16892_v41 = vadd.f32 %v16889_v40, %v16417_v39  ;;  %v34330_v40 = vld [vmem:[#allocation3 + $0x63] ss:$0 sm:$0xff] }
+  0x85   : > { %16894 = vst [vmem:[#allocation4 + $0x40] sm:$0x20] /*vst_source=*/%v16892_v41  ;;  %v17374_v43 = vadd.f32 %v17371_v42, %v16892_v41 }
+  0x86   : > { %17376 = vst [vmem:[#allocation4 + $0x40] sm:$0x40] /*vst_source=*/%v17374_v43  ;;  %v17863_v46 = vadd.f32 %v17860_v44, %v17374_v43  ;;  %v35018_v43 = vld [vmem:[#allocation3 + $0x64] ss:$0 sm:$0xff] }
+  0x87   : > { %17865 = vst [vmem:[#allocation4 + $0x40] sm:$0x80] /*vst_source=*/%v17863_v46  ;;  %v18358_v47 = vadd.f32 %v18355_v45, %v17863_v46  ;;  %v35713_v45 = vld [vmem:[#allocation3 + $0x65] ss:$0 sm:$0xff] }
+  0x88   : > { %18360 = vst [vmem:[#allocation4 + $0x20] sm:$0x1] /*vst_source=*/%v18358_v47  ;;  %v18860_v49 = vadd.f32 %v18857_v48, %v18358_v47  ;;  %v36415_v47 = vld [vmem:[#allocation3 + $0x66] ss:$0 sm:$0xff] }
+  0x89   : > { %18862 = vst [vmem:[#allocation4 + $0x20] sm:$0x2] /*vst_source=*/%v18860_v49  ;;  %v19369_v51 = vadd.f32 %v19366_v50, %v18860_v49  ;;  %v37124_v49 = vld [vmem:[#allocation3 + $0x67] ss:$0 sm:$0xff]  ;;  %v37839_v50 = vld [vmem:[#allocation3 + $0x68] ss:$0 sm:$0xff] }
+  0x8a   : > { %19371 = vst [vmem:[#allocation4 + $0x20] sm:$0x4] /*vst_source=*/%v19369_v51  ;;  %v19885_v53 = vadd.f32 %v19882_v52, %v19369_v51 }
+  0x8b   : > { %v56214_v54 = vld [vmem:[#allocation4 + $0x40] sm:$0xff] }
+  0x8c   : > { %56237 = vxpose.xlu0.b32.cont [9/16] (narrow) /*vx=*/%v56214_v54, /*width=*/8  ;;  %19887 = vst [vmem:[#allocation4 + $0x20] sm:$0x8] /*vst_source=*/%v19885_v53  ;;  %v20408_v56 = vadd.f32 %v20405_v55, %v19885_v53  ;;  %v38561_v53 = vld [vmem:[#allocation3 + $0x69] ss:$0 sm:$0xff] }
+  0x8d   : > { %v39290_v55 = vld [vmem:[#allocation3 + $0x6a] ss:$0 sm:$0xff] }
+  0x8e   : > { %20410 = vst [vmem:[#allocation4 + $0x20] sm:$0x10] /*vst_source=*/%v20408_v56  ;;  %v20938_v58 = vadd.f32 %v20935_v57, %v20408_v56  ;;  %v40026_v57 = vld [vmem:[#allocation3 + $0x6b] ss:$0 sm:$0xff] }
+  0x8f   : > { %20940 = vst [vmem:[#allocation4 + $0x20] sm:$0x20] /*vst_source=*/%v20938_v58  ;;  %v21475_v60 = vadd.f32 %v21472_v59, %v20938_v58 }
+  0x90   : > { %21477 = vst [vmem:[#allocation4 + $0x20] sm:$0x40] /*vst_source=*/%v21475_v60  ;;  %v22019_v63 = vadd.f32 %v22016_v61, %v21475_v60  ;;  %v40769_v60 = vld [vmem:[#allocation3 + $0x6c] ss:$0 sm:$0xff] }
+  0x91   : > { %22021 = vst [vmem:[#allocation4 + $0x20] sm:$0x80] /*vst_source=*/%v22019_v63  ;;  %v22569_v1 = vadd.f32 %v22566_v62, %v22019_v63  ;;  %v41519_v62 = vld [vmem:[#allocation3 + $0x6d] ss:$0 sm:$0xff] }
+  0x92   : > { %22571 = vst [vmem:[#allocation4 + $0x10] sm:$0x1] /*vst_source=*/%v22569_v1  ;;  %v23126_v3 = vadd.f32 %v23123_v2, %v22569_v1  ;;  %v42276_v1 = vld [vmem:[#allocation3 + $0x6e] ss:$0 sm:$0xff] }
+  0x93   : > { %23128 = vst [vmem:[#allocation4 + $0x10] sm:$0x2] /*vst_source=*/%v23126_v3  ;;  %v23690_v5 = vadd.f32 %v23687_v4, %v23126_v3  ;;  %v43040_v3 = vld [vmem:[#allocation3 + $0x6f] ss:$0 sm:$0xff]  ;;  %v43810_v4 = vld [vmem:[#allocation3 + $0x70] ss:$0 sm:$0xff] }
+  0x94   : > { %23692 = vst [vmem:[#allocation4 + $0x10] sm:$0x4] /*vst_source=*/%v23690_v5  ;;  %v24261_v7 = vadd.f32 %v24258_v6, %v23690_v5 }
+  0x95   : > { %v56216_v8 = vld [vmem:[#allocation4 + $0x20] sm:$0xff] }
+  0x96   : > { %56238 = vxpose.xlu0.b32.cont [10/16] (narrow) /*vx=*/%v56216_v8, /*width=*/8  ;;  %24263 = vst [vmem:[#allocation4 + $0x10] sm:$0x8] /*vst_source=*/%v24261_v7  ;;  %v24839_v10 = vadd.f32 %v24836_v9, %v24261_v7  ;;  %v44587_v7 = vld [vmem:[#allocation3 + $0x71] ss:$0 sm:$0xff] }
+  0x97   : > { %v45371_v9 = vld [vmem:[#allocation3 + $0x72] ss:$0 sm:$0xff] }
+  0x98   : > { %24841 = vst [vmem:[#allocation4 + $0x10] sm:$0x10] /*vst_source=*/%v24839_v10  ;;  %v25424_v12 = vadd.f32 %v25421_v11, %v24839_v10  ;;  %v46162_v11 = vld [vmem:[#allocation3 + $0x73] ss:$0 sm:$0xff] }
+  0x99   : > { %25426 = vst [vmem:[#allocation4 + $0x10] sm:$0x20] /*vst_source=*/%v25424_v12  ;;  %v26016_v14 = vadd.f32 %v26013_v13, %v25424_v12 }
+  0x9a   : > { %26018 = vst [vmem:[#allocation4 + $0x10] sm:$0x40] /*vst_source=*/%v26016_v14  ;;  %v26615_v17 = vadd.f32 %v26612_v15, %v26016_v14  ;;  %v46960_v14 = vld [vmem:[#allocation3 + $0x74] ss:$0 sm:$0xff] }
+  0x9b   : > { %26617 = vst [vmem:[#allocation4 + $0x10] sm:$0x80] /*vst_source=*/%v26615_v17  ;;  %v27220_v18 = vadd.f32 %v27217_v16, %v26615_v17  ;;  %v47765_v16 = vld [vmem:[#allocation3 + $0x75] ss:$0 sm:$0xff] }
+  0x9c   : > { %27222 = vst [vmem:[#allocation4 + $0x38] sm:$0x1] /*vst_source=*/%v27220_v18  ;;  %v27832_v20 = vadd.f32 %v27829_v19, %v27220_v18  ;;  %v48577_v18 = vld [vmem:[#allocation3 + $0x76] ss:$0 sm:$0xff] }
+  0x9d   : > { %27834 = vst [vmem:[#allocation4 + $0x38] sm:$0x2] /*vst_source=*/%v27832_v20  ;;  %v28451_v22 = vadd.f32 %v28448_v21, %v27832_v20  ;;  %v49396_v20 = vld [vmem:[#allocation3 + $0x77] ss:$0 sm:$0xff]  ;;  %v50221_v21 = vld [vmem:[#allocation3 + $0x78] ss:$0 sm:$0xff] }
+  0x9e   : > { %28453 = vst [vmem:[#allocation4 + $0x38] sm:$0x4] /*vst_source=*/%v28451_v22  ;;  %v29077_v24 = vadd.f32 %v29074_v23, %v28451_v22 }
+  0x9f   : > { %v56218_v25 = vld [vmem:[#allocation4 + $0x10] sm:$0xff] }
+  0xa0   : > { %56239 = vxpose.xlu0.b32.cont [11/16] (narrow) /*vx=*/%v56218_v25, /*width=*/8  ;;  %29079 = vst [vmem:[#allocation4 + $0x38] sm:$0x8] /*vst_source=*/%v29077_v24  ;;  %v29710_v27 = vadd.f32 %v29707_v26, %v29077_v24  ;;  %v51053_v24 = vld [vmem:[#allocation3 + $0x79] ss:$0 sm:$0xff] }
+  0xa1   : > { %v51892_v26 = vld [vmem:[#allocation3 + $0x7a] ss:$0 sm:$0xff] }
+  0xa2   : > { %29712 = vst [vmem:[#allocation4 + $0x38] sm:$0x10] /*vst_source=*/%v29710_v27  ;;  %v30350_v29 = vadd.f32 %v30347_v28, %v29710_v27  ;;  %v52738_v28 = vld [vmem:[#allocation3 + $0x7b] ss:$0 sm:$0xff] }
+  0xa3   : > { %30352 = vst [vmem:[#allocation4 + $0x38] sm:$0x20] /*vst_source=*/%v30350_v29  ;;  %v30997_v31 = vadd.f32 %v30994_v30, %v30350_v29 }
+  0xa4   : > { %30999 = vst [vmem:[#allocation4 + $0x38] sm:$0x40] /*vst_source=*/%v30997_v31  ;;  %v31651_v34 = vadd.f32 %v31648_v32, %v30997_v31  ;;  %v53591_v31 = vld [vmem:[#allocation3 + $0x7c] ss:$0 sm:$0xff] }
+  0xa5   : > { %31653 = vst [vmem:[#allocation4 + $0x38] sm:$0x80] /*vst_source=*/%v31651_v34  ;;  %v32311_v35 = vadd.f32 %v32308_v33, %v31651_v34  ;;  %v54451_v33 = vld [vmem:[#allocation3 + $0x7d] ss:$0 sm:$0xff] }
+  0xa6   : > { %32313 = vst [vmem:[#allocation4 + $0x60] sm:$0x1] /*vst_source=*/%v32311_v35  ;;  %v32978_v37 = vadd.f32 %v32975_v36, %v32311_v35  ;;  %v55318_v35 = vld [vmem:[#allocation3 + $0x7e] ss:$0 sm:$0xff] }
+  0xa7   : > { %32980 = vst [vmem:[#allocation4 + $0x60] sm:$0x2] /*vst_source=*/%v32978_v37  ;;  %v33652_v39 = vadd.f32 %v33649_v38, %v32978_v37  ;;  %v56192_v37 = vld [vmem:[#allocation3 + $0x7f] ss:$0 sm:$0xff] }
+  0xa8   : > { %33654 = vst [vmem:[#allocation4 + $0x60] sm:$0x4] /*vst_source=*/%v33652_v39  ;;  %v34333_v41 = vadd.f32 %v34330_v40, %v33652_v39 }
+  0xa9   : > { %v56220_v42 = vld [vmem:[#allocation4 + $0x38] sm:$0xff] }
+  0xaa   : > { %56240 = vxpose.xlu0.b32.cont [12/16] (narrow) /*vx=*/%v56220_v42, /*width=*/8  ;;  %34335 = vst [vmem:[#allocation4 + $0x60] sm:$0x8] /*vst_source=*/%v34333_v41  ;;  %v35021_v44 = vadd.f32 %v35018_v43, %v34333_v41 }
+  0xab   : > { %35023 = vst [vmem:[#allocation4 + $0x60] sm:$0x10] /*vst_source=*/%v35021_v44  ;;  %v35716_v46 = vadd.f32 %v35713_v45, %v35021_v44 }
+  0xac   : > { %35718 = vst [vmem:[#allocation4 + $0x60] sm:$0x20] /*vst_source=*/%v35716_v46  ;;  %v36418_v48 = vadd.f32 %v36415_v47, %v35716_v46 }
+  0xad   : > { %36420 = vst [vmem:[#allocation4 + $0x60] sm:$0x40] /*vst_source=*/%v36418_v48  ;;  %v37127_v51 = vadd.f32 %v37124_v49, %v36418_v48 }
+  0xae   : > { %37129 = vst [vmem:[#allocation4 + $0x60] sm:$0x80] /*vst_source=*/%v37127_v51  ;;  %v37842_v52 = vadd.f32 %v37839_v50, %v37127_v51 }
+  0xaf   : > { %37844 = vst [vmem:[#allocation4 + $0x70] sm:$0x1] /*vst_source=*/%v37842_v52  ;;  %v38564_v54 = vadd.f32 %v38561_v53, %v37842_v52 }
+  0xb0   : > { %38566 = vst [vmem:[#allocation4 + $0x70] sm:$0x2] /*vst_source=*/%v38564_v54  ;;  %v39293_v56 = vadd.f32 %v39290_v55, %v38564_v54 }
+  0xb1   : > { %39295 = vst [vmem:[#allocation4 + $0x70] sm:$0x4] /*vst_source=*/%v39293_v56  ;;  %v40029_v58 = vadd.f32 %v40026_v57, %v39293_v56 }
+  0xb2   : > { %v56222_v59 = vld [vmem:[#allocation4 + $0x60] sm:$0xff] }
+  0xb3   : > { %56241 = vxpose.xlu0.b32.cont [13/16] (narrow) /*vx=*/%v56222_v59, /*width=*/8  ;;  %40031 = vst [vmem:[#allocation4 + $0x70] sm:$0x8] /*vst_source=*/%v40029_v58  ;;  %v40772_v61 = vadd.f32 %v40769_v60, %v40029_v58 }
+  0xb4   : > { %40774 = vst [vmem:[#allocation4 + $0x70] sm:$0x10] /*vst_source=*/%v40772_v61  ;;  %v41522_v63 = vadd.f32 %v41519_v62, %v40772_v61 }
+  0xb5   : > { %41524 = vst [vmem:[#allocation4 + $0x70] sm:$0x20] /*vst_source=*/%v41522_v63  ;;  %v42279_v2 = vadd.f32 %v42276_v1, %v41522_v63 }
+  0xb6   : > { %42281 = vst [vmem:[#allocation4 + $0x70] sm:$0x40] /*vst_source=*/%v42279_v2  ;;  %v43043_v5 = vadd.f32 %v43040_v3, %v42279_v2 }
+  0xb7   : > { %43045 = vst [vmem:[#allocation4 + $0x70] sm:$0x80] /*vst_source=*/%v43043_v5  ;;  %v43813_v6 = vadd.f32 %v43810_v4, %v43043_v5 }
+  0xb8   : > { %43815 = vst [vmem:[#allocation4 + $0x78] sm:$0x1] /*vst_source=*/%v43813_v6  ;;  %v44590_v8 = vadd.f32 %v44587_v7, %v43813_v6 }
+  0xb9   : > { %44592 = vst [vmem:[#allocation4 + $0x78] sm:$0x2] /*vst_source=*/%v44590_v8  ;;  %v45374_v10 = vadd.f32 %v45371_v9, %v44590_v8 }
+  0xba   : > { %45376 = vst [vmem:[#allocation4 + $0x78] sm:$0x4] /*vst_source=*/%v45374_v10  ;;  %v46165_v12 = vadd.f32 %v46162_v11, %v45374_v10 }
+  0xbb   : > { %v56224_v13 = vld [vmem:[#allocation4 + $0x70] sm:$0xff] }
+  0xbc   : > { %56242 = vxpose.xlu0.b32.cont [14/16] (narrow) /*vx=*/%v56224_v13, /*width=*/8  ;;  %46167 = vst [vmem:[#allocation4 + $0x78] sm:$0x8] /*vst_source=*/%v46165_v12  ;;  %v46963_v15 = vadd.f32 %v46960_v14, %v46165_v12 }
+  0xbd   : > { %46965 = vst [vmem:[#allocation4 + $0x78] sm:$0x10] /*vst_source=*/%v46963_v15  ;;  %v47768_v17 = vadd.f32 %v47765_v16, %v46963_v15 }
+  0xbe   : > { %47770 = vst [vmem:[#allocation4 + $0x78] sm:$0x20] /*vst_source=*/%v47768_v17  ;;  %v48580_v19 = vadd.f32 %v48577_v18, %v47768_v17 }
+  0xbf   : > { %48582 = vst [vmem:[#allocation4 + $0x78] sm:$0x40] /*vst_source=*/%v48580_v19  ;;  %v49399_v22 = vadd.f32 %v49396_v20, %v48580_v19 }
+  0xc0   : > { %49401 = vst [vmem:[#allocation4 + $0x78] sm:$0x80] /*vst_source=*/%v49399_v22  ;;  %v50224_v23 = vadd.f32 %v50221_v21, %v49399_v22 }
+  0xc1   : > { %50226 = vst [vmem:[#allocation4 + $0x28] sm:$0x1] /*vst_source=*/%v50224_v23  ;;  %v51056_v25 = vadd.f32 %v51053_v24, %v50224_v23 }
+  0xc2   : > { %51058 = vst [vmem:[#allocation4 + $0x28] sm:$0x2] /*vst_source=*/%v51056_v25  ;;  %v51895_v27 = vadd.f32 %v51892_v26, %v51056_v25 }
+  0xc3   : > { %51897 = vst [vmem:[#allocation4 + $0x28] sm:$0x4] /*vst_source=*/%v51895_v27  ;;  %v52741_v29 = vadd.f32 %v52738_v28, %v51895_v27 }
+  0xc4   : > { %v56226_v30 = vld [vmem:[#allocation4 + $0x78] sm:$0xff] }
+  0xc5   : > { %56243 = vxpose.xlu0.b32.cont [15/16] (narrow) /*vx=*/%v56226_v30, /*width=*/8  ;;  %52743 = vst [vmem:[#allocation4 + $0x28] sm:$0x8] /*vst_source=*/%v52741_v29  ;;  %v53594_v32 = vadd.f32 %v53591_v31, %v52741_v29 }
+  0xc6   : > { %53596 = vst [vmem:[#allocation4 + $0x28] sm:$0x10] /*vst_source=*/%v53594_v32  ;;  %v54454_v34 = vadd.f32 %v54451_v33, %v53594_v32 }
+  0xc7   : > { %54456 = vst [vmem:[#allocation4 + $0x28] sm:$0x20] /*vst_source=*/%v54454_v34  ;;  %v55321_v36 = vadd.f32 %v55318_v35, %v54454_v34 }
+  0xc8   : > { %55323 = vst [vmem:[#allocation4 + $0x28] sm:$0x40] /*vst_source=*/%v55321_v36  ;;  %v56195_v38 = vadd.f32 %v56192_v37, %v55321_v36 }
+  0xc9   : > { %56197 = vst [vmem:[#allocation4 + $0x28] sm:$0x80] /*vst_source=*/%v56195_v38 }
+  0xca   : > { %v56228_v39 = vld [vmem:[#allocation4 + $0x28] sm:$0xff] }
+  0xcb   : > { %56244 = vxpose.xlu0.b32.end [16/16] (narrow) /*vx=*/%v56228_v39, /*width=*/8 }
+  0xcc   : > { %v56245_v40 = vpop.trf.xlu0 }
+  0xcd   : > { %56299 = vst [vmem:[%s56269_s28] sm:$0xff] /*vst_source=*/%v56245_v40 } /* End region 14745 :: End region 53 */
+  0xce PF: > { %s9_s12 = sadd.s32 1, %s62717_s12 /* copy for cssa :: iteration index, stage = 0 :: iteration index, stage = 0 */  ;;  %s62800_s1 = smov %s62713_s11 /* copy for cssa :: phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 :: phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 */ } /* Start/End empty region 54 :: Start region 6 :: End region 6 :: Start region 7 :: End region 7 :: Start region 3 :: Start region 4 :: Start region 14744 */
+  0xcf   : > { %p6_p5 = scmp.ge.s32.totalorder %s9_s12, 10 /* loop exit test */  ;;  %s62801_s11 = smov %s62803_s14 /* copy for cssa :: iteration index, stage = 0 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 */ } /* End region 3 */
+  0xd0   :  { %8 = sbr.rel (!%p6_p5) target = $region14745 }
+  0xd1   :  {}
+  0xd2   :  {}
+  0xd3   :  {}
+  0xd4   :  {} /* End region 0 :: End region 1 :: End region 4 :: End region 14744 */
+  0xd5   :  {} /* exit bundle: %reduce-window.4 = reduce-window(%copy.1, %constant.32.clone) */

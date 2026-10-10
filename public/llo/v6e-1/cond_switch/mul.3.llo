@@ -1,0 +1,15 @@
+// cond_switch · v6e:1 · 1791619724152562757-mul.3-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s34_s0 = inlined_call_operand.vmem [shape: f32[64], index: 0, kind: input, shape index: {}, may-alias: {0,1}] /* operand 0, may alias with: [0, 1] */  ;;  %s35_s1 = inlined_call_operand.vmem [shape: f32[64], index: 1, kind: input, shape index: {}, may-alias: {0,1}] /* operand 1, may alias with: [0, 1] */  ;;  %s36_s2 = inlined_call_operand.vmem [shape: f32[64], index: 2, kind: output, shape index: {}] /* operand 2 */ } /* entry bundle: %mul.3 = multiply(%get-tuple-element.4, %get-tuple-element.4) */
+   0x1   :  { %v3_v0 = vld [vmem:[%s34_s0] sm:$0x1] }
+   0x2   :  { %v4_v1 = vld [vmem:[%s35_s1] sm:$0x1] }
+   0x3   :  { %v7_v2 = vmul.f32 %v4_v1, %v3_v0 }
+   0x4   :  { %9 = vst [vmem:[%s36_s2] sm:$0x1] /*vst_source=*/%v7_v2 } /* exit bundle: %mul.3 = multiply(%get-tuple-element.4, %get-tuple-element.4) */

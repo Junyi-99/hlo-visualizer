@@ -1,6 +1,7 @@
 dist
 node_modules
 examples
+public/llo
 package-lock.json
 *.hlo
 .agents

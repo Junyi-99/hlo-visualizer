@@ -1,0 +1,48 @@
+// sort_topk · v6e:2x2 · 1791619919446699771-slice_reduce_fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v5_v0 = vlaneseq  ;;  %s186_s14 = smov 1 /* materialized constant */  ;;  %v187_v18 = vmov -0.0 /* materialized constant */  ;;  %s265_s0 = inlined_call_operand.vmem [shape: f32[8,8,128], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s266_s1 = inlined_call_operand.vmem [shape: f32[8,8], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %slice_reduce_fusion = fusion(%reduce-window.4) */
+   0x1   :  { %v4_v1 = vld [vmem:[%s265_s0] sm:$0xff]  ;;  %v171_v3 = vld [vmem:[%s265_s0 + $0x10] sm:$0xff]  ;;  %v172_v4 = vld [vmem:[%s265_s0 + $0x18] sm:$0xff]  ;;  %3 = vst [vmem:[%s266_s1] sm:$0xff] /*vst_source=*/%v187_v18 }
+   0x2   :  { %v6_v2 = vand.u32 127, %v5_v0  ;;  %v170_v5 = vld [vmem:[%s265_s0 + $0x8] sm:$0xff]  ;;  %v173_v11 = vld [vmem:[%s265_s0 + $0x20] sm:$0xff]  ;;  %v176_v14 = vld [vmem:[%s265_s0 + $0x38] sm:$0xff] }
+   0x3   :  { %v174_v10 = vld [vmem:[%s265_s0 + $0x28] sm:$0xff]  ;;  %v175_v15 = vld [vmem:[%s265_s0 + $0x30] sm:$0xff] }
+   0x4   :  { %vm7_vm0 = vcmp.lt.s32.totalorder %v6_v2, 127  ;;  %vm13_vm1 = vcmp.lt.s32.totalorder %v6_v2, 1  ;;  %v104_v35 = vand.u32 7, %v6_v2 }
+   0x5   :  { %v8_v6 = vsel /*vm=*/%vm7_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v4_v1  ;;  %v32_v7 = vsel /*vm=*/%vm7_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v171_v3  ;;  %v44_v8 = vsel /*vm=*/%vm7_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v172_v4  ;;  %v20_v9 = vsel /*vm=*/%vm7_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v170_v5 }
+   0x6   :  { %9 = vrot.lane.b32.xlu0 %v8_v6, %s186_s14  ;;  %33 = vrot.lane.b32.xlu1 %v32_v7, %s186_s14  ;;  %v68_v12 = vsel /*vm=*/%vm7_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v174_v10  ;;  %v56_v13 = vsel /*vm=*/%vm7_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v173_v11  ;;  %v92_v16 = vsel /*vm=*/%vm7_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v176_v14  ;;  %v80_v17 = vsel /*vm=*/%vm7_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v175_v15 }
+   0x7   :  { %45 = vrot.lane.b32.xlu1 %v44_v8, %s186_s14  ;;  %21 = vrot.lane.b32.xlu0 %v20_v9, %s186_s14 }
+   0x8   :  { %69 = vrot.lane.b32.xlu1 %v68_v12, %s186_s14  ;;  %57 = vrot.lane.b32.xlu0 %v56_v13, %s186_s14 }
+   0x9   :  { %93 = vrot.lane.b32.xlu1 %v92_v16, %s186_s14  ;;  %81 = vrot.lane.b32.xlu0 %v80_v17, %s186_s14 }
+   0xa   :  { %v10_v19 = vpop.permute.xlu0 %9  ;;  %v34_v20 = vpop.permute.xlu1 %33 }
+   0xb   :  { %v14_v21 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v10_v19, /*on_false_vx=*/-0.0  ;;  %v38_v22 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v34_v20, /*on_false_vx=*/-0.0 }
+   0xc   :  { %99 = vadd.xlane.f32.xlu0 %v14_v21 }
+   0xd   :  { %v46_v23 = vpop.permute.xlu1 %45  ;;  %v22_v24 = vpop.permute.xlu0 %21 }
+   0xe   :  { %v50_v25 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v46_v23, /*on_false_vx=*/-0.0  ;;  %v26_v26 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v22_v24, /*on_false_vx=*/-0.0 }
+   0xf   :  { %117 = vadd.xlane.f32.xlu0 %v38_v22  ;;  %108 = vadd.xlane.f32.xlu1 %v26_v26 }
+  0x10   :  { %v70_v27 = vpop.permute.xlu1 %69  ;;  %v58_v28 = vpop.permute.xlu0 %57 }
+  0x11   :  { %v74_v29 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v70_v27, /*on_false_vx=*/-0.0  ;;  %v62_v30 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v58_v28, /*on_false_vx=*/-0.0 }
+  0x12   :  { %126 = vadd.xlane.f32.xlu0 %v50_v25  ;;  %135 = vadd.xlane.f32.xlu1 %v62_v30 }
+  0x13   :  { %v94_v31 = vpop.permute.xlu1 %93  ;;  %v82_v32 = vpop.permute.xlu0 %81 }
+  0x14   :  { %v98_v33 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v94_v31, /*on_false_vx=*/-0.0  ;;  %v86_v34 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v82_v32, /*on_false_vx=*/-0.0 }
+  0x15   :  { %144 = vadd.xlane.f32.xlu0 %v74_v29  ;;  %153 = vadd.xlane.f32.xlu1 %v86_v34 }
+  0x16   :  { %162 = vadd.xlane.f32.xlu0 %v98_v33 }
+  0x17   :  { %v100_v36 = vpop.xlane.xlu0 %99 }
+  0x18   :  { %v105_v37 = vrot.slane %v100_v36, %v104_v35 }
+  0x19   :  { %106 = vst [vmem:[%s266_s1] sm:$0x1] /*vst_source=*/%v105_v37 }
+  0x1a   :  { %v118_v38 = vpop.xlane.xlu0 %117  ;;  %v109_v39 = vpop.xlane.xlu1 %108 }
+  0x1b   :  { %v123_v40 = vrot.slane %v118_v38, %v104_v35  ;;  %v114_v41 = vrot.slane %v109_v39, %v104_v35 }
+  0x1c   :  { %178 = vst [vmem:[%s266_s1 + $0x2] sm:$0x1] /*vst_source=*/%v123_v40  ;;  %177 = vst [vmem:[%s266_s1 + $0x1] sm:$0x1] /*vst_source=*/%v114_v41 }
+  0x1d   :  { %v127_v42 = vpop.xlane.xlu0 %126  ;;  %v136_v43 = vpop.xlane.xlu1 %135 }
+  0x1e   :  { %v132_v44 = vrot.slane %v127_v42, %v104_v35  ;;  %v141_v45 = vrot.slane %v136_v43, %v104_v35 }
+  0x1f   :  { %179 = vst [vmem:[%s266_s1 + $0x3] sm:$0x1] /*vst_source=*/%v132_v44  ;;  %180 = vst [vmem:[%s266_s1 + $0x4] sm:$0x1] /*vst_source=*/%v141_v45 }
+  0x20   :  { %v145_v46 = vpop.xlane.xlu0 %144  ;;  %v154_v47 = vpop.xlane.xlu1 %153 }
+  0x21   :  { %v150_v48 = vrot.slane %v145_v46, %v104_v35  ;;  %v159_v49 = vrot.slane %v154_v47, %v104_v35 }
+  0x22   :  { %181 = vst [vmem:[%s266_s1 + $0x5] sm:$0x1] /*vst_source=*/%v150_v48  ;;  %182 = vst [vmem:[%s266_s1 + $0x6] sm:$0x1] /*vst_source=*/%v159_v49 }
+  0x23   :  { %v163_v50 = vpop.xlane.xlu0 %162 }
+  0x24   :  { %v168_v51 = vrot.slane %v163_v50, %v104_v35 }
+  0x25   :  { %183 = vst [vmem:[%s266_s1 + $0x7] sm:$0x1] /*vst_source=*/%v168_v51 } /* exit bundle: %slice_reduce_fusion = fusion(%reduce-window.4) */

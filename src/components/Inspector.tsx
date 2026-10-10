@@ -17,6 +17,7 @@ interface InspectorProps {
   node: HloNode | null;
   upstreamCount: number;
   downstreamCount: number;
+  lloHref: string | null;
   onClose: () => void;
   onNode: (name: string) => void;
   onComputation: (name: string) => void;
@@ -146,6 +147,7 @@ export function Inspector({
   node,
   upstreamCount,
   downstreamCount,
+  lloHref,
   onClose,
   onNode,
   onComputation
@@ -153,7 +155,7 @@ export function Inspector({
   const isPhone = useMediaQuery('(max-width: 700px)');
   const panelRef = useRef<HTMLElement>(null);
 
-  const shown = node && computation ? { copyGroup, module, computation, node, upstreamCount, downstreamCount } : null;
+  const shown = node && computation ? { copyGroup, module, computation, node, upstreamCount, downstreamCount, lloHref } : null;
 
   // The drawer keeps the last node rendered while it slides away.
   const [lastShown, setLastShown] = useState(shown);
@@ -267,6 +269,7 @@ function InstructionDetails({
   node,
   upstreamCount,
   downstreamCount,
+  lloHref,
   onNode,
   onComputation
 }: DetailsProps & Pick<InspectorProps, 'onNode' | 'onComputation'>) {
@@ -326,6 +329,18 @@ function InstructionDetails({
       )}
       {!!node.controlSuccessors.length && <ReferenceSection title="Control successors" names={node.controlSuccessors} onNode={onNode} />}
       {!!Object.keys(node.calls).length && <CalledComputations calls={node.calls} onComputation={onComputation} />}
+      {lloHref && (
+        <div className="inspector-section">
+          <h4>TPU backend program</h4>
+          <a className="jump-link" href={lloHref}>
+            <span>
+              <small>LLO FINAL BUNDLES</small>
+              <strong>%{node.name}</strong>
+            </span>
+            <span>→</span>
+          </a>
+        </div>
+      )}
     </div>
   );
 }

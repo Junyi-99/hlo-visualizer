@@ -1,0 +1,31 @@
+// sort_topk · v6e:1 · 1791619741483436832-add_bitcast_fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s214_s1 = inlined_call_operand.vmem [shape: f32[8,8], index: 1, kind: input, shape index: {}] /* operand 1 */  ;;  %s215_s2 = inlined_call_operand.vmem [shape: f32[1,8,8,128], index: 2, kind: output, shape index: {}] /* operand 2 */  ;;  %s216_s0 = inlined_call_operand.vmem [shape: f32[8,8,128], index: 0, kind: input, shape index: {}] /* operand 0 */ } /* entry bundle: %add_bitcast_fusion = fusion(%reduce-window, %bitcast.10) */
+   0x1   :  { %v109_v0 = vld [vmem:[%s214_s1 + $0x2] ss:$0 sm:$0xff]  ;;  %v5_v1 = vld [vmem:[%s214_s1] ss:$0 sm:$0xff]  ;;  %v112_v2 = vld [vmem:[%s214_s1 + $0x3] ss:$0 sm:$0xff] }
+   0x2   :  { %31 = vbcast.lane.b32.xlu1 %v109_v0, 256  ;;  %7 = vbcast.lane.b32.xlu0 %v5_v1, 256  ;;  %v106_v3 = vld [vmem:[%s214_s1 + $0x1] ss:$0 sm:$0xff]  ;;  %v118_v4 = vld [vmem:[%s214_s1 + $0x5] ss:$0 sm:$0xff] }
+   0x3   :  { %v115_v5 = vld [vmem:[%s214_s1 + $0x4] ss:$0 sm:$0xff]  ;;  %v124_v6 = vld [vmem:[%s214_s1 + $0x7] ss:$0 sm:$0xff]  ;;  %v121_v7 = vld [vmem:[%s214_s1 + $0x6] ss:$0 sm:$0xff] }
+   0x4   :  { %v110_v8 = vld [vmem:[%s216_s0 + $0x10] sm:$0xff]  ;;  %v9_v9 = vld [vmem:[%s216_s0] sm:$0xff]  ;;  %v113_v14 = vld [vmem:[%s216_s0 + $0x18] sm:$0xff] }
+   0x5   :  { %v107_v15 = vld [vmem:[%s216_s0 + $0x8] sm:$0xff]  ;;  %v116_v21 = vld [vmem:[%s216_s0 + $0x20] sm:$0xff]  ;;  %v125_v26 = vld [vmem:[%s216_s0 + $0x38] sm:$0xff] }
+   0x6   :  { %44 = vbcast.lane.b32.xlu1 %v112_v2, 256  ;;  %18 = vbcast.lane.b32.xlu0 %v106_v3, 256  ;;  %v119_v20 = vld [vmem:[%s216_s0 + $0x28] sm:$0xff]  ;;  %v122_v27 = vld [vmem:[%s216_s0 + $0x30] sm:$0xff] }
+   0x7   :  { %70 = vbcast.lane.b32.xlu1 %v118_v4, 256  ;;  %57 = vbcast.lane.b32.xlu0 %v115_v5, 256 }
+   0x8   :  { %96 = vbcast.lane.b32.xlu1 %v124_v6, 256  ;;  %83 = vbcast.lane.b32.xlu0 %v121_v7, 256 }
+   0x9   :  { %v32_v10 = vpop.permute.xlu1 %31  ;;  %v8_v11 = vpop.permute.xlu0 %7 }
+   0xa   :  { %v37_v12 = vadd.f32 %v110_v8, %v32_v10  ;;  %v12_v13 = vadd.f32 %v9_v9, %v8_v11 }
+   0xb   :  { %111 = vst [vmem:[%s215_s2 + $0x10] sm:$0xff] /*vst_source=*/%v37_v12  ;;  %14 = vst [vmem:[%s215_s2] sm:$0xff] /*vst_source=*/%v12_v13 }
+   0xc   :  { %v45_v16 = vpop.permute.xlu1 %44  ;;  %v19_v17 = vpop.permute.xlu0 %18 }
+   0xd   :  { %v50_v18 = vadd.f32 %v113_v14, %v45_v16  ;;  %v24_v19 = vadd.f32 %v107_v15, %v19_v17 }
+   0xe   :  { %114 = vst [vmem:[%s215_s2 + $0x18] sm:$0xff] /*vst_source=*/%v50_v18  ;;  %108 = vst [vmem:[%s215_s2 + $0x8] sm:$0xff] /*vst_source=*/%v24_v19 }
+   0xf   :  { %v71_v22 = vpop.permute.xlu1 %70  ;;  %v58_v23 = vpop.permute.xlu0 %57 }
+  0x10   :  { %v76_v24 = vadd.f32 %v119_v20, %v71_v22  ;;  %v63_v25 = vadd.f32 %v116_v21, %v58_v23 }
+  0x11   :  { %120 = vst [vmem:[%s215_s2 + $0x28] sm:$0xff] /*vst_source=*/%v76_v24  ;;  %117 = vst [vmem:[%s215_s2 + $0x20] sm:$0xff] /*vst_source=*/%v63_v25 }
+  0x12   :  { %v97_v28 = vpop.permute.xlu1 %96  ;;  %v84_v29 = vpop.permute.xlu0 %83 }
+  0x13   :  { %v102_v30 = vadd.f32 %v125_v26, %v97_v28  ;;  %v89_v31 = vadd.f32 %v122_v27, %v84_v29 }
+  0x14   :  { %126 = vst [vmem:[%s215_s2 + $0x38] sm:$0xff] /*vst_source=*/%v102_v30  ;;  %123 = vst [vmem:[%s215_s2 + $0x30] sm:$0xff] /*vst_source=*/%v89_v31 } /* exit bundle: %add_bitcast_fusion = fusion(%reduce-window, %bitcast.10) */

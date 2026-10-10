@@ -1,0 +1,17 @@
+// conv_pool · v6e:1 · 1791619585986167726-add_rsqrt_fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s31_s0 = inlined_call_operand.vmem [shape: f32[32], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s32_s1 = inlined_call_operand.vmem [shape: f32[32], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %add_rsqrt_fusion = fusion(%multiply_reduce_fusion) */
+   0x1   :  { %v2_v0 = vld [vmem:[%s31_s0] sm:$0x1] }
+   0x2   :  { %v5_v1 = vmul.f32 0.00012207031, %v2_v0 }
+   0x3   :  { %v9_v2 = vadd.f32 1e-05, %v5_v1 }
+   0x4   :  { %13 = vrsqrt.f32 %v9_v2 }
+   0x5   :  { %v14_v3 = vpop.eup %13 }
+   0x6   :  { %12 = vst [vmem:[%s32_s1] sm:$0x1] /*vst_source=*/%v14_v3 } /* exit bundle: %add_rsqrt_fusion = fusion(%multiply_reduce_fusion) */

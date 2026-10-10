@@ -10,7 +10,7 @@ import { Toolbar } from './components/Toolbar';
 import { useStoredState } from './hooks/useStoredState';
 import { groupCopyPairs } from './lib/copy-grouping';
 import { examples } from './lib/examples';
-import { lloExamples } from './llo/examples';
+import { lloExamples, type LloExample } from './llo/examples';
 import { clampZoom, type LayoutMode } from './lib/graph-layout';
 import { parseHlo, reachable } from './lib/parser';
 import type { HloModule } from './lib/types';
@@ -23,6 +23,8 @@ interface HistoryEntry {
 const readAutoGroup = (saved: string | null) => saved === 'true';
 const readLayoutMode = (saved: string | null): LayoutMode => (saved === 'horizontal' || saved === 'vertical' ? saved : 'auto');
 
+const lloLink = (program: LloExample | undefined) => (program ? `?view=llo&example=${program.id}` : null);
+
 const isTextField = (element: Element | null) => element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement;
 
 // Mirrors the loaded example into ?example=<id> so a reviewed module can be linked directly.
@@ -30,6 +32,7 @@ function syncExampleParam(example: string | null) {
   const url = new URL(location.href);
   if (example) url.searchParams.set('example', example);
   else url.searchParams.delete('example');
+  url.searchParams.delete('node');
   window.history.replaceState(null, '', url);
 }
 
@@ -54,6 +57,8 @@ export default function App() {
   const [notesOpen, setNotesOpen] = useState(false);
 
   const graphRef = useRef<GraphHandle>(null);
+  // ?node=<name> from a cross link opens that instruction once its example has loaded.
+  const pendingNode = useRef(new URLSearchParams(location.search).get('node'));
 
   const computation = current ? module.byName.get(current) || null : null;
   const node = selected && computation ? computation.byName.get(selected) || null : null;
@@ -108,6 +113,17 @@ export default function App() {
     if (id) void loadExample(id);
   }, [loadExample]);
 
+  useEffect(() => {
+    const name = pendingNode.current;
+    if (!name || !exampleId || exampleId !== new URLSearchParams(location.search).get('example')) return;
+    pendingNode.current = null;
+    const owner = module.computations.find(item => item.byName.has(name));
+    if (!owner) return;
+    setCurrent(owner.name);
+    setSelected(name);
+    requestAnimationFrame(() => graphRef.current?.centerNode(name));
+  }, [module, exampleId]);
+
   // Wait a frame so the graph has rendered the node before centering on it.
   const centerSoon = (name: string) => requestAnimationFrame(() => graphRef.current?.centerNode(name));
 
@@ -159,9 +175,16 @@ export default function App() {
     onExample: (id: string) => void loadExample(id)
   };
 
-  // Same program in the LLO view when the loaded module is a bundled example.
-  const lloId = exampleId && `v6e-1/${exampleId.split('.')[0]}`;
-  const lloHref = lloId && lloExamples.some(item => item.id === lloId) ? `?view=llo&example=${lloId}` : '?view=llo';
+  // LLO programs compiled from this HLO example, one per instruction (v6e-1 matches the shipped HLO dumps).
+  const lloPrograms = useMemo(() => lloExamples.filter(item => item.topology === 'v6e-1' && item.hloExample === exampleId), [exampleId]);
+  const nodeLloHref = node ? lloLink(lloPrograms.find(item => item.instruction === node.name)) : null;
+  const lloHref =
+    nodeLloHref ??
+    lloLink(
+      lloPrograms.find(item => item.default) ??
+        lloExamples.find(item => item.topology === 'v6e-1' && item.default && !!exampleId && exampleId.startsWith(`${item.example}.`))
+    ) ??
+    '?view=llo';
 
   const status = node
     ? `%${node.name} · ${upstreamCount} upstream · ${downstreamCount} downstream`
@@ -217,6 +240,7 @@ export default function App() {
           node={node}
           upstreamCount={upstreamCount}
           downstreamCount={downstreamCount}
+          lloHref={nodeLloHref}
           onClose={() => setSelected(null)}
           onNode={openReference}
           onComputation={showComputation}

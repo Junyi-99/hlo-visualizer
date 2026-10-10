@@ -1,0 +1,62 @@
+// remat_grad · v6e:2x2 · 1791619945700542625-broadcast_in_dim.2-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s251_s0 = inlined_call_operand.<no memory space> [shape: f32[], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s252_s1 = inlined_call_operand.hbm [shape: f32[256,256], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %broadcast_in_dim.2 = broadcast(%constant.2.clone) */
+   0x1   :  { %v182_v0 = vstv %s251_s0 }
+   0x2   :  { %3 = vsyncpa [#allocation1], 0  ;;  %4 = vst [vmem:[#allocation0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %s166_s0 = smov [#allocation0] /* materialized constant */ } /* Start region 1 */
+   0x3   :  { %6 = vst [vmem:[#allocation0 + $0x10] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %8 = vst [vmem:[#allocation0 + $0x20] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %s132_s8 = sshll.u32 %s166_s0, 4  ;;  %s133_s8 = int_to_ptr.vmem [resolvable:$true] %s132_s8 }
+   0x4   :  { %10 = vst [vmem:[#allocation0 + $0x30] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %12 = vst [vmem:[#allocation0 + $0x40] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %s144_s9 = scalar_lea.vmem %s133_s8, 8192  ;;  %p149_p1 = scmp.lt.s32.totalorder %s133_s8, %s133_s8 }
+   0x5   :  { %14 = vst [vmem:[#allocation0 + $0x50] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %16 = vst [vmem:[#allocation0 + $0x60] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %p145_p0 = scmp.ne.s32.totalorder %s133_s8, %s144_s9  ;;  %p150_p2 = scmp.lt.s32.totalorder %s144_s9, %s144_s9 }
+   0x6   :  { %18 = vst [vmem:[#allocation0 + $0x70] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %20 = vst [vmem:[#allocation0 + $0x80] sm:$0xff] /*vst_source=*/%v182_v0 }
+   0x7   :  { %22 = vst [vmem:[#allocation0 + $0x90] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %24 = vst [vmem:[#allocation0 + $0xa0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %p151_p3 = por %p150_p2, %p149_p1 }
+   0x8   :  { %26 = vst [vmem:[#allocation0 + $0xb0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %28 = vst [vmem:[#allocation0 + $0xc0] sm:$0xff] /*vst_source=*/%v182_v0 }
+   0x9   :  { %30 = vst [vmem:[#allocation0 + $0xd0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %32 = vst [vmem:[#allocation0 + $0xe0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %p152_p4 = pnand %p151_p3, %p145_p0 }
+   0xa   :  { %34 = vst [vmem:[#allocation0 + $0xf0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %36 = vst [vmem:[#allocation0 + $0x100] sm:$0xff] /*vst_source=*/%v182_v0 }
+   0xb   :  { %38 = vst [vmem:[#allocation0 + $0x110] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %40 = vst [vmem:[#allocation0 + $0x120] sm:$0xff] /*vst_source=*/%v182_v0 }
+   0xc   :  { %42 = vst [vmem:[#allocation0 + $0x130] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %44 = vst [vmem:[#allocation0 + $0x140] sm:$0xff] /*vst_source=*/%v182_v0 }
+   0xd   :  { %46 = vst [vmem:[#allocation0 + $0x150] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %48 = vst [vmem:[#allocation0 + $0x160] sm:$0xff] /*vst_source=*/%v182_v0 }
+   0xe   :  { %50 = vst [vmem:[#allocation0 + $0x170] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %52 = vst [vmem:[#allocation0 + $0x180] sm:$0xff] /*vst_source=*/%v182_v0 }
+   0xf   :  { %54 = vst [vmem:[#allocation0 + $0x190] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %56 = vst [vmem:[#allocation0 + $0x1a0] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x10   :  { %58 = vst [vmem:[#allocation0 + $0x1b0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %60 = vst [vmem:[#allocation0 + $0x1c0] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x11   :  { %62 = vst [vmem:[#allocation0 + $0x1d0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %64 = vst [vmem:[#allocation0 + $0x1e0] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x12   :  { %66 = vst [vmem:[#allocation0 + $0x1f0] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %68 = vst [vmem:[#allocation0 + $0x8] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x13   :  { %70 = vst [vmem:[#allocation0 + $0x18] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %72 = vst [vmem:[#allocation0 + $0x28] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x14   :  { %74 = vst [vmem:[#allocation0 + $0x38] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %76 = vst [vmem:[#allocation0 + $0x48] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x15   :  { %78 = vst [vmem:[#allocation0 + $0x58] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %80 = vst [vmem:[#allocation0 + $0x68] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x16   :  { %82 = vst [vmem:[#allocation0 + $0x78] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %84 = vst [vmem:[#allocation0 + $0x88] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x17   :  { %86 = vst [vmem:[#allocation0 + $0x98] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %88 = vst [vmem:[#allocation0 + $0xa8] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x18   :  { %90 = vst [vmem:[#allocation0 + $0xb8] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %92 = vst [vmem:[#allocation0 + $0xc8] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x19   :  { %94 = vst [vmem:[#allocation0 + $0xd8] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %96 = vst [vmem:[#allocation0 + $0xe8] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x1a   :  { %98 = vst [vmem:[#allocation0 + $0xf8] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %100 = vst [vmem:[#allocation0 + $0x108] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x1b   :  { %102 = vst [vmem:[#allocation0 + $0x118] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %104 = vst [vmem:[#allocation0 + $0x128] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x1c   :  { %106 = vst [vmem:[#allocation0 + $0x138] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %108 = vst [vmem:[#allocation0 + $0x148] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x1d   :  { %110 = vst [vmem:[#allocation0 + $0x158] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %112 = vst [vmem:[#allocation0 + $0x168] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x1e   :  { %114 = vst [vmem:[#allocation0 + $0x178] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %116 = vst [vmem:[#allocation0 + $0x188] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x1f   :  { %118 = vst [vmem:[#allocation0 + $0x198] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %120 = vst [vmem:[#allocation0 + $0x1a8] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x20   :  { %122 = vst [vmem:[#allocation0 + $0x1b8] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %124 = vst [vmem:[#allocation0 + $0x1c8] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x21   :  { %126 = vst [vmem:[#allocation0 + $0x1d8] sm:$0xff] /*vst_source=*/%v182_v0  ;;  %128 = vst [vmem:[#allocation0 + $0x1e8] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x22   :  { %130 = vst [vmem:[#allocation0 + $0x1f8] sm:$0xff] /*vst_source=*/%v182_v0 }
+  0x23   :  { %155 = shalt.err (!%p152_p4) /* BoundsCheck 64 [deref of opnd#0] for %138=dma.vmem_to_hbm
+hlo: broadcast_in_dim.2
+ */ }
+  0x24   :  { %s167_s10 = smov 256 /* materialized constant */  ;;  %s168_s11 = smov 16 /* materialized constant */ }
+  0x25   :  { %138 = dma.vmem_to_hbm [thread:$0]  /*vmem=*/%s133_s8, /*size_in_granules=*/8192, /*hbm=*/%s252_s1, /*dst_syncflagno=*/[#allocation1], /*src_stride=*/%s167_s10, /*dst_stride=*/%s167_s10, /*steps_per_stride=*/%s168_s11 /* 
+base_bounds: (32, 2)
+dynamic_base_bounds: (32, 2)
+window_bounds: (32, 2)
+iteration_bounds: (1, 1)
+strides: (32, 2)
+pad_low: (0, 0)
+pad_high: (0, 0)
+element_size_in_bytes: 4096
+second_minor_factor: 1 */ }
+  0x26   :  { %164 = dma.done.wait [#allocation1], 8192 /* pipeline-emitter-dma-wait */ }
+  0x27   :  { %165 = vsyncadd [#allocation1], 4294959104 }
+  0x28   :  { %140 = vsyncpa [#allocation1], 1 } /* exit bundle: %broadcast_in_dim.2 = broadcast(%constant.2.clone) */

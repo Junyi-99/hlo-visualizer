@@ -39,6 +39,8 @@ export interface LloProgram {
   regions: LloRegion[];
   instructions: LloInstruction[];
   warnings: string[];
+  // The HLO instruction this program implements, from the entry-bundle comment of final-bundle dumps.
+  hlo: { name: string; opcode: string; operands: string[] } | null;
 }
 
 export const units: Unit[] = ['MXU', 'XLU', 'DMA', 'VLOAD', 'VSTORE', 'VPU', 'SCALAR', 'OTHER'];
@@ -99,7 +101,22 @@ function bundleStatements(body: string): { raw: string; lineOffset: number }[] {
 }
 
 export function parseLlo(source: string): LloProgram {
-  const program: LloProgram = { regions: [], instructions: [], warnings: [] };
+  const entry = /entry bundle: %([\w.-]+) = ([\w-]+)\(([^)]*)\)/.exec(source);
+  const program: LloProgram = {
+    regions: [],
+    instructions: [],
+    warnings: [],
+    hlo: entry
+      ? {
+          name: entry[1],
+          opcode: entry[2],
+          operands: entry[3]
+            .split(',')
+            .map(item => item.trim())
+            .filter(Boolean)
+        }
+      : null
+  };
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
   let region: LloRegion | null = null;
   let bundle: LloBundle | null = null;

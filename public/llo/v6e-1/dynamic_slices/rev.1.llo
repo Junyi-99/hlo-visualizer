@@ -1,0 +1,63 @@
+// dynamic_slices · v6e:1 · 1791619735964716187-rev.1-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s547_s6 = smov 0 /* copy for cssa */  ;;  %s549_s7 = smov 0 /* copy for cssa */  ;;  %s629_s0 = inlined_call_operand.vmem [shape: f32[256,256], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s630_s1 = inlined_call_operand.vmem [shape: f32[256,256], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %rev.1 = reverse(%dynamic_update_slice.1) */
+   0x1   :  { %s551_s8 = smov 0 /* copy for cssa */  ;;  %s553_s9 = smov 0 /* copy for cssa */ }
+   0x2   :  { %s555_s10 = smov 0 /* copy for cssa */ } /* End region 159 */
+   0x3 LB: > { %s408_s11 = sadd.s32 4294967295, %s535_s10 /* iteration index, stage = 1 */  ;;  %s16_s12 = sadd.s32 1, %s527_s8  ;;  %s535_s10 = sphi %s555_s10, %s7_s10 /* phi copy :: iteration index, stage = 0 :: iteration index, stage = 0 */  ;;  %s531_s9 = sphi %s553_s9, %s634_s9 /* copy for cssa :: phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 :: phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 */  ;;  %s527_s8 = sphi %s551_s8, %s633_s8 /* copy for cssa :: phi copy :: iteration index, stage = 1 iter bound = 1 :: iteration index, stage = 0 iter bound = 1 :: phi copy :: iteration index, stage = 1 iter bound = 1 :: iteration index, stage = 0 iter bound = 1 :: iteration index, stage = 1 iter bound = 1 :: iteration index, stage = 0 iter bound = 1 */  ;;  %s523_s7 = sphi %s549_s7, %s632_s7 /* phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 1 iter bound = 0 */  ;;  %s519_s6 = sphi %s547_s6, %s631_s6 /* phi copy :: iteration index, stage = 1 iter bound = 1 :: iteration index, stage = 1 iter bound = 1 */ } /* Start region 164 :: Start region 13 :: Start region 14 :: Start region 15 */
+   0x4   : > { %p17_p0 = scmp.ge.s32.totalorder %s16_s12, 2  ;;  %s19_s13 = sadd.s32 1, %s531_s9 }
+   0x5   : > { %p410_p2 = scmp.ge.s32.totalorder %s535_s10, 4 }
+   0x6   : > { %s636_s12 = smov (%p17_p0, %s16_s12), 0 /* copy for cssa :: iteration index, stage = 0 iter bound = 1 :: iteration index, stage = 0 iter bound = 1 */  ;;  %s638_s13 = smov (!%p17_p0, %s19_s13), %s531_s9 }
+   0x7   : > { %p21_p1 = scmp.ge.s32.totalorder %s638_s13, 2  ;;  %33 = sbr.rel (%p410_p2) target = $region16 }
+   0x8   : > { %s35_s14 = sand.u32 (!%p410_p2), 1, %s535_s10 /* smod.u32 w/div 2 */  ;;  %s38_s15 = ssub.s32 (!%p410_p2), 1, %s531_s9 }
+   0x9   : > { %s640_s13 = smov (%p21_p1, %s638_s13), 0 /* copy for cssa :: iteration index, stage = 0 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 */  ;;  %s411_s16 = sshll.u32 (!%p410_p2), %s35_s14, 7 } /* End region 13 */
+   0xa   : > { %s455_s17 = sshll.u32 (!%p410_p2), %s38_s15, 5  ;;  %s37_s23 = scalar_lea.vmem (!%p410_p2), [#allocation0], %s411_s16 }
+   0xb   : > { %s41_s18 = sadd.s32 (!%p410_p2), %s527_s8, %s455_s17 } /* End region 14 */
+   0xc   : > { %s414_s19 = sshll.u32 %s41_s18, 3 }
+   0xd   : > { %s587_s22 = scalar_lea.vmem %s629_s0, %s414_s19 }
+   0xe   : > { %v102_v0 = vld [vmem:[%s587_s22] sm:$0xff]  ;;  %v104_v1 = vld [vmem:[%s587_s22 + $0x10] sm:$0xff] }
+   0xf   : > { %v106_v2 = vld [vmem:[%s587_s22 + $0x20] sm:$0xff]  ;;  %103 = vst [vmem:[%s37_s23] sm:$0xff] /*vst_source=*/%v102_v0  ;;  %105 = vst [vmem:[%s37_s23 + $0x8] sm:$0xff] /*vst_source=*/%v104_v1  ;;  %v108_v3 = vld [vmem:[%s587_s22 + $0x30] sm:$0xff] }
+  0x10   : > { %107 = vst [vmem:[%s37_s23 + $0x10] sm:$0xff] /*vst_source=*/%v106_v2  ;;  %v110_v4 = vld [vmem:[%s587_s22 + $0x40] sm:$0xff]  ;;  %v112_v5 = vld [vmem:[%s587_s22 + $0x50] sm:$0xff]  ;;  %109 = vst [vmem:[%s37_s23 + $0x18] sm:$0xff] /*vst_source=*/%v108_v3 }
+  0x11   : > { %111 = vst [vmem:[%s37_s23 + $0x20] sm:$0xff] /*vst_source=*/%v110_v4  ;;  %113 = vst [vmem:[%s37_s23 + $0x28] sm:$0xff] /*vst_source=*/%v112_v5  ;;  %v114_v6 = vld [vmem:[%s587_s22 + $0x60] sm:$0xff]  ;;  %v116_v7 = vld [vmem:[%s587_s22 + $0x70] sm:$0xff] }
+  0x12   : > { %v118_v8 = vld [vmem:[%s587_s22 + $0x80] sm:$0xff]  ;;  %115 = vst [vmem:[%s37_s23 + $0x30] sm:$0xff] /*vst_source=*/%v114_v6  ;;  %117 = vst [vmem:[%s37_s23 + $0x38] sm:$0xff] /*vst_source=*/%v116_v7  ;;  %v120_v9 = vld [vmem:[%s587_s22 + $0x90] sm:$0xff] }
+  0x13   : > { %119 = vst [vmem:[%s37_s23 + $0x40] sm:$0xff] /*vst_source=*/%v118_v8  ;;  %v122_v10 = vld [vmem:[%s587_s22 + $0xa0] sm:$0xff]  ;;  %v124_v11 = vld [vmem:[%s587_s22 + $0xb0] sm:$0xff]  ;;  %121 = vst [vmem:[%s37_s23 + $0x48] sm:$0xff] /*vst_source=*/%v120_v9 }
+  0x14   : > { %123 = vst [vmem:[%s37_s23 + $0x50] sm:$0xff] /*vst_source=*/%v122_v10  ;;  %125 = vst [vmem:[%s37_s23 + $0x58] sm:$0xff] /*vst_source=*/%v124_v11  ;;  %v126_v12 = vld [vmem:[%s587_s22 + $0xc0] sm:$0xff]  ;;  %v128_v13 = vld [vmem:[%s587_s22 + $0xd0] sm:$0xff] }
+  0x15   : > { %v130_v14 = vld [vmem:[%s587_s22 + $0xe0] sm:$0xff]  ;;  %127 = vst [vmem:[%s37_s23 + $0x60] sm:$0xff] /*vst_source=*/%v126_v12  ;;  %129 = vst [vmem:[%s37_s23 + $0x68] sm:$0xff] /*vst_source=*/%v128_v13  ;;  %v132_v15 = vld [vmem:[%s587_s22 + $0xf0] sm:$0xff] }
+  0x16   : > { %131 = vst [vmem:[%s37_s23 + $0x70] sm:$0xff] /*vst_source=*/%v130_v14  ;;  %133 = vst [vmem:[%s37_s23 + $0x78] sm:$0xff] /*vst_source=*/%v132_v15 } /* End region 15 */
+  0x17 PF: > { %p415_p3 = scmp.ge.s32.totalorder %s535_s10, 1  ;;  %p138_p4 = scmp.lt.s32.totalorder %s535_s10, 5 } /* Start/End empty region 16 :: Start region 51 :: Start region 52 :: Start region 53 */
+  0x18   : > { %p139_p5 = pnand %p415_p3, %p138_p4 } /* End region 51 */
+  0x19   : > { %s145_s24 = sand.u32 (!%p139_p5), 1, %s408_s11 /* smod.u32 w/div 2 */  ;;  %s456_s26 = sshll.u32 (!%p139_p5), %s523_s7, 5 }
+  0x1a   : > { %142 = sbr.rel (%p139_p5) target = $region54  ;;  %s416_s25 = sshll.u32 (!%p139_p5), %s145_s24, 7 }
+  0x1b   : > { %s147_s27 = scalar_lea.vmem (!%p139_p5), [#allocation0], %s416_s25  ;;  %s243_s28 = sadd.s32 (!%p139_p5), %s519_s6, %s456_s26 }
+  0x1c   : > { %s452_s29 = sshll.u32 (!%p139_p5), %s243_s28, 3 }
+  0x1d   : > { %s245_s3 = scalar_lea.vmem (!%p139_p5), %s630_s1, %s452_s29 }
+  0x1e   :  {} /* End region 52 */
+  0x1f   : > { %v418_v16 = vld [vmem:[%s147_s27 + $0x7f] ss:$-1 sm:$0xff]  ;;  %v419_v17 = vld [vmem:[%s147_s27 + $0x77] ss:$-1 sm:$0xff]  ;;  %v421_v18 = vld [vmem:[%s147_s27 + $0x6f] ss:$-1 sm:$0xff] }
+  0x20   : > { %v423_v19 = vld [vmem:[%s147_s27 + $0x67] ss:$-1 sm:$0xff]  ;;  %v425_v20 = vld [vmem:[%s147_s27 + $0x5f] ss:$-1 sm:$0xff]  ;;  %v427_v21 = vld [vmem:[%s147_s27 + $0x57] ss:$-1 sm:$0xff]  ;;  %305 = vst [vmem:[%s245_s3] sm:$0xff] /*vst_source=*/%v418_v16 }
+  0x21   : > { %v429_v22 = vld [vmem:[%s147_s27 + $0x4f] ss:$-1 sm:$0xff]  ;;  %v431_v23 = vld [vmem:[%s147_s27 + $0x47] ss:$-1 sm:$0xff]  ;;  %v433_v24 = vld [vmem:[%s147_s27 + $0x3f] ss:$-1 sm:$0xff] }
+  0x22   : > { %v435_v25 = vld [vmem:[%s147_s27 + $0x37] ss:$-1 sm:$0xff]  ;;  %v437_v26 = vld [vmem:[%s147_s27 + $0x2f] ss:$-1 sm:$0xff]  ;;  %v439_v27 = vld [vmem:[%s147_s27 + $0x27] ss:$-1 sm:$0xff] }
+  0x23   : > { %v441_v28 = vld [vmem:[%s147_s27 + $0x1f] ss:$-1 sm:$0xff]  ;;  %v443_v29 = vld [vmem:[%s147_s27 + $0x17] ss:$-1 sm:$0xff]  ;;  %v445_v30 = vld [vmem:[%s147_s27 + $0xf] ss:$-1 sm:$0xff] }
+  0x24   : > { %v447_v31 = vld [vmem:[%s147_s27 + $0x7] ss:$-1 sm:$0xff]  ;;  %307 = vst [vmem:[%s245_s3 + $0x10] sm:$0xff] /*vst_source=*/%v419_v17  ;;  %309 = vst [vmem:[%s245_s3 + $0x20] sm:$0xff] /*vst_source=*/%v421_v18 }
+  0x25   : > { %311 = vst [vmem:[%s245_s3 + $0x30] sm:$0xff] /*vst_source=*/%v423_v19  ;;  %313 = vst [vmem:[%s245_s3 + $0x40] sm:$0xff] /*vst_source=*/%v425_v20 }
+  0x26   : > { %315 = vst [vmem:[%s245_s3 + $0x50] sm:$0xff] /*vst_source=*/%v427_v21  ;;  %317 = vst [vmem:[%s245_s3 + $0x60] sm:$0xff] /*vst_source=*/%v429_v22 }
+  0x27   : > { %319 = vst [vmem:[%s245_s3 + $0x70] sm:$0xff] /*vst_source=*/%v431_v23  ;;  %321 = vst [vmem:[%s245_s3 + $0x80] sm:$0xff] /*vst_source=*/%v433_v24 }
+  0x28   : > { %323 = vst [vmem:[%s245_s3 + $0x90] sm:$0xff] /*vst_source=*/%v435_v25  ;;  %325 = vst [vmem:[%s245_s3 + $0xa0] sm:$0xff] /*vst_source=*/%v437_v26 }
+  0x29   : > { %327 = vst [vmem:[%s245_s3 + $0xb0] sm:$0xff] /*vst_source=*/%v439_v27  ;;  %329 = vst [vmem:[%s245_s3 + $0xc0] sm:$0xff] /*vst_source=*/%v441_v28 }
+  0x2a   : > { %331 = vst [vmem:[%s245_s3 + $0xd0] sm:$0xff] /*vst_source=*/%v443_v29  ;;  %333 = vst [vmem:[%s245_s3 + $0xe0] sm:$0xff] /*vst_source=*/%v445_v30 }
+  0x2b   : > { %335 = vst [vmem:[%s245_s3 + $0xf0] sm:$0xff] /*vst_source=*/%v447_v31 } /* End region 164 :: End region 53 */
+  0x2c PF: > { %s7_s10 = sadd.s32 1, %s535_s10 /* copy for cssa :: iteration index, stage = 0 :: iteration index, stage = 0 */  ;;  %s631_s6 = smov %s527_s8 /* copy for cssa :: phi copy :: iteration index, stage = 1 iter bound = 1 :: iteration index, stage = 0 iter bound = 1 :: phi copy :: iteration index, stage = 1 iter bound = 1 :: iteration index, stage = 0 iter bound = 1 :: iteration index, stage = 1 iter bound = 1 :: iteration index, stage = 0 iter bound = 1 */ } /* Start/End empty region 54 :: Start region 6 :: End region 6 :: Start region 7 :: End region 7 :: Start region 3 :: Start region 4 :: Start region 163 */
+  0x2d   : > { %p4_p6 = scmp.ge.s32.totalorder %s7_s10, 6 /* loop exit test */  ;;  %s632_s7 = smov %s531_s9 /* copy for cssa :: phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 :: phi copy :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 :: iteration index, stage = 1 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 */ }
+  0x2e   : > { %s633_s8 = smov %s636_s12 /* copy for cssa :: iteration index, stage = 0 iter bound = 1 :: iteration index, stage = 0 iter bound = 1 */  ;;  %s634_s9 = smov %s640_s13 /* copy for cssa :: iteration index, stage = 0 iter bound = 0 :: iteration index, stage = 0 iter bound = 0 */ } /* End region 3 */
+  0x2f   :  { %6 = sbr.rel (!%p4_p6) target = $region164 }
+  0x30   :  {}
+  0x31   :  {}
+  0x32   :  {}
+  0x33   :  {} /* End region 0 :: End region 1 :: End region 4 :: End region 163 */
+  0x34   :  {} /* exit bundle: %rev.1 = reverse(%dynamic_update_slice.1) */

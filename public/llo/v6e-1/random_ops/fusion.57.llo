@@ -1,0 +1,21 @@
+// random_ops · v6e:1 · 1791619758168960474-fusion.57-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v3_v0 = vlaneseq  ;;  %v40_v9 = vmov 65535 /* materialized constant */  ;;  %s57_s0 = inlined_call_operand.vmem [shape: u32[128], index: 0, kind: output, shape index: {0}] /* operand 0 */  ;;  %s58_s1 = inlined_call_operand.vmem [shape: u32[128], index: 1, kind: output, shape index: {1}] /* operand 1 */ } /* entry bundle: %fusion.57 = fusion() */
+   0x1   :  { %vm37_vm0 = vnez %v40_v9 }
+   0x2   :  { %v6_v1 = vand.u32 65535, %v3_v0  ;;  %v15_v2 = vshrl.u32 %v3_v0, 16 }
+   0x3   :  { %v9_v3 = vmul.u32 128, %v6_v1  ;;  %v18_v4 = vmul.u32 128, %v15_v2 }
+   0x4   :  { %v20_v5 = vshrl.u32 %v9_v3, 16 }
+   0x5   :  { %v23_v6 = vadd.s32 %v20_v5, %v18_v4 }
+   0x6   :  { %v25_v7 = vand.u32 65535, %v23_v6  ;;  %v28_v8 = vshrl.u32 %v23_v6, 16 }
+   0x7   :  { %v26_v10 = vshll.u32 %v25_v7, 16  ;;  %v29_v11 = vshrl.u32 %v25_v7, 16 }
+   0x8   :  { %v38_v12 = vsel /*vm=*/%vm37_vm0, /*on_true_vy=*/%v9_v3, /*on_false_vx=*/%v26_v10  ;;  %v32_v13 = vadd.s32 %v29_v11, %v28_v8 }
+   0x9   :  { %35 = vst [vmem:[%s57_s0] sm:$0x1] /*vst_source=*/%v38_v12 }
+   0xa   :  { %36 = vst [vmem:[%s58_s1] sm:$0x1] /*vst_source=*/%v32_v13 } /* exit bundle: %fusion.57 = fusion() */

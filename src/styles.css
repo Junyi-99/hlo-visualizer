@@ -1729,6 +1729,9 @@ marker path {
 }
 
 .reference,
+a.jump-link {
+  text-decoration: none;
+}
 .jump-link {
   display: flex;
   align-items: center;

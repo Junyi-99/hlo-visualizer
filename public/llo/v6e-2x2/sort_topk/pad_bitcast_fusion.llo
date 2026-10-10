@@ -1,0 +1,19 @@
+// sort_topk · v6e:2x2 · 1791619919409266132-pad_bitcast_fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v66_v0 = vlaneseq  ;;  %s145_s0 = inlined_call_operand.vmem [shape: f32[8,1000], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s146_s1 = inlined_call_operand.vmem [shape: f32[8,8,128], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %pad_bitcast_fusion = fusion(%copy-done) */
+   0x1   :  { %v3_v1 = vld [vmem:[%s145_s0] sm:$0xff]  ;;  %v73_v2 = vld [vmem:[%s145_s0 + $0x8] sm:$0xff]  ;;  %v75_v3 = vld [vmem:[%s145_s0 + $0x10] sm:$0xff] }
+   0x2   :  { %9 = vst [vmem:[%s146_s1] sm:$0xff] /*vst_source=*/%v3_v1  ;;  %74 = vst [vmem:[%s146_s1 + $0x8] sm:$0xff] /*vst_source=*/%v73_v2  ;;  %v77_v4 = vld [vmem:[%s145_s0 + $0x18] sm:$0xff]  ;;  %v79_v5 = vld [vmem:[%s145_s0 + $0x20] sm:$0xff]  ;;  %v67_v7 = vand.u32 127, %v66_v0 }
+   0x3   :  { %76 = vst [vmem:[%s146_s1 + $0x10] sm:$0xff] /*vst_source=*/%v75_v3  ;;  %v81_v6 = vld [vmem:[%s145_s0 + $0x28] sm:$0xff]  ;;  %78 = vst [vmem:[%s146_s1 + $0x18] sm:$0xff] /*vst_source=*/%v77_v4  ;;  %v83_v8 = vld [vmem:[%s145_s0 + $0x30] sm:$0xff] }
+   0x4   :  { %80 = vst [vmem:[%s146_s1 + $0x20] sm:$0xff] /*vst_source=*/%v79_v5  ;;  %82 = vst [vmem:[%s146_s1 + $0x28] sm:$0xff] /*vst_source=*/%v81_v6  ;;  %v85_v9 = vld [vmem:[%s145_s0 + $0x38] sm:$0xff]  ;;  %v68_v10 = vadd.s32 896, %v67_v7 }
+   0x5   :  { %84 = vst [vmem:[%s146_s1 + $0x30] sm:$0xff] /*vst_source=*/%v83_v8 }
+   0x6   :  { %vm69_vm0 = vcmp.lt.s32.totalorder %v68_v10, 1000 }
+   0x7   :  { %v70_v11 = vsel /*vm=*/%vm69_vm0, /*on_true_vy=*/%v85_v9, /*on_false_vx=*/0.0 }
+   0x8   :  { %86 = vst [vmem:[%s146_s1 + $0x38] sm:$0xff] /*vst_source=*/%v70_v11 } /* exit bundle: %pad_bitcast_fusion = fusion(%copy-done) */

@@ -1,0 +1,181 @@
+// dynamic_slices · v6e:1 · 1791619735956145584-copy-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s1712_s0 = inlined_call_operand.vmem [shape: f32[256,256], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s1713_s1 = inlined_call_operand.vmem [shape: f32[256,256], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %copy = copy(%bitcast.1) */
+   0x1   :  { %v78_v0 = vld [vmem:[%s1712_s0 + $0x100] sm:$0xff] /* (strided) load 0100:00, stride: 1, sublanes: 8 */  ;;  %v82_v2 = vld [vmem:[%s1712_s0 + $0x110] sm:$0xff] /* (strided) load 0110:00, stride: 1, sublanes: 8 */  ;;  %v80_v32 = vld [vmem:[%s1712_s0 + $0x108] sm:$0xff] /* (strided) load 0108:00, stride: 1, sublanes: 8 */ }
+   0x2   :  { %v14_v1 = vld [vmem:[%s1712_s0] sm:$0xff] /* (strided) load 0000:00, stride: 1, sublanes: 8 */  ;;  %511 = vxpose.xlu1.b32.start [1/16] /*vx=*/%v78_v0, /*width=*/128  ;;  %v18_v3 = vld [vmem:[%s1712_s0 + $0x10] sm:$0xff] /* (strided) load 0010:00, stride: 1, sublanes: 8 */  ;;  %v16_v33 = vld [vmem:[%s1712_s0 + $0x8] sm:$0xff] /* (strided) load 0008:00, stride: 1, sublanes: 8 */ }
+   0x3   :  { %256 = vxpose.xlu0.b32.start [1/16] /*vx=*/%v14_v1, /*width=*/128  ;;  %v86_v4 = vld [vmem:[%s1712_s0 + $0x120] sm:$0xff] /* (strided) load 0120:00, stride: 1, sublanes: 8 */  ;;  %v90_v6 = vld [vmem:[%s1712_s0 + $0x130] sm:$0xff] /* (strided) load 0130:00, stride: 1, sublanes: 8 */  ;;  %v84_v34 = vld [vmem:[%s1712_s0 + $0x118] sm:$0xff] /* (strided) load 0118:00, stride: 1, sublanes: 8 */ }
+   0x4   :  { %v22_v5 = vld [vmem:[%s1712_s0 + $0x20] sm:$0xff] /* (strided) load 0020:00, stride: 1, sublanes: 8 */  ;;  %v26_v7 = vld [vmem:[%s1712_s0 + $0x30] sm:$0xff] /* (strided) load 0030:00, stride: 1, sublanes: 8 */  ;;  %v20_v35 = vld [vmem:[%s1712_s0 + $0x18] sm:$0xff] /* (strided) load 0018:00, stride: 1, sublanes: 8 */ }
+   0x5   :  { %v94_v8 = vld [vmem:[%s1712_s0 + $0x140] sm:$0xff] /* (strided) load 0140:00, stride: 1, sublanes: 8 */  ;;  %v98_v10 = vld [vmem:[%s1712_s0 + $0x150] sm:$0xff] /* (strided) load 0150:00, stride: 1, sublanes: 8 */  ;;  %v88_v36 = vld [vmem:[%s1712_s0 + $0x128] sm:$0xff] /* (strided) load 0128:00, stride: 1, sublanes: 8 */ }
+   0x6   :  { %512 = vxpose.xlu1.b32.cont [2/16] /*vx=*/%v82_v2, /*width=*/128  ;;  %v30_v9 = vld [vmem:[%s1712_s0 + $0x40] sm:$0xff] /* (strided) load 0040:00, stride: 1, sublanes: 8 */  ;;  %v34_v11 = vld [vmem:[%s1712_s0 + $0x50] sm:$0xff] /* (strided) load 0050:00, stride: 1, sublanes: 8 */  ;;  %v24_v37 = vld [vmem:[%s1712_s0 + $0x28] sm:$0xff] /* (strided) load 0028:00, stride: 1, sublanes: 8 */ }
+   0x7   :  { %257 = vxpose.xlu0.b32.cont [2/16] /*vx=*/%v18_v3, /*width=*/128  ;;  %v102_v12 = vld [vmem:[%s1712_s0 + $0x160] sm:$0xff] /* (strided) load 0160:00, stride: 1, sublanes: 8 */  ;;  %v106_v14 = vld [vmem:[%s1712_s0 + $0x170] sm:$0xff] /* (strided) load 0170:00, stride: 1, sublanes: 8 */  ;;  %v92_v38 = vld [vmem:[%s1712_s0 + $0x138] sm:$0xff] /* (strided) load 0138:00, stride: 1, sublanes: 8 */ }
+   0x8   :  { %v38_v13 = vld [vmem:[%s1712_s0 + $0x60] sm:$0xff] /* (strided) load 0060:00, stride: 1, sublanes: 8 */  ;;  %v42_v15 = vld [vmem:[%s1712_s0 + $0x70] sm:$0xff] /* (strided) load 0070:00, stride: 1, sublanes: 8 */  ;;  %v28_v39 = vld [vmem:[%s1712_s0 + $0x38] sm:$0xff] /* (strided) load 0038:00, stride: 1, sublanes: 8 */ }
+   0x9   :  { %v110_v16 = vld [vmem:[%s1712_s0 + $0x180] sm:$0xff] /* (strided) load 0180:00, stride: 1, sublanes: 8 */  ;;  %v114_v18 = vld [vmem:[%s1712_s0 + $0x190] sm:$0xff] /* (strided) load 0190:00, stride: 1, sublanes: 8 */  ;;  %v96_v40 = vld [vmem:[%s1712_s0 + $0x148] sm:$0xff] /* (strided) load 0148:00, stride: 1, sublanes: 8 */ }
+   0xa   :  { %513 = vxpose.xlu1.b32.cont [3/16] /*vx=*/%v86_v4, /*width=*/128  ;;  %v46_v17 = vld [vmem:[%s1712_s0 + $0x80] sm:$0xff] /* (strided) load 0080:00, stride: 1, sublanes: 8 */  ;;  %v50_v19 = vld [vmem:[%s1712_s0 + $0x90] sm:$0xff] /* (strided) load 0090:00, stride: 1, sublanes: 8 */  ;;  %v32_v41 = vld [vmem:[%s1712_s0 + $0x48] sm:$0xff] /* (strided) load 0048:00, stride: 1, sublanes: 8 */ }
+   0xb   :  { %258 = vxpose.xlu0.b32.cont [3/16] /*vx=*/%v22_v5, /*width=*/128  ;;  %v118_v20 = vld [vmem:[%s1712_s0 + $0x1a0] sm:$0xff] /* (strided) load 01a0:00, stride: 1, sublanes: 8 */  ;;  %v122_v22 = vld [vmem:[%s1712_s0 + $0x1b0] sm:$0xff] /* (strided) load 01b0:00, stride: 1, sublanes: 8 */  ;;  %v100_v42 = vld [vmem:[%s1712_s0 + $0x158] sm:$0xff] /* (strided) load 0158:00, stride: 1, sublanes: 8 */ }
+   0xc   :  { %v54_v21 = vld [vmem:[%s1712_s0 + $0xa0] sm:$0xff] /* (strided) load 00a0:00, stride: 1, sublanes: 8 */  ;;  %v58_v23 = vld [vmem:[%s1712_s0 + $0xb0] sm:$0xff] /* (strided) load 00b0:00, stride: 1, sublanes: 8 */  ;;  %v36_v43 = vld [vmem:[%s1712_s0 + $0x58] sm:$0xff] /* (strided) load 0058:00, stride: 1, sublanes: 8 */ }
+   0xd   :  { %v126_v24 = vld [vmem:[%s1712_s0 + $0x1c0] sm:$0xff] /* (strided) load 01c0:00, stride: 1, sublanes: 8 */  ;;  %v130_v26 = vld [vmem:[%s1712_s0 + $0x1d0] sm:$0xff] /* (strided) load 01d0:00, stride: 1, sublanes: 8 */  ;;  %v104_v44 = vld [vmem:[%s1712_s0 + $0x168] sm:$0xff] /* (strided) load 0168:00, stride: 1, sublanes: 8 */ }
+   0xe   :  { %514 = vxpose.xlu1.b32.cont [4/16] /*vx=*/%v90_v6, /*width=*/128  ;;  %v62_v25 = vld [vmem:[%s1712_s0 + $0xc0] sm:$0xff] /* (strided) load 00c0:00, stride: 1, sublanes: 8 */  ;;  %v66_v27 = vld [vmem:[%s1712_s0 + $0xd0] sm:$0xff] /* (strided) load 00d0:00, stride: 1, sublanes: 8 */  ;;  %v40_v45 = vld [vmem:[%s1712_s0 + $0x68] sm:$0xff] /* (strided) load 0068:00, stride: 1, sublanes: 8 */ }
+   0xf   :  { %259 = vxpose.xlu0.b32.cont [4/16] /*vx=*/%v26_v7, /*width=*/128  ;;  %v134_v28 = vld [vmem:[%s1712_s0 + $0x1e0] sm:$0xff] /* (strided) load 01e0:00, stride: 1, sublanes: 8 */  ;;  %v138_v30 = vld [vmem:[%s1712_s0 + $0x1f0] sm:$0xff] /* (strided) load 01f0:00, stride: 1, sublanes: 8 */  ;;  %v108_v46 = vld [vmem:[%s1712_s0 + $0x178] sm:$0xff] /* (strided) load 0178:00, stride: 1, sublanes: 8 */ }
+  0x10   :  { %v70_v29 = vld [vmem:[%s1712_s0 + $0xe0] sm:$0xff] /* (strided) load 00e0:00, stride: 1, sublanes: 8 */  ;;  %v74_v31 = vld [vmem:[%s1712_s0 + $0xf0] sm:$0xff] /* (strided) load 00f0:00, stride: 1, sublanes: 8 */  ;;  %v44_v47 = vld [vmem:[%s1712_s0 + $0x78] sm:$0xff] /* (strided) load 0078:00, stride: 1, sublanes: 8 */ }
+  0x11   :  { %v112_v48 = vld [vmem:[%s1712_s0 + $0x188] sm:$0xff] /* (strided) load 0188:00, stride: 1, sublanes: 8 */  ;;  %v116_v50 = vld [vmem:[%s1712_s0 + $0x198] sm:$0xff] /* (strided) load 0198:00, stride: 1, sublanes: 8 */ }
+  0x12   :  { %515 = vxpose.xlu1.b32.cont [5/16] /*vx=*/%v94_v8, /*width=*/128  ;;  %v48_v49 = vld [vmem:[%s1712_s0 + $0x88] sm:$0xff] /* (strided) load 0088:00, stride: 1, sublanes: 8 */  ;;  %v52_v51 = vld [vmem:[%s1712_s0 + $0x98] sm:$0xff] /* (strided) load 0098:00, stride: 1, sublanes: 8 */ }
+  0x13   :  { %260 = vxpose.xlu0.b32.cont [5/16] /*vx=*/%v30_v9, /*width=*/128  ;;  %v120_v52 = vld [vmem:[%s1712_s0 + $0x1a8] sm:$0xff] /* (strided) load 01a8:00, stride: 1, sublanes: 8 */  ;;  %v124_v54 = vld [vmem:[%s1712_s0 + $0x1b8] sm:$0xff] /* (strided) load 01b8:00, stride: 1, sublanes: 8 */ }
+  0x14   :  { %v56_v53 = vld [vmem:[%s1712_s0 + $0xa8] sm:$0xff] /* (strided) load 00a8:00, stride: 1, sublanes: 8 */  ;;  %v60_v55 = vld [vmem:[%s1712_s0 + $0xb8] sm:$0xff] /* (strided) load 00b8:00, stride: 1, sublanes: 8 */ }
+  0x15   :  { %v128_v56 = vld [vmem:[%s1712_s0 + $0x1c8] sm:$0xff] /* (strided) load 01c8:00, stride: 1, sublanes: 8 */  ;;  %v132_v58 = vld [vmem:[%s1712_s0 + $0x1d8] sm:$0xff] /* (strided) load 01d8:00, stride: 1, sublanes: 8 */ }
+  0x16   :  { %516 = vxpose.xlu1.b32.cont [6/16] /*vx=*/%v98_v10, /*width=*/128  ;;  %v64_v57 = vld [vmem:[%s1712_s0 + $0xc8] sm:$0xff] /* (strided) load 00c8:00, stride: 1, sublanes: 8 */  ;;  %v68_v59 = vld [vmem:[%s1712_s0 + $0xd8] sm:$0xff] /* (strided) load 00d8:00, stride: 1, sublanes: 8 */ }
+  0x17   :  { %261 = vxpose.xlu0.b32.cont [6/16] /*vx=*/%v34_v11, /*width=*/128  ;;  %v136_v60 = vld [vmem:[%s1712_s0 + $0x1e8] sm:$0xff] /* (strided) load 01e8:00, stride: 1, sublanes: 8 */  ;;  %v140_v62 = vld [vmem:[%s1712_s0 + $0x1f8] sm:$0xff] /* (strided) load 01f8:00, stride: 1, sublanes: 8 */ }
+  0x18   :  { %v72_v61 = vld [vmem:[%s1712_s0 + $0xe8] sm:$0xff] /* (strided) load 00e8:00, stride: 1, sublanes: 8 */  ;;  %v76_v63 = vld [vmem:[%s1712_s0 + $0xf8] sm:$0xff] /* (strided) load 00f8:00, stride: 1, sublanes: 8 */ }
+  0x19   :  { %517 = vxpose.xlu1.b32.cont [7/16] /*vx=*/%v102_v12, /*width=*/128 }
+  0x1a   :  { %262 = vxpose.xlu0.b32.cont [7/16] /*vx=*/%v38_v13, /*width=*/128 }
+  0x1b   :  { %518 = vxpose.xlu1.b32.cont [8/16] /*vx=*/%v106_v14, /*width=*/128 }
+  0x1c   :  { %263 = vxpose.xlu0.b32.cont [8/16] /*vx=*/%v42_v15, /*width=*/128 }
+  0x1d   :  { %519 = vxpose.xlu1.b32.cont [9/16] /*vx=*/%v110_v16, /*width=*/128 }
+  0x1e   :  { %264 = vxpose.xlu0.b32.cont [9/16] /*vx=*/%v46_v17, /*width=*/128 }
+  0x1f   :  { %520 = vxpose.xlu1.b32.cont [10/16] /*vx=*/%v114_v18, /*width=*/128 }
+  0x20   :  { %265 = vxpose.xlu0.b32.cont [10/16] /*vx=*/%v50_v19, /*width=*/128 }
+  0x21   :  { %521 = vxpose.xlu1.b32.cont [11/16] /*vx=*/%v118_v20, /*width=*/128 }
+  0x22   :  { %266 = vxpose.xlu0.b32.cont [11/16] /*vx=*/%v54_v21, /*width=*/128 }
+  0x23   :  { %522 = vxpose.xlu1.b32.cont [12/16] /*vx=*/%v122_v22, /*width=*/128 }
+  0x24   :  { %267 = vxpose.xlu0.b32.cont [12/16] /*vx=*/%v58_v23, /*width=*/128 }
+  0x25   :  { %523 = vxpose.xlu1.b32.cont [13/16] /*vx=*/%v126_v24, /*width=*/128 }
+  0x26   :  { %268 = vxpose.xlu0.b32.cont [13/16] /*vx=*/%v62_v25, /*width=*/128 }
+  0x27   :  { %524 = vxpose.xlu1.b32.cont [14/16] /*vx=*/%v130_v26, /*width=*/128 }
+  0x28   :  { %269 = vxpose.xlu0.b32.cont [14/16] /*vx=*/%v66_v27, /*width=*/128 }
+  0x29   :  { %525 = vxpose.xlu1.b32.cont [15/16] /*vx=*/%v134_v28, /*width=*/128 }
+  0x2a   :  { %270 = vxpose.xlu0.b32.cont [15/16] /*vx=*/%v70_v29, /*width=*/128 }
+  0x2b   :  { %526 = vxpose.xlu1.b32.end [16/16] /*vx=*/%v138_v30, /*width=*/128 }
+  0x2c   :  { %271 = vxpose.xlu0.b32.end [16/16] /*vx=*/%v74_v31, /*width=*/128 }
+  0x2d   :  { %1023 = vxpose.xlu1.b32.start [1/16] /*vx=*/%v80_v32, /*width=*/128 }
+  0x2e   :  { %767 = vxpose.xlu0.b32.start [1/16] /*vx=*/%v16_v33, /*width=*/128 }
+  0x2f   :  { %1024 = vxpose.xlu1.b32.cont [2/16] /*vx=*/%v84_v34, /*width=*/128 }
+  0x30   :  { %768 = vxpose.xlu0.b32.cont [2/16] /*vx=*/%v20_v35, /*width=*/128 }
+  0x31   :  { %1025 = vxpose.xlu1.b32.cont [3/16] /*vx=*/%v88_v36, /*width=*/128 }
+  0x32   :  { %769 = vxpose.xlu0.b32.cont [3/16] /*vx=*/%v24_v37, /*width=*/128 }
+  0x33   :  { %1026 = vxpose.xlu1.b32.cont [4/16] /*vx=*/%v92_v38, /*width=*/128 }
+  0x34   :  { %770 = vxpose.xlu0.b32.cont [4/16] /*vx=*/%v28_v39, /*width=*/128 }
+  0x35   :  { %1027 = vxpose.xlu1.b32.cont [5/16] /*vx=*/%v96_v40, /*width=*/128 }
+  0x36   :  { %771 = vxpose.xlu0.b32.cont [5/16] /*vx=*/%v32_v41, /*width=*/128 }
+  0x37   :  { %1028 = vxpose.xlu1.b32.cont [6/16] /*vx=*/%v100_v42, /*width=*/128 }
+  0x38   :  { %772 = vxpose.xlu0.b32.cont [6/16] /*vx=*/%v36_v43, /*width=*/128 }
+  0x39   :  { %1029 = vxpose.xlu1.b32.cont [7/16] /*vx=*/%v104_v44, /*width=*/128 }
+  0x3a   :  { %773 = vxpose.xlu0.b32.cont [7/16] /*vx=*/%v40_v45, /*width=*/128 }
+  0x3b   :  { %1030 = vxpose.xlu1.b32.cont [8/16] /*vx=*/%v108_v46, /*width=*/128 }
+  0x3c   :  { %774 = vxpose.xlu0.b32.cont [8/16] /*vx=*/%v44_v47, /*width=*/128 }
+  0x3d   :  { %1031 = vxpose.xlu1.b32.cont [9/16] /*vx=*/%v112_v48, /*width=*/128 }
+  0x3e   :  { %775 = vxpose.xlu0.b32.cont [9/16] /*vx=*/%v48_v49, /*width=*/128 }
+  0x3f   :  { %1032 = vxpose.xlu1.b32.cont [10/16] /*vx=*/%v116_v50, /*width=*/128 }
+  0x40   :  { %776 = vxpose.xlu0.b32.cont [10/16] /*vx=*/%v52_v51, /*width=*/128 }
+  0x41   :  { %1033 = vxpose.xlu1.b32.cont [11/16] /*vx=*/%v120_v52, /*width=*/128 }
+  0x42   :  { %777 = vxpose.xlu0.b32.cont [11/16] /*vx=*/%v56_v53, /*width=*/128 }
+  0x43   :  { %1034 = vxpose.xlu1.b32.cont [12/16] /*vx=*/%v124_v54, /*width=*/128 }
+  0x44   :  { %778 = vxpose.xlu0.b32.cont [12/16] /*vx=*/%v60_v55, /*width=*/128 }
+  0x45   :  { %1035 = vxpose.xlu1.b32.cont [13/16] /*vx=*/%v128_v56, /*width=*/128 }
+  0x46   :  { %779 = vxpose.xlu0.b32.cont [13/16] /*vx=*/%v64_v57, /*width=*/128 }
+  0x47   :  { %1036 = vxpose.xlu1.b32.cont [14/16] /*vx=*/%v132_v58, /*width=*/128 }
+  0x48   :  { %780 = vxpose.xlu0.b32.cont [14/16] /*vx=*/%v68_v59, /*width=*/128 }
+  0x49   :  { %1037 = vxpose.xlu1.b32.cont [15/16] /*vx=*/%v136_v60, /*width=*/128 }
+  0x4a   :  { %781 = vxpose.xlu0.b32.cont [15/16] /*vx=*/%v72_v61, /*width=*/128 }
+  0x4b   :  { %1038 = vxpose.xlu1.b32.end [16/16] /*vx=*/%v140_v62, /*width=*/128  ;;  %v527_v0 = vpop.trf.xlu1 /* (strided) load 0000:00, stride: 1, sublanes: 8 */ }
+  0x4c   :  { %782 = vxpose.xlu0.b32.end [16/16] /*vx=*/%v76_v63, /*width=*/128  ;;  %v272_v1 = vpop.trf.xlu0 /* (strided) load 0000:00, stride: 1, sublanes: 8 */  ;;  %1182 = vst [vmem:[%s1713_s1 + $0x8] sm:$0xff] /*vst_source=*/%v527_v0 }
+  0x4d   :  { %1180 = vst [vmem:[%s1713_s1] sm:$0xff] /*vst_source=*/%v272_v1 }
+  0x4e   :  { %v528_v2 = vpop.trf.xlu1 /* (strided) load 0008:00, stride: 1, sublanes: 8 */ }
+  0x4f   :  { %v273_v3 = vpop.trf.xlu0 /* (strided) load 0008:00, stride: 1, sublanes: 8 */  ;;  %1186 = vst [vmem:[%s1713_s1 + $0x18] sm:$0xff] /*vst_source=*/%v528_v2 }
+  0x50   :  { %1184 = vst [vmem:[%s1713_s1 + $0x10] sm:$0xff] /*vst_source=*/%v273_v3 }
+  0x51   :  { %v529_v4 = vpop.trf.xlu1 /* (strided) load 0010:00, stride: 1, sublanes: 8 */ }
+  0x52   :  { %v274_v5 = vpop.trf.xlu0 /* (strided) load 0010:00, stride: 1, sublanes: 8 */  ;;  %1190 = vst [vmem:[%s1713_s1 + $0x28] sm:$0xff] /*vst_source=*/%v529_v4 }
+  0x53   :  { %1188 = vst [vmem:[%s1713_s1 + $0x20] sm:$0xff] /*vst_source=*/%v274_v5 }
+  0x54   :  { %v530_v6 = vpop.trf.xlu1 /* (strided) load 0018:00, stride: 1, sublanes: 8 */ }
+  0x55   :  { %v275_v7 = vpop.trf.xlu0 /* (strided) load 0018:00, stride: 1, sublanes: 8 */  ;;  %1194 = vst [vmem:[%s1713_s1 + $0x38] sm:$0xff] /*vst_source=*/%v530_v6 }
+  0x56   :  { %1192 = vst [vmem:[%s1713_s1 + $0x30] sm:$0xff] /*vst_source=*/%v275_v7 }
+  0x57   :  { %v531_v8 = vpop.trf.xlu1 /* (strided) load 0020:00, stride: 1, sublanes: 8 */ }
+  0x58   :  { %v276_v9 = vpop.trf.xlu0 /* (strided) load 0020:00, stride: 1, sublanes: 8 */  ;;  %1198 = vst [vmem:[%s1713_s1 + $0x48] sm:$0xff] /*vst_source=*/%v531_v8 }
+  0x59   :  { %1196 = vst [vmem:[%s1713_s1 + $0x40] sm:$0xff] /*vst_source=*/%v276_v9 }
+  0x5a   :  { %v532_v10 = vpop.trf.xlu1 /* (strided) load 0028:00, stride: 1, sublanes: 8 */ }
+  0x5b   :  { %v277_v11 = vpop.trf.xlu0 /* (strided) load 0028:00, stride: 1, sublanes: 8 */  ;;  %1202 = vst [vmem:[%s1713_s1 + $0x58] sm:$0xff] /*vst_source=*/%v532_v10 }
+  0x5c   :  { %1200 = vst [vmem:[%s1713_s1 + $0x50] sm:$0xff] /*vst_source=*/%v277_v11 }
+  0x5d   :  { %v533_v12 = vpop.trf.xlu1 /* (strided) load 0030:00, stride: 1, sublanes: 8 */ }
+  0x5e   :  { %v278_v13 = vpop.trf.xlu0 /* (strided) load 0030:00, stride: 1, sublanes: 8 */  ;;  %1206 = vst [vmem:[%s1713_s1 + $0x68] sm:$0xff] /*vst_source=*/%v533_v12 }
+  0x5f   :  { %1204 = vst [vmem:[%s1713_s1 + $0x60] sm:$0xff] /*vst_source=*/%v278_v13 }
+  0x60   :  { %v534_v14 = vpop.trf.xlu1 /* (strided) load 0038:00, stride: 1, sublanes: 8 */ }
+  0x61   :  { %v279_v15 = vpop.trf.xlu0 /* (strided) load 0038:00, stride: 1, sublanes: 8 */  ;;  %1210 = vst [vmem:[%s1713_s1 + $0x78] sm:$0xff] /*vst_source=*/%v534_v14 }
+  0x62   :  { %1208 = vst [vmem:[%s1713_s1 + $0x70] sm:$0xff] /*vst_source=*/%v279_v15 }
+  0x63   :  { %v535_v16 = vpop.trf.xlu1 /* (strided) load 0040:00, stride: 1, sublanes: 8 */ }
+  0x64   :  { %v280_v17 = vpop.trf.xlu0 /* (strided) load 0040:00, stride: 1, sublanes: 8 */  ;;  %1214 = vst [vmem:[%s1713_s1 + $0x88] sm:$0xff] /*vst_source=*/%v535_v16 }
+  0x65   :  { %1212 = vst [vmem:[%s1713_s1 + $0x80] sm:$0xff] /*vst_source=*/%v280_v17 }
+  0x66   :  { %v536_v18 = vpop.trf.xlu1 /* (strided) load 0048:00, stride: 1, sublanes: 8 */ }
+  0x67   :  { %v281_v19 = vpop.trf.xlu0 /* (strided) load 0048:00, stride: 1, sublanes: 8 */  ;;  %1218 = vst [vmem:[%s1713_s1 + $0x98] sm:$0xff] /*vst_source=*/%v536_v18 }
+  0x68   :  { %1216 = vst [vmem:[%s1713_s1 + $0x90] sm:$0xff] /*vst_source=*/%v281_v19 }
+  0x69   :  { %v537_v20 = vpop.trf.xlu1 /* (strided) load 0050:00, stride: 1, sublanes: 8 */ }
+  0x6a   :  { %v282_v21 = vpop.trf.xlu0 /* (strided) load 0050:00, stride: 1, sublanes: 8 */  ;;  %1222 = vst [vmem:[%s1713_s1 + $0xa8] sm:$0xff] /*vst_source=*/%v537_v20 }
+  0x6b   :  { %1220 = vst [vmem:[%s1713_s1 + $0xa0] sm:$0xff] /*vst_source=*/%v282_v21 }
+  0x6c   :  { %v538_v22 = vpop.trf.xlu1 /* (strided) load 0058:00, stride: 1, sublanes: 8 */ }
+  0x6d   :  { %v283_v23 = vpop.trf.xlu0 /* (strided) load 0058:00, stride: 1, sublanes: 8 */  ;;  %1226 = vst [vmem:[%s1713_s1 + $0xb8] sm:$0xff] /*vst_source=*/%v538_v22 }
+  0x6e   :  { %1224 = vst [vmem:[%s1713_s1 + $0xb0] sm:$0xff] /*vst_source=*/%v283_v23 }
+  0x6f   :  { %v539_v24 = vpop.trf.xlu1 /* (strided) load 0060:00, stride: 1, sublanes: 8 */ }
+  0x70   :  { %v284_v25 = vpop.trf.xlu0 /* (strided) load 0060:00, stride: 1, sublanes: 8 */  ;;  %1230 = vst [vmem:[%s1713_s1 + $0xc8] sm:$0xff] /*vst_source=*/%v539_v24 }
+  0x71   :  { %1228 = vst [vmem:[%s1713_s1 + $0xc0] sm:$0xff] /*vst_source=*/%v284_v25 }
+  0x72   :  { %v540_v26 = vpop.trf.xlu1 /* (strided) load 0068:00, stride: 1, sublanes: 8 */ }
+  0x73   :  { %v285_v27 = vpop.trf.xlu0 /* (strided) load 0068:00, stride: 1, sublanes: 8 */  ;;  %1234 = vst [vmem:[%s1713_s1 + $0xd8] sm:$0xff] /*vst_source=*/%v540_v26 }
+  0x74   :  { %1232 = vst [vmem:[%s1713_s1 + $0xd0] sm:$0xff] /*vst_source=*/%v285_v27 }
+  0x75   :  { %v541_v28 = vpop.trf.xlu1 /* (strided) load 0070:00, stride: 1, sublanes: 8 */ }
+  0x76   :  { %v286_v29 = vpop.trf.xlu0 /* (strided) load 0070:00, stride: 1, sublanes: 8 */  ;;  %1238 = vst [vmem:[%s1713_s1 + $0xe8] sm:$0xff] /*vst_source=*/%v541_v28 }
+  0x77   :  { %1236 = vst [vmem:[%s1713_s1 + $0xe0] sm:$0xff] /*vst_source=*/%v286_v29 }
+  0x78   :  { %v542_v30 = vpop.trf.xlu1 /* (strided) load 0078:00, stride: 1, sublanes: 8 */ }
+  0x79   :  { %v287_v31 = vpop.trf.xlu0 /* (strided) load 0078:00, stride: 1, sublanes: 8 */  ;;  %1242 = vst [vmem:[%s1713_s1 + $0xf8] sm:$0xff] /*vst_source=*/%v542_v30 }
+  0x7a   :  { %1240 = vst [vmem:[%s1713_s1 + $0xf0] sm:$0xff] /*vst_source=*/%v287_v31 }
+  0x7b   :  { %v1039_v32 = vpop.trf.xlu1 /* (strided) load 0000:00, stride: 1, sublanes: 8 */ }
+  0x7c   :  { %v783_v33 = vpop.trf.xlu0 /* (strided) load 0000:00, stride: 1, sublanes: 8 */  ;;  %1246 = vst [vmem:[%s1713_s1 + $0x108] sm:$0xff] /*vst_source=*/%v1039_v32 }
+  0x7d   :  { %1244 = vst [vmem:[%s1713_s1 + $0x100] sm:$0xff] /*vst_source=*/%v783_v33 }
+  0x7e   :  { %v1040_v34 = vpop.trf.xlu1 /* (strided) load 0008:00, stride: 1, sublanes: 8 */ }
+  0x7f   :  { %v784_v35 = vpop.trf.xlu0 /* (strided) load 0008:00, stride: 1, sublanes: 8 */  ;;  %1250 = vst [vmem:[%s1713_s1 + $0x118] sm:$0xff] /*vst_source=*/%v1040_v34 }
+  0x80   :  { %1248 = vst [vmem:[%s1713_s1 + $0x110] sm:$0xff] /*vst_source=*/%v784_v35 }
+  0x81   :  { %v1041_v36 = vpop.trf.xlu1 /* (strided) load 0010:00, stride: 1, sublanes: 8 */ }
+  0x82   :  { %v785_v37 = vpop.trf.xlu0 /* (strided) load 0010:00, stride: 1, sublanes: 8 */  ;;  %1254 = vst [vmem:[%s1713_s1 + $0x128] sm:$0xff] /*vst_source=*/%v1041_v36 }
+  0x83   :  { %1252 = vst [vmem:[%s1713_s1 + $0x120] sm:$0xff] /*vst_source=*/%v785_v37 }
+  0x84   :  { %v1042_v38 = vpop.trf.xlu1 /* (strided) load 0018:00, stride: 1, sublanes: 8 */ }
+  0x85   :  { %v786_v39 = vpop.trf.xlu0 /* (strided) load 0018:00, stride: 1, sublanes: 8 */  ;;  %1258 = vst [vmem:[%s1713_s1 + $0x138] sm:$0xff] /*vst_source=*/%v1042_v38 }
+  0x86   :  { %1256 = vst [vmem:[%s1713_s1 + $0x130] sm:$0xff] /*vst_source=*/%v786_v39 }
+  0x87   :  { %v1043_v40 = vpop.trf.xlu1 /* (strided) load 0020:00, stride: 1, sublanes: 8 */ }
+  0x88   :  { %v787_v41 = vpop.trf.xlu0 /* (strided) load 0020:00, stride: 1, sublanes: 8 */  ;;  %1262 = vst [vmem:[%s1713_s1 + $0x148] sm:$0xff] /*vst_source=*/%v1043_v40 }
+  0x89   :  { %1260 = vst [vmem:[%s1713_s1 + $0x140] sm:$0xff] /*vst_source=*/%v787_v41 }
+  0x8a   :  { %v1044_v42 = vpop.trf.xlu1 /* (strided) load 0028:00, stride: 1, sublanes: 8 */ }
+  0x8b   :  { %v788_v43 = vpop.trf.xlu0 /* (strided) load 0028:00, stride: 1, sublanes: 8 */  ;;  %1266 = vst [vmem:[%s1713_s1 + $0x158] sm:$0xff] /*vst_source=*/%v1044_v42 }
+  0x8c   :  { %1264 = vst [vmem:[%s1713_s1 + $0x150] sm:$0xff] /*vst_source=*/%v788_v43 }
+  0x8d   :  { %v1045_v44 = vpop.trf.xlu1 /* (strided) load 0030:00, stride: 1, sublanes: 8 */ }
+  0x8e   :  { %v789_v45 = vpop.trf.xlu0 /* (strided) load 0030:00, stride: 1, sublanes: 8 */  ;;  %1270 = vst [vmem:[%s1713_s1 + $0x168] sm:$0xff] /*vst_source=*/%v1045_v44 }
+  0x8f   :  { %1268 = vst [vmem:[%s1713_s1 + $0x160] sm:$0xff] /*vst_source=*/%v789_v45 }
+  0x90   :  { %v1046_v46 = vpop.trf.xlu1 /* (strided) load 0038:00, stride: 1, sublanes: 8 */ }
+  0x91   :  { %v790_v47 = vpop.trf.xlu0 /* (strided) load 0038:00, stride: 1, sublanes: 8 */  ;;  %1274 = vst [vmem:[%s1713_s1 + $0x178] sm:$0xff] /*vst_source=*/%v1046_v46 }
+  0x92   :  { %1272 = vst [vmem:[%s1713_s1 + $0x170] sm:$0xff] /*vst_source=*/%v790_v47 }
+  0x93   :  { %v1047_v48 = vpop.trf.xlu1 /* (strided) load 0040:00, stride: 1, sublanes: 8 */ }
+  0x94   :  { %v791_v49 = vpop.trf.xlu0 /* (strided) load 0040:00, stride: 1, sublanes: 8 */  ;;  %1278 = vst [vmem:[%s1713_s1 + $0x188] sm:$0xff] /*vst_source=*/%v1047_v48 }
+  0x95   :  { %1276 = vst [vmem:[%s1713_s1 + $0x180] sm:$0xff] /*vst_source=*/%v791_v49 }
+  0x96   :  { %v1048_v50 = vpop.trf.xlu1 /* (strided) load 0048:00, stride: 1, sublanes: 8 */ }
+  0x97   :  { %v792_v51 = vpop.trf.xlu0 /* (strided) load 0048:00, stride: 1, sublanes: 8 */  ;;  %1282 = vst [vmem:[%s1713_s1 + $0x198] sm:$0xff] /*vst_source=*/%v1048_v50 }
+  0x98   :  { %1280 = vst [vmem:[%s1713_s1 + $0x190] sm:$0xff] /*vst_source=*/%v792_v51 }
+  0x99   :  { %v1049_v52 = vpop.trf.xlu1 /* (strided) load 0050:00, stride: 1, sublanes: 8 */ }
+  0x9a   :  { %v793_v53 = vpop.trf.xlu0 /* (strided) load 0050:00, stride: 1, sublanes: 8 */  ;;  %1286 = vst [vmem:[%s1713_s1 + $0x1a8] sm:$0xff] /*vst_source=*/%v1049_v52 }
+  0x9b   :  { %1284 = vst [vmem:[%s1713_s1 + $0x1a0] sm:$0xff] /*vst_source=*/%v793_v53 }
+  0x9c   :  { %v1050_v54 = vpop.trf.xlu1 /* (strided) load 0058:00, stride: 1, sublanes: 8 */ }
+  0x9d   :  { %v794_v55 = vpop.trf.xlu0 /* (strided) load 0058:00, stride: 1, sublanes: 8 */  ;;  %1290 = vst [vmem:[%s1713_s1 + $0x1b8] sm:$0xff] /*vst_source=*/%v1050_v54 }
+  0x9e   :  { %1288 = vst [vmem:[%s1713_s1 + $0x1b0] sm:$0xff] /*vst_source=*/%v794_v55 }
+  0x9f   :  { %v1051_v56 = vpop.trf.xlu1 /* (strided) load 0060:00, stride: 1, sublanes: 8 */ }
+  0xa0   :  { %v795_v57 = vpop.trf.xlu0 /* (strided) load 0060:00, stride: 1, sublanes: 8 */  ;;  %1294 = vst [vmem:[%s1713_s1 + $0x1c8] sm:$0xff] /*vst_source=*/%v1051_v56 }
+  0xa1   :  { %1292 = vst [vmem:[%s1713_s1 + $0x1c0] sm:$0xff] /*vst_source=*/%v795_v57 }
+  0xa2   :  { %v1052_v58 = vpop.trf.xlu1 /* (strided) load 0068:00, stride: 1, sublanes: 8 */ }
+  0xa3   :  { %v796_v59 = vpop.trf.xlu0 /* (strided) load 0068:00, stride: 1, sublanes: 8 */  ;;  %1298 = vst [vmem:[%s1713_s1 + $0x1d8] sm:$0xff] /*vst_source=*/%v1052_v58 }
+  0xa4   :  { %1296 = vst [vmem:[%s1713_s1 + $0x1d0] sm:$0xff] /*vst_source=*/%v796_v59 }
+  0xa5   :  { %v1053_v60 = vpop.trf.xlu1 /* (strided) load 0070:00, stride: 1, sublanes: 8 */ }
+  0xa6   :  { %v797_v61 = vpop.trf.xlu0 /* (strided) load 0070:00, stride: 1, sublanes: 8 */  ;;  %1302 = vst [vmem:[%s1713_s1 + $0x1e8] sm:$0xff] /*vst_source=*/%v1053_v60 }
+  0xa7   :  { %1300 = vst [vmem:[%s1713_s1 + $0x1e0] sm:$0xff] /*vst_source=*/%v797_v61 }
+  0xa8   :  { %v1054_v62 = vpop.trf.xlu1 /* (strided) load 0078:00, stride: 1, sublanes: 8 */ }
+  0xa9   :  { %v798_v63 = vpop.trf.xlu0 /* (strided) load 0078:00, stride: 1, sublanes: 8 */  ;;  %1306 = vst [vmem:[%s1713_s1 + $0x1f8] sm:$0xff] /*vst_source=*/%v1054_v62 }
+  0xaa   :  { %1304 = vst [vmem:[%s1713_s1 + $0x1f0] sm:$0xff] /*vst_source=*/%v798_v63 } /* exit bundle: %copy = copy(%bitcast.1) */

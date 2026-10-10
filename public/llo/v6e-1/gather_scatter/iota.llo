@@ -1,0 +1,13 @@
+// gather_scatter · v6e:1 · 1791619731517318816-iota-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v1_v0 = vlaneseq  ;;  %s14_s0 = inlined_call_operand.vmem [shape: s32[32,1,1], index: 0, kind: output, shape index: {}] /* operand 0 */ } /* entry bundle: %iota = iota() */
+   0x1   :  { %v2_v1 = vand.u32 127, %v1_v0 }
+   0x2   :  { %5 = vst [vmem:[%s14_s0] sm:$0x1] /*vst_source=*/%v2_v1 } /* exit bundle: %iota = iota() */

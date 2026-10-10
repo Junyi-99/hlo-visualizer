@@ -1,0 +1,279 @@
+// gather_scatter · v6e:2x2 · 1791619912770927826-gather_fusion.1-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %3 = vsyncpa [#allocation2], 0  ;;  %s2909_s12 = smov [#allocation1] /* materialized constant */  ;;  %s3216_s0 = inlined_call_operand.vmem [shape: f32[32,64], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s3217_s1 = inlined_call_operand.vmem [shape: s32[32], index: 1, kind: input, shape index: {}] /* operand 1 */  ;;  %s3218_s2 = inlined_call_operand.vmem [shape: f32[32], index: 2, kind: output, shape index: {}] /* operand 2 */ } /* entry bundle: %gather_fusion.1 = fusion(%slice-done, %or_bitcast_fusion) */
+   0x1   :  { %s6_s11 = sshll.u32 %s3217_s1, 4  ;;  %s7_s11 = int_to_ptr.vmem [resolvable:$true] %s6_s11 }
+   0x2   :  { %9 = dma.vmem_to_smem /*vmem=*/%s7_s11, /*size_in_granules=*/16, /*smem=*/%s2909_s12, /*dst_syncflagno=*/[#allocation2] /* 
+base_bounds: (1)
+dynamic_base_bounds: (1)
+window_bounds: (1)
+iteration_bounds: (1)
+strides: (1)
+pad_low: (0)
+pad_high: (0)
+element_size_in_bytes: 512
+second_minor_factor: 1 */ }
+   0x3   :  { %2907 = dma.done.wait [#allocation2], 16 /* pipeline-emitter-dma-wait */ }
+   0x4   :  { %2908 = vsyncadd [#allocation2], 4294967280 }
+   0x5   :  { %11 = sfence }
+   0x6   :  { %s1748_s13 = sld [smem:[#allocation1 + $0x2]]  ;;  %v1717_v34 = vlaneseq } /* Start region 2 */
+   0x7   :  { %s1704_s14 = sld [smem:[#allocation1]] }
+   0x8   :  { %s2928_s15 = sld [smem:[#allocation1 + $0x3]]  ;;  %v3026_v36 = vand.u32 127, %v1717_v34  ;;  %v3028_v37 = vshrl.u32 %v1717_v34, 7 }
+   0x9   :  { %s2930_s16 = sld [smem:[#allocation1 + $0x1]] }
+   0xa   :  { %s2932_s17 = sld [smem:[#allocation1 + $0x4]]  ;;  %vm1719_vm0 = vcmp.eq.s32.totalorder %v3026_v36, 0  ;;  %vm1722_vm1 = vcmp.eq.s32.totalorder %v3028_v37, 0  ;;  %vm1741_vm3 = vcmp.eq.s32.totalorder %v3026_v36, 1  ;;  %vm1763_vm4 = vcmp.eq.s32.totalorder %v3026_v36, 2 }
+   0xb   :  { %s2934_s18 = sld [smem:[#allocation1 + $0x5]]  ;;  %vm1723_vm2 = vmand %vm1719_vm0, %vm1722_vm1  ;;  %vm1785_vm5 = vcmp.eq.s32.totalorder %v3026_v36, 3  ;;  %vm1807_vm9 = vcmp.eq.s32.totalorder %v3026_v36, 4  ;;  %vm1829_vm11 = vcmp.eq.s32.totalorder %v3026_v36, 5  ;;  %vm1851_vm13 = vcmp.eq.s32.totalorder %v3026_v36, 6 }
+   0xc   :  { %s1753_s19 = sand.u32 31, %s1748_s13  ;;  %s1018_s20 = sshrl.u32 %s1748_s13, 5  ;;  %vm1745_vm6 = vmand %vm1741_vm3, %vm1722_vm1  ;;  %vm1873_vm15 = vcmp.eq.s32.totalorder %v3026_v36, 7 }
+   0xd   :  { %v2813_v0 = vstv %s1753_s19  ;;  %s1709_s1 = sand.u32 31, %s1704_s14  ;;  %s1019_s21 = sand.u32 63, %s1018_s20  ;;  %vm1767_vm7 = vmand %vm1763_vm4, %vm1722_vm1  ;;  %vm1917_vm4 = vcmp.eq.s32.totalorder %v3026_v36, 9 }
+   0xe   :  { %2876 = vset.pattern.permute.xlu1 %v2813_v0  ;;  %v2809_v1 = vstv %s1709_s1  ;;  %s1020_s22 = sshrl.u32 %s1019_s21, 3  ;;  %s1751_s23 = sand.u32 7, %s1019_s21 /* smod.u32 w/div 8 */  ;;  %vm1789_vm8 = vmand %vm1785_vm5, %vm1722_vm1 }
+   0xf   :  { %2874 = vset.pattern.permute.xlu0 %v2809_v1  ;;  %p1022_p0 = scmp.lt.s32.totalorder %s1020_s22, 7  ;;  %s973_s24 = sshrl.u32 %s1704_s14, 5  ;;  %vm1811_vm10 = vmand %vm1807_vm9, %vm1722_vm1 }
+  0x10   :  { %s974_s25 = sand.u32 63, %s973_s24  ;;  %s1775_s5 = sand.u32 31, %s2928_s15  ;;  %vm1833_vm12 = vmand %vm1829_vm11, %vm1722_vm1 }
+  0x11   :  { %s3220_s22 = smov (!%p1022_p0, %s1020_s22), 7  ;;  %s975_s27 = sshrl.u32 %s974_s25, 3  ;;  %v2815_v3 = vstv %s1775_s5  ;;  %vm1855_vm14 = vmand %vm1851_vm13, %vm1722_vm1 }
+  0x12   :  { %s2779_s26 = sshll.u32 %s3220_s22, 3  ;;  %p977_p1 = scmp.lt.s32.totalorder %s975_s27, 7  ;;  %vm1877_vm0 = vmand %vm1873_vm15, %vm1722_vm1 }
+  0x13   :  { %s1028_s30 = scalar_lea.vmem %s3216_s0, %s2779_s26  ;;  %s1707_s4 = sand.u32 7, %s974_s25 /* smod.u32 w/div 8 */  ;;  %vm1921_vm5 = vmand %vm1917_vm4, %vm1722_vm1 }
+  0x14   :  { %s1755_s3 = scalar_lea.vmem %s1028_s30, %s1751_s23  ;;  %s3222_s27 = smov (!%p977_p1, %s975_s27), 7 }
+  0x15   :  { %v1756_v2 = vld [vmem:[%s1755_s3] ss:$0 sm:$0xff]  ;;  %s1731_s6 = sand.u32 31, %s2930_s16  ;;  %s1041_s7 = sshrl.u32 %s2928_s15, 5 }
+  0x16   :  { %1759 = vperm.xlu1 /*pattern=*/%2876, /*source=*/%v1756_v2 /* Set PCR instruction */  ;;  %s2777_s8 = sshll.u32 %s3222_s27, 3  ;;  %s1042_s9 = sand.u32 63, %s1041_s7  ;;  %v2811_v5 = vstv %s1731_s6 }
+  0x17   :  { %s983_s12 = scalar_lea.vmem %s3216_s0, %s2777_s8  ;;  %s1043_s13 = sshrl.u32 %s1042_s9, 3 }
+  0x18   :  { %s1711_s14 = scalar_lea.vmem %s983_s12, %s1707_s4  ;;  %p1045_p2 = scmp.lt.s32.totalorder %s1043_s13, 7 }
+  0x19   :  { %v1712_v4 = vld [vmem:[%s1711_s14] ss:$0 sm:$0xff]  ;;  %s1773_s19 = sand.u32 7, %s1042_s9 /* smod.u32 w/div 8 */  ;;  %s995_s20 = sshrl.u32 %s2930_s16, 5 }
+  0x1a   :  { %2877 = vset.pattern.permute.xlu1 %v2815_v3  ;;  %1715 = vperm.xlu0 /*pattern=*/%2874, /*source=*/%v1712_v4 /* Set PCR instruction */  ;;  %s3224_s13 = smov (!%p1045_p2, %s1043_s13), 7  ;;  %s996_s1 = sand.u32 63, %s995_s20 }
+  0x1b   :  { %s2780_s15 = sshll.u32 %s3224_s13, 3  ;;  %s997_s21 = sshrl.u32 %s996_s1, 3 }
+  0x1c   :  { %s1051_s24 = scalar_lea.vmem %s3216_s0, %s2780_s15  ;;  %p999_p3 = scmp.lt.s32.totalorder %s997_s21, 7 }
+  0x1d   :  { %s1777_s25 = scalar_lea.vmem %s1051_s24, %s1773_s19  ;;  %s1729_s26 = sand.u32 7, %s996_s1 /* smod.u32 w/div 8 */ }
+  0x1e   :  { %2875 = vset.pattern.permute.xlu0 %v2811_v5  ;;  %v1778_v6 = vld [vmem:[%s1777_s25] ss:$0 sm:$0xff]  ;;  %s3226_s21 = smov (!%p999_p3, %s997_s21), 7  ;;  %s1797_s27 = sand.u32 31, %s2932_s17 }
+  0x1f   :  { %1781 = vperm.xlu1 /*pattern=*/%2877, /*source=*/%v1778_v6 /* Set PCR instruction */  ;;  %s1064_s28 = sshrl.u32 %s2932_s17, 5  ;;  %v2817_v7 = vstv %s1797_s27  ;;  %s2778_s29 = sshll.u32 %s3226_s21, 3 }
+  0x20   :  { %s1065_s16 = sand.u32 63, %s1064_s28  ;;  %s1005_s5 = scalar_lea.vmem %s3216_s0, %s2778_s29 }
+  0x21   :  { %s1066_s30 = sshrl.u32 %s1065_s16, 3  ;;  %s1733_s6 = scalar_lea.vmem %s1005_s5, %s1729_s26 }
+  0x22   :  { %p1068_p4 = scmp.lt.s32.totalorder %s1066_s30, 7  ;;  %v1734_v8 = vld [vmem:[%s1733_s6] ss:$0 sm:$0xff]  ;;  %s1795_s7 = sand.u32 7, %s1065_s16 /* smod.u32 w/div 8 */ }
+  0x23   :  { %2878 = vset.pattern.permute.xlu1 %v2817_v7  ;;  %1737 = vperm.xlu0 /*pattern=*/%2875, /*source=*/%v1734_v8 /* Set PCR instruction */  ;;  %s1819_s8 = sand.u32 31, %s2934_s18  ;;  %s1836_s9 = sld [smem:[#allocation1 + $0x6]] }
+  0x24   :  { %s3228_s30 = smov (!%p1068_p4, %s1066_s30), 7  ;;  %v2819_v9 = vstv %s1819_s8  ;;  %s1087_s10 = sshrl.u32 %s2934_s18, 5 }
+  0x25   :  { %s2781_s17 = sshll.u32 %s3228_s30, 3  ;;  %s1088_s14 = sand.u32 63, %s1087_s10 }
+  0x26   :  { %s1074_s13 = scalar_lea.vmem %s3216_s0, %s2781_s17  ;;  %s1089_s20 = sshrl.u32 %s1088_s14, 3 }
+  0x27   :  { %2879 = vset.pattern.permute.xlu0 %v2819_v9  ;;  %s1799_s19 = scalar_lea.vmem %s1074_s13, %s1795_s7  ;;  %p1091_p5 = scmp.lt.s32.totalorder %s1089_s20, 7 }
+  0x28   :  { %v1800_v10 = vld [vmem:[%s1799_s19] ss:$0 sm:$0xff]  ;;  %s1817_s15 = sand.u32 7, %s1088_s14 /* smod.u32 w/div 8 */  ;;  %s1858_s16 = sld [smem:[#allocation1 + $0x7]] }
+  0x29   :  { %1803 = vperm.xlu1 /*pattern=*/%2878, /*source=*/%v1800_v10 /* Set PCR instruction */  ;;  %s1841_s1 = sand.u32 31, %s1836_s9  ;;  %s3230_s20 = smov (!%p1091_p5, %s1089_s20), 7 }
+  0x2a   :  { %v2821_v11 = vstv %s1841_s1  ;;  %s1110_s21 = sshrl.u32 %s1836_s9, 5  ;;  %s2782_s23 = sshll.u32 %s3230_s20, 3 }
+  0x2b   :  { %s1111_s22 = sand.u32 63, %s1110_s21  ;;  %s1097_s26 = scalar_lea.vmem %s3216_s0, %s2782_s23 }
+  0x2c   :  { %s1112_s18 = sshrl.u32 %s1111_s22, 3  ;;  %s1821_s27 = scalar_lea.vmem %s1097_s26, %s1817_s15 }
+  0x2d   :  { %2880 = vset.pattern.permute.xlu1 %v2821_v11  ;;  %p1114_p6 = scmp.lt.s32.totalorder %s1112_s18, 7  ;;  %v1822_v12 = vld [vmem:[%s1821_s27] ss:$0 sm:$0xff]  ;;  %s1839_s28 = sand.u32 7, %s1111_s22 /* smod.u32 w/div 8 */ }
+  0x2e   :  { %1825 = vperm.xlu0 /*pattern=*/%2879, /*source=*/%v1822_v12 /* Set PCR instruction */  ;;  %s1880_s29 = sld [smem:[#allocation1 + $0x8]]  ;;  %s1863_s10 = sand.u32 31, %s1858_s16 }
+  0x2f   :  { %s3232_s18 = smov (!%p1114_p6, %s1112_s18), 7  ;;  %s2962_s3 = sld [smem:[#allocation1 + $0x9]]  ;;  %v2823_v14 = vstv %s1863_s10 }
+  0x30   :  { %s2783_s30 = sshll.u32 %s3232_s18, 3  ;;  %s2967_s7 = sld [smem:[#allocation1 + $0xa]] }
+  0x31   :  { %s1120_s6 = scalar_lea.vmem %s3216_s0, %s2783_s30  ;;  %s2969_s9 = sld [smem:[#allocation1 + $0xb]] }
+  0x32   :  { %s1843_s8 = scalar_lea.vmem %s1120_s6, %s1839_s28  ;;  %s2971_s17 = sld [smem:[#allocation1 + $0xc]] }
+  0x33   :  { %v1844_v13 = vld [vmem:[%s1843_s8] ss:$0 sm:$0xff]  ;;  %s1133_s11 = sshrl.u32 %s1858_s16, 5 }
+  0x34   :  { %1847 = vperm.xlu1 /*pattern=*/%2880, /*source=*/%v1844_v13 /* Set PCR instruction */  ;;  %s1134_s12 = sand.u32 63, %s1133_s11  ;;  %s1885_s19 = sand.u32 31, %s1880_s29 }
+  0x35   :  { %s1135_s13 = sshrl.u32 %s1134_s12, 3  ;;  %s1861_s14 = sand.u32 7, %s1134_s12 /* smod.u32 w/div 8 */  ;;  %v2825_v15 = vstv %s1885_s19 }
+  0x36   :  { %p1137_p7 = scmp.lt.s32.totalorder %s1135_s13, 7  ;;  %2882 = vset.pattern.permute.xlu0 %v2825_v15  ;;  %s1907_s20 = sand.u32 31, %s2962_s3 }
+  0x37   :  { %s1156_s1 = sshrl.u32 %s1880_s29, 5  ;;  %v2827_v17 = vstv %s1907_s20  ;;  %s1179_s27 = sshrl.u32 %s2962_s3, 5 }
+  0x38   :  { %2881 = vset.pattern.permute.xlu1 %v2823_v14  ;;  %s3234_s13 = smov (!%p1137_p7, %s1135_s13), 7  ;;  %s1157_s15 = sand.u32 63, %s1156_s1 }
+  0x39   :  { %s2784_s21 = sshll.u32 %s3234_s13, 3  ;;  %s1158_s22 = sshrl.u32 %s1157_s15, 3 }
+  0x3a   :  { %s1143_s24 = scalar_lea.vmem %s3216_s0, %s2784_s21  ;;  %p1160_p8 = scmp.lt.s32.totalorder %s1158_s22, 7 }
+  0x3b   :  { %s1865_s25 = scalar_lea.vmem %s1143_s24, %s1861_s14  ;;  %s1883_s26 = sand.u32 7, %s1157_s15 /* smod.u32 w/div 8 */ }
+  0x3c   :  { %v1866_v16 = vld [vmem:[%s1865_s25] ss:$0 sm:$0xff]  ;;  %s3236_s22 = smov (!%p1160_p8, %s1158_s22), 7  ;;  %s1180_s28 = sand.u32 63, %s1179_s27 }
+  0x3d   :  { %1869 = vperm.xlu1 /*pattern=*/%2881, /*source=*/%v1866_v16 /* Set PCR instruction */  ;;  %s2785_s16 = sshll.u32 %s3236_s22, 3  ;;  %s1181_s29 = sshrl.u32 %s1180_s28, 3 }
+  0x3e   :  { %s1166_s5 = scalar_lea.vmem %s3216_s0, %s2785_s16  ;;  %p1183_p9 = scmp.lt.s32.totalorder %s1181_s29, 7 }
+  0x3f   :  { %s1887_s6 = scalar_lea.vmem %s1166_s5, %s1883_s26  ;;  %s1905_s8 = sand.u32 7, %s1180_s28 /* smod.u32 w/div 8 */ }
+  0x40   :  { %v1888_v18 = vld [vmem:[%s1887_s6] ss:$0 sm:$0xff]  ;;  %s3238_s29 = smov (!%p1183_p9, %s1181_s29), 7  ;;  %s1929_s10 = sand.u32 31, %s2967_s7 }
+  0x41   :  { %2883 = vset.pattern.permute.xlu1 %v2827_v17  ;;  %1891 = vperm.xlu0 /*pattern=*/%2882, /*source=*/%v1888_v18 /* Set PCR instruction */  ;;  %s1202_s11 = sshrl.u32 %s2967_s7, 5  ;;  %s2786_s3 = sshll.u32 %s3238_s29, 3  ;;  %v2829_v20 = vstv %s1929_s10 }
+  0x42   :  { %s1203_s12 = sand.u32 63, %s1202_s11  ;;  %s1189_s19 = scalar_lea.vmem %s3216_s0, %s2786_s3 }
+  0x43   :  { %s1204_s20 = sshrl.u32 %s1203_s12, 3  ;;  %s1909_s1 = scalar_lea.vmem %s1189_s19, %s1905_s8 }
+  0x44   :  { %v1910_v19 = vld [vmem:[%s1909_s1] ss:$0 sm:$0xff]  ;;  %p1206_p10 = scmp.lt.s32.totalorder %s1204_s20, 7  ;;  %s1927_s15 = sand.u32 7, %s1203_s12 /* smod.u32 w/div 8 */ }
+  0x45   :  { %1913 = vperm.xlu1 /*pattern=*/%2883, /*source=*/%v1910_v19 /* Set PCR instruction */  ;;  %s1951_s21 = sand.u32 31, %s2969_s9  ;;  %s1973_s22 = sand.u32 31, %s2971_s17 }
+  0x46   :  { %s3240_s20 = smov (!%p1206_p10, %s1204_s20), 7  ;;  %v2831_v21 = vstv %s1951_s21  ;;  %s1225_s23 = sshrl.u32 %s2969_s9, 5  ;;  %v2833_v23 = vstv %s1973_s22 }
+  0x47   :  { %s2787_s7 = sshll.u32 %s3240_s20, 3  ;;  %2885 = vset.pattern.permute.xlu0 %v2831_v21  ;;  %s1226_s18 = sand.u32 63, %s1225_s23 }
+  0x48   :  { %s1212_s26 = scalar_lea.vmem %s3216_s0, %s2787_s7  ;;  %s1227_s27 = sshrl.u32 %s1226_s18, 3 }
+  0x49   :  { %2884 = vset.pattern.permute.xlu1 %v2829_v20  ;;  %s1931_s28 = scalar_lea.vmem %s1212_s26, %s1927_s15  ;;  %p1229_p11 = scmp.lt.s32.totalorder %s1227_s27, 7 }
+  0x4a   :  { %v1932_v22 = vld [vmem:[%s1931_s28] ss:$0 sm:$0xff]  ;;  %s1949_s16 = sand.u32 7, %s1226_s18 /* smod.u32 w/div 8 */  ;;  %s1248_s29 = sshrl.u32 %s2971_s17, 5 }
+  0x4b   :  { %1935 = vperm.xlu1 /*pattern=*/%2884, /*source=*/%v1932_v22 /* Set PCR instruction */  ;;  %s3242_s27 = smov (!%p1229_p11, %s1227_s27), 7  ;;  %s1249_s30 = sand.u32 63, %s1248_s29 }
+  0x4c   :  { %s2788_s9 = sshll.u32 %s3242_s27, 3  ;;  %s1250_s4 = sshrl.u32 %s1249_s30, 3 }
+  0x4d   :  { %s1235_s8 = scalar_lea.vmem %s3216_s0, %s2788_s9  ;;  %p1252_p12 = scmp.lt.s32.totalorder %s1250_s4, 7 }
+  0x4e   :  { %s1953_s10 = scalar_lea.vmem %s1235_s8, %s1949_s16  ;;  %s1971_s11 = sand.u32 7, %s1249_s30 /* smod.u32 w/div 8 */ }
+  0x4f   :  { %2886 = vset.pattern.permute.xlu1 %v2833_v23  ;;  %v1954_v24 = vld [vmem:[%s1953_s10] ss:$0 sm:$0xff]  ;;  %s3244_s4 = smov (!%p1252_p12, %s1250_s4), 7  ;;  %s1990_s3 = sld [smem:[#allocation1 + $0xd]] }
+  0x50   :  { %1957 = vperm.xlu0 /*pattern=*/%2885, /*source=*/%v1954_v24 /* Set PCR instruction */  ;;  %s2012_s12 = sld [smem:[#allocation1 + $0xe]]  ;;  %s2789_s13 = sshll.u32 %s3244_s4, 3 }
+  0x51   :  { %s2996_s14 = sld [smem:[#allocation1 + $0xf]]  ;;  %s1258_s20 = scalar_lea.vmem %s3216_s0, %s2789_s13 }
+  0x52   :  { %s3001_s1 = sld [smem:[#allocation1 + $0x10]]  ;;  %s1975_s15 = scalar_lea.vmem %s1258_s20, %s1971_s11 }
+  0x53   :  { %s3003_s21 = sld [smem:[#allocation1 + $0x11]]  ;;  %v1976_v25 = vld [vmem:[%s1975_s15] ss:$0 sm:$0xff] }
+  0x54   :  { %s3005_s22 = sld [smem:[#allocation1 + $0x12]]  ;;  %1979 = vperm.xlu1 /*pattern=*/%2886, /*source=*/%v1976_v25 /* Set PCR instruction */ }
+  0x55   :  { %s1995_s23 = sand.u32 31, %s1990_s3  ;;  %s1271_s7 = sshrl.u32 %s1990_s3, 5 }
+  0x56   :  { %v2835_v26 = vstv %s1995_s23  ;;  %s1272_s18 = sand.u32 63, %s1271_s7  ;;  %s2017_s26 = sand.u32 31, %s2012_s12 }
+  0x57   :  { %s1273_s24 = sshrl.u32 %s1272_s18, 3  ;;  %s1993_s25 = sand.u32 7, %s1272_s18 /* smod.u32 w/div 8 */  ;;  %v2837_v27 = vstv %s2017_s26 }
+  0x58   :  { %p1275_p13 = scmp.lt.s32.totalorder %s1273_s24, 7  ;;  %2887 = vset.pattern.permute.xlu1 %v2835_v26  ;;  %2888 = vset.pattern.permute.xlu0 %v2837_v27  ;;  %s2039_s27 = sand.u32 31, %s2996_s14 }
+  0x59   :  { %s1294_s28 = sshrl.u32 %s2012_s12, 5  ;;  %v2839_v29 = vstv %s2039_s27  ;;  %s1317_s10 = sshrl.u32 %s2996_s14, 5 }
+  0x5a   :  { %s3246_s24 = smov (!%p1275_p13, %s1273_s24), 7  ;;  %s1295_s16 = sand.u32 63, %s1294_s28 }
+  0x5b   :  { %s2790_s29 = sshll.u32 %s3246_s24, 3  ;;  %s1296_s30 = sshrl.u32 %s1295_s16, 3 }
+  0x5c   :  { %s1281_s5 = scalar_lea.vmem %s3216_s0, %s2790_s29  ;;  %p1298_p0 = scmp.lt.s32.totalorder %s1296_s30, 7 }
+  0x5d   :  { %s1997_s6 = scalar_lea.vmem %s1281_s5, %s1993_s25  ;;  %s2015_s8 = sand.u32 7, %s1295_s16 /* smod.u32 w/div 8 */ }
+  0x5e   :  { %v1998_v28 = vld [vmem:[%s1997_s6] ss:$0 sm:$0xff]  ;;  %s3248_s30 = smov (!%p1298_p0, %s1296_s30), 7  ;;  %s1318_s11 = sand.u32 63, %s1317_s10 }
+  0x5f   :  { %2001 = vperm.xlu1 /*pattern=*/%2887, /*source=*/%v1998_v28 /* Set PCR instruction */  ;;  %s2791_s3 = sshll.u32 %s3248_s30, 3  ;;  %s1319_s12 = sshrl.u32 %s1318_s11, 3 }
+  0x60   :  { %s1304_s19 = scalar_lea.vmem %s3216_s0, %s2791_s3  ;;  %p1321_p1 = scmp.lt.s32.totalorder %s1319_s12, 7 }
+  0x61   :  { %s2019_s20 = scalar_lea.vmem %s1304_s19, %s2015_s8  ;;  %s2037_s15 = sand.u32 7, %s1318_s11 /* smod.u32 w/div 8 */ }
+  0x62   :  { %v2020_v30 = vld [vmem:[%s2019_s20] ss:$0 sm:$0xff]  ;;  %s3250_s12 = smov (!%p1321_p1, %s1319_s12), 7  ;;  %s2061_s23 = sand.u32 31, %s3001_s1 }
+  0x63   :  { %2889 = vset.pattern.permute.xlu1 %v2839_v29  ;;  %2023 = vperm.xlu0 /*pattern=*/%2888, /*source=*/%v2020_v30 /* Set PCR instruction */  ;;  %s1340_s7 = sshrl.u32 %s3001_s1, 5  ;;  %s2792_s14 = sshll.u32 %s3250_s12, 3  ;;  %v2841_v32 = vstv %s2061_s23 }
+  0x64   :  { %s1341_s18 = sand.u32 63, %s1340_s7  ;;  %s1327_s26 = scalar_lea.vmem %s3216_s0, %s2792_s14 }
+  0x65   :  { %s1342_s27 = sshrl.u32 %s1341_s18, 3  ;;  %s2041_s28 = scalar_lea.vmem %s1327_s26, %s2037_s15 }
+  0x66   :  { %v2042_v31 = vld [vmem:[%s2041_s28] ss:$0 sm:$0xff]  ;;  %p1344_p2 = scmp.lt.s32.totalorder %s1342_s27, 7  ;;  %s2059_s16 = sand.u32 7, %s1341_s18 /* smod.u32 w/div 8 */ }
+  0x67   :  { %2045 = vperm.xlu1 /*pattern=*/%2889, /*source=*/%v2042_v31 /* Set PCR instruction */  ;;  %s2083_s29 = sand.u32 31, %s3003_s21  ;;  %s2105_s30 = sand.u32 31, %s3005_s22 }
+  0x68   :  { %s3252_s27 = smov (!%p1344_p2, %s1342_s27), 7  ;;  %v2843_v33 = vstv %s2083_s29  ;;  %s1363_s9 = sshrl.u32 %s3003_s21, 5  ;;  %v2845_v38 = vstv %s2105_s30 }
+  0x69   :  { %s2793_s1 = sshll.u32 %s3252_s27, 3  ;;  %2891 = vset.pattern.permute.xlu0 %v2843_v33  ;;  %s1364_s4 = sand.u32 63, %s1363_s9 }
+  0x6a   :  { %s1350_s8 = scalar_lea.vmem %s3216_s0, %s2793_s1  ;;  %s1365_s10 = sshrl.u32 %s1364_s4, 3 }
+  0x6b   :  { %2890 = vset.pattern.permute.xlu1 %v2841_v32  ;;  %s2063_s11 = scalar_lea.vmem %s1350_s8, %s2059_s16  ;;  %p1367_p3 = scmp.lt.s32.totalorder %s1365_s10, 7 }
+  0x6c   :  { %v2064_v35 = vld [vmem:[%s2063_s11] ss:$0 sm:$0xff]  ;;  %s2081_s3 = sand.u32 7, %s1364_s4 /* smod.u32 w/div 8 */  ;;  %s1386_s21 = sshrl.u32 %s3005_s22, 5 }
+  0x6d   :  { %2067 = vperm.xlu1 /*pattern=*/%2890, /*source=*/%v2064_v35 /* Set PCR instruction */  ;;  %s3254_s10 = smov (!%p1367_p3, %s1365_s10), 7  ;;  %s1387_s12 = sand.u32 63, %s1386_s21 }
+  0x6e   :  { %s2794_s13 = sshll.u32 %s3254_s10, 3  ;;  %s1388_s17 = sshrl.u32 %s1387_s12, 3 }
+  0x6f   :  { %s1373_s15 = scalar_lea.vmem %s3216_s0, %s2794_s13  ;;  %p1390_p4 = scmp.lt.s32.totalorder %s1388_s17, 7 }
+  0x70   :  { %s2085_s23 = scalar_lea.vmem %s1373_s15, %s2081_s3  ;;  %s2103_s7 = sand.u32 7, %s1387_s12 /* smod.u32 w/div 8 */ }
+  0x71   :  { %2892 = vset.pattern.permute.xlu1 %v2845_v38  ;;  %v2086_v40 = vld [vmem:[%s2085_s23] ss:$0 sm:$0xff]  ;;  %s3256_s17 = smov (!%p1390_p4, %s1388_s17), 7  ;;  %s2122_s22 = sld [smem:[#allocation1 + $0x13]] }
+  0x72   :  { %2089 = vperm.xlu0 /*pattern=*/%2891, /*source=*/%v2086_v40 /* Set PCR instruction */  ;;  %s3038_s14 = sld [smem:[#allocation1 + $0x14]]  ;;  %s2795_s18 = sshll.u32 %s3256_s17, 3 }
+  0x73   :  { %s3040_s24 = sld [smem:[#allocation1 + $0x15]]  ;;  %s1396_s27 = scalar_lea.vmem %s3216_s0, %s2795_s18 }
+  0x74   :  { %s3045_s28 = sld [smem:[#allocation1 + $0x16]]  ;;  %s2107_s16 = scalar_lea.vmem %s1396_s27, %s2103_s7 }
+  0x75   :  { %s3048_s29 = sld [smem:[#allocation1 + $0x17]]  ;;  %v2108_v42 = vld [vmem:[%s2107_s16] ss:$0 sm:$0xff] }
+  0x76   :  { %s3051_s30 = sld [smem:[#allocation1 + $0x18]]  ;;  %2111 = vperm.xlu1 /*pattern=*/%2892, /*source=*/%v2108_v42 /* Set PCR instruction */ }
+  0x77   :  { %s2127_s9 = sand.u32 31, %s2122_s22  ;;  %s1409_s1 = sshrl.u32 %s2122_s22, 5 }
+  0x78   :  { %v2847_v43 = vstv %s2127_s9  ;;  %s1410_s4 = sand.u32 63, %s1409_s1  ;;  %s2149_s8 = sand.u32 31, %s3038_s14 }
+  0x79   :  { %s1411_s5 = sshrl.u32 %s1410_s4, 3  ;;  %s2125_s6 = sand.u32 7, %s1410_s4 /* smod.u32 w/div 8 */  ;;  %v2849_v46 = vstv %s2149_s8 }
+  0x7a   :  { %p1413_p5 = scmp.lt.s32.totalorder %s1411_s5, 7  ;;  %2893 = vset.pattern.permute.xlu1 %v2847_v43  ;;  %2894 = vset.pattern.permute.xlu0 %v2849_v46  ;;  %s2171_s10 = sand.u32 31, %s3040_s24 }
+  0x7b   :  { %s1432_s11 = sshrl.u32 %s3038_s14, 5  ;;  %v2851_v49 = vstv %s2171_s10  ;;  %s1455_s23 = sshrl.u32 %s3040_s24, 5 }
+  0x7c   :  { %s3258_s5 = smov (!%p1413_p5, %s1411_s5), 7  ;;  %s1433_s3 = sand.u32 63, %s1432_s11 }
+  0x7d   :  { %s2796_s21 = sshll.u32 %s3258_s5, 3  ;;  %s1434_s12 = sshrl.u32 %s1433_s3, 3 }
+  0x7e   :  { %s1419_s19 = scalar_lea.vmem %s3216_s0, %s2796_s21  ;;  %p1436_p6 = scmp.lt.s32.totalorder %s1434_s12, 7 }
+  0x7f   :  { %s2129_s20 = scalar_lea.vmem %s1419_s19, %s2125_s6  ;;  %s2147_s15 = sand.u32 7, %s1433_s3 /* smod.u32 w/div 8 */ }
+  0x80   :  { %v2130_v48 = vld [vmem:[%s2129_s20] ss:$0 sm:$0xff]  ;;  %s3260_s12 = smov (!%p1436_p6, %s1434_s12), 7  ;;  %s1456_s7 = sand.u32 63, %s1455_s23 }
+  0x81   :  { %2133 = vperm.xlu1 /*pattern=*/%2893, /*source=*/%v2130_v48 /* Set PCR instruction */  ;;  %s2797_s22 = sshll.u32 %s3260_s12, 3  ;;  %s1457_s14 = sshrl.u32 %s1456_s7, 3 }
+  0x82   :  { %s1442_s26 = scalar_lea.vmem %s3216_s0, %s2797_s22  ;;  %p1459_p7 = scmp.lt.s32.totalorder %s1457_s14, 7 }
+  0x83   :  { %s2151_s27 = scalar_lea.vmem %s1442_s26, %s2147_s15  ;;  %s2169_s24 = sand.u32 7, %s1456_s7 /* smod.u32 w/div 8 */ }
+  0x84   :  { %v2152_v50 = vld [vmem:[%s2151_s27] ss:$0 sm:$0xff]  ;;  %s3262_s14 = smov (!%p1459_p7, %s1457_s14), 7  ;;  %s2193_s16 = sand.u32 31, %s3045_s28 }
+  0x85   :  { %2895 = vset.pattern.permute.xlu1 %v2851_v49  ;;  %2155 = vperm.xlu0 /*pattern=*/%2894, /*source=*/%v2152_v50 /* Set PCR instruction */  ;;  %s1478_s9 = sshrl.u32 %s3045_s28, 5  ;;  %s2798_s1 = sshll.u32 %s3262_s14, 3  ;;  %v2853_v54 = vstv %s2193_s16 }
+  0x86   :  { %s1479_s4 = sand.u32 63, %s1478_s9  ;;  %s1465_s8 = scalar_lea.vmem %s3216_s0, %s2798_s1 }
+  0x87   :  { %s1480_s10 = sshrl.u32 %s1479_s4, 3  ;;  %s2173_s11 = scalar_lea.vmem %s1465_s8, %s2169_s24 }
+  0x88   :  { %v2174_v52 = vld [vmem:[%s2173_s11] ss:$0 sm:$0xff]  ;;  %p1482_p8 = scmp.lt.s32.totalorder %s1480_s10, 7  ;;  %s2191_s3 = sand.u32 7, %s1479_s4 /* smod.u32 w/div 8 */ }
+  0x89   :  { %2177 = vperm.xlu1 /*pattern=*/%2895, /*source=*/%v2174_v52 /* Set PCR instruction */  ;;  %s2215_s28 = sand.u32 31, %s3048_s29  ;;  %s2237_s21 = sand.u32 31, %s3051_s30 }
+  0x8a   :  { %s3264_s10 = smov (!%p1482_p8, %s1480_s10), 7  ;;  %v2855_v55 = vstv %s2215_s28  ;;  %s1501_s12 = sshrl.u32 %s3048_s29, 5  ;;  %v2857_v57 = vstv %s2237_s21 }
+  0x8b   :  { %s2799_s13 = sshll.u32 %s3264_s10, 3  ;;  %2897 = vset.pattern.permute.xlu0 %v2855_v55  ;;  %s1502_s17 = sand.u32 63, %s1501_s12 }
+  0x8c   :  { %s1488_s15 = scalar_lea.vmem %s3216_s0, %s2799_s13  ;;  %s1503_s23 = sshrl.u32 %s1502_s17, 3 }
+  0x8d   :  { %2896 = vset.pattern.permute.xlu1 %v2853_v54  ;;  %s2195_s7 = scalar_lea.vmem %s1488_s15, %s2191_s3  ;;  %p1505_p9 = scmp.lt.s32.totalorder %s1503_s23, 7 }
+  0x8e   :  { %v2196_v56 = vld [vmem:[%s2195_s7] ss:$0 sm:$0xff]  ;;  %s2213_s22 = sand.u32 7, %s1502_s17 /* smod.u32 w/div 8 */  ;;  %s1524_s29 = sshrl.u32 %s3051_s30, 5 }
+  0x8f   :  { %2199 = vperm.xlu1 /*pattern=*/%2896, /*source=*/%v2196_v56 /* Set PCR instruction */  ;;  %s3266_s23 = smov (!%p1505_p9, %s1503_s23), 7  ;;  %s1525_s14 = sand.u32 63, %s1524_s29 }
+  0x90   :  { %s2800_s18 = sshll.u32 %s3266_s23, 3  ;;  %s1526_s25 = sshrl.u32 %s1525_s14, 3 }
+  0x91   :  { %v1760_v41 = vpop.permute.xlu1 %1759  ;;  %s1511_s24 = scalar_lea.vmem %s3216_s0, %s2800_s18  ;;  %p1528_p10 = scmp.lt.s32.totalorder %s1526_s25, 7 }
+  0x92   :  { %s2217_s16 = scalar_lea.vmem %s1511_s24, %s2213_s22  ;;  %s2235_s30 = sand.u32 7, %s1525_s14 /* smod.u32 w/div 8 */ }
+  0x93   :  { %2898 = vset.pattern.permute.xlu1 %v2857_v57  ;;  %v2218_v59 = vld [vmem:[%s2217_s16] ss:$0 sm:$0xff]  ;;  %s3268_s25 = smov (!%p1528_p10, %s1526_s25), 7  ;;  %s2254_s9 = sld [smem:[#allocation1 + $0x19]] }
+  0x94   :  { %2221 = vperm.xlu0 /*pattern=*/%2897, /*source=*/%v2218_v59 /* Set PCR instruction */  ;;  %s3100_s1 = sld [smem:[#allocation1 + $0x1a]]  ;;  %s2801_s4 = sshll.u32 %s3268_s25, 3 }
+  0x95   :  { %v1716_v39 = vpop.permute.xlu0 %1715  ;;  %s3102_s5 = sld [smem:[#allocation1 + $0x1b]]  ;;  %s1534_s10 = scalar_lea.vmem %s3216_s0, %s2801_s4 }
+  0x96   :  { %1724 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1723_vm2, /*vst_source=*/%v1716_v39  ;;  %vm1895_vm2 = vcmp.eq.s32.totalorder %v3026_v36, 8  ;;  %s3107_s11 = sld [smem:[#allocation1 + $0x1c]]  ;;  %s2239_s3 = scalar_lea.vmem %s1534_s10, %s2235_s30 }
+  0x97   :  { %vm1899_vm3 = vmand %vm1895_vm2, %vm1722_vm1  ;;  %s3110_s28 = sld [smem:[#allocation1 + $0x1d]]  ;;  %v2240_v61 = vld [vmem:[%s2239_s3] ss:$0 sm:$0xff] }
+  0x98   :  { %s3112_s21 = sld [smem:[#allocation1 + $0x1e]]  ;;  %2243 = vperm.xlu1 /*pattern=*/%2898, /*source=*/%v2240_v61 /* Set PCR instruction */ }
+  0x99   :  { %s2259_s12 = sand.u32 31, %s2254_s9  ;;  %s1547_s13 = sshrl.u32 %s2254_s9, 5 }
+  0x9a   :  { %v1782_v45 = vpop.permute.xlu1 %1781  ;;  %v2859_v62 = vstv %s2259_s12  ;;  %s1548_s17 = sand.u32 63, %s1547_s13  ;;  %s2281_s15 = sand.u32 31, %s3100_s1 }
+  0x9b   :  { %s1549_s19 = sshrl.u32 %s1548_s17, 3  ;;  %s2257_s20 = sand.u32 7, %s1548_s17 /* smod.u32 w/div 8 */  ;;  %v2861_v0 = vstv %s2281_s15 }
+  0x9c   :  { %p1551_p11 = scmp.lt.s32.totalorder %s1549_s19, 7  ;;  %2899 = vset.pattern.permute.xlu1 %v2859_v62  ;;  %2900 = vset.pattern.permute.xlu0 %v2861_v0  ;;  %s2303_s23 = sand.u32 31, %s3102_s5 }
+  0x9d   :  { %s1570_s7 = sshrl.u32 %s3100_s1, 5  ;;  %v2863_v3 = vstv %s2303_s23  ;;  %s1593_s16 = sshrl.u32 %s3102_s5, 5 }
+  0x9e   :  { %v1738_v44 = vpop.permute.xlu0 %1737  ;;  %s3270_s19 = smov (!%p1551_p11, %s1549_s19), 7  ;;  %s1571_s22 = sand.u32 63, %s1570_s7 }
+  0x9f   :  { %1746 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1745_vm6, /*vst_source=*/%v1738_v44  ;;  %vm1939_vm6 = vcmp.eq.s32.totalorder %v3026_v36, 10  ;;  %s2802_s29 = sshll.u32 %s3270_s19, 3  ;;  %s1572_s14 = sshrl.u32 %s1571_s22, 3 }
+  0xa0   :  { %1768 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1767_vm7, /*vst_source=*/%v1760_v41  ;;  %vm1943_vm7 = vmand %vm1939_vm6, %vm1722_vm1  ;;  %s1557_s26 = scalar_lea.vmem %s3216_s0, %s2802_s29  ;;  %p1574_p12 = scmp.lt.s32.totalorder %s1572_s14, 7 }
+  0xa1   :  { %1790 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1789_vm8, /*vst_source=*/%v1782_v45  ;;  %s2261_s27 = scalar_lea.vmem %s1557_s26, %s2257_s20  ;;  %s2279_s24 = sand.u32 7, %s1571_s22 /* smod.u32 w/div 8 */  ;;  %vm1961_vm8 = vcmp.eq.s32.totalorder %v3026_v36, 11 }
+  0xa2   :  { %v2262_v2 = vld [vmem:[%s2261_s27] ss:$0 sm:$0xff]  ;;  %s3272_s14 = smov (!%p1574_p12, %s1572_s14), 7  ;;  %s1594_s30 = sand.u32 63, %s1593_s16  ;;  %vm1965_vm9 = vmand %vm1961_vm8, %vm1722_vm1 }
+  0xa3   :  { %2265 = vperm.xlu1 /*pattern=*/%2899, /*source=*/%v2262_v2 /* Set PCR instruction */  ;;  %s2803_s9 = sshll.u32 %s3272_s14, 3  ;;  %s1595_s1 = sshrl.u32 %s1594_s30, 3 }
+  0xa4   :  { %v1804_v47 = vpop.permute.xlu1 %1803  ;;  %s1580_s8 = scalar_lea.vmem %s3216_s0, %s2803_s9  ;;  %p1597_p13 = scmp.lt.s32.totalorder %s1595_s1, 7 }
+  0xa5   :  { %1812 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1811_vm10, /*vst_source=*/%v1804_v47  ;;  %s2283_s10 = scalar_lea.vmem %s1580_s8, %s2279_s24  ;;  %s2301_s5 = sand.u32 7, %s1594_s30 /* smod.u32 w/div 8 */  ;;  %vm1983_vm10 = vcmp.eq.s32.totalorder %v3026_v36, 12 }
+  0xa6   :  { %v2284_v4 = vld [vmem:[%s2283_s10] ss:$0 sm:$0xff]  ;;  %s3274_s1 = smov (!%p1597_p13, %s1595_s1), 7  ;;  %s2325_s3 = sand.u32 31, %s3107_s11  ;;  %vm1987_vm11 = vmand %vm1983_vm10, %vm1722_vm1 }
+  0xa7   :  { %2901 = vset.pattern.permute.xlu1 %v2863_v3  ;;  %2287 = vperm.xlu0 /*pattern=*/%2900, /*source=*/%v2284_v4 /* Set PCR instruction */  ;;  %s1616_s12 = sshrl.u32 %s3107_s11, 5  ;;  %s2804_s13 = sshll.u32 %s3274_s1, 3  ;;  %v2865_v8 = vstv %s2325_s3 }
+  0xa8   :  { %s1617_s17 = sand.u32 63, %s1616_s12  ;;  %s1603_s15 = scalar_lea.vmem %s3216_s0, %s2804_s13 }
+  0xa9   :  { %v1826_v51 = vpop.permute.xlu0 %1825  ;;  %s1618_s23 = sshrl.u32 %s1617_s17, 3  ;;  %s2305_s7 = scalar_lea.vmem %s1603_s15, %s2301_s5 }
+  0xaa   :  { %1834 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1833_vm12, /*vst_source=*/%v1826_v51  ;;  %v2306_v6 = vld [vmem:[%s2305_s7] ss:$0 sm:$0xff]  ;;  %p1620_p0 = scmp.lt.s32.totalorder %s1618_s23, 7  ;;  %s2323_s22 = sand.u32 7, %s1617_s17 /* smod.u32 w/div 8 */  ;;  %vm2005_vm12 = vcmp.eq.s32.totalorder %v3026_v36, 13 }
+  0xab   :  { %2309 = vperm.xlu1 /*pattern=*/%2901, /*source=*/%v2306_v6 /* Set PCR instruction */  ;;  %s2347_s11 = sand.u32 31, %s3110_s28  ;;  %s2369_s29 = sand.u32 31, %s3112_s21  ;;  %vm2009_vm13 = vmand %vm2005_vm12, %vm1722_vm1 }
+  0xac   :  { %s3276_s23 = smov (!%p1620_p0, %s1618_s23), 7  ;;  %v2867_v9 = vstv %s2347_s11  ;;  %s1639_s14 = sshrl.u32 %s3110_s28, 5  ;;  %v2869_v11 = vstv %s2369_s29 }
+  0xad   :  { %s2805_s18 = sshll.u32 %s3276_s23, 3  ;;  %2903 = vset.pattern.permute.xlu0 %v2867_v9  ;;  %s1640_s25 = sand.u32 63, %s1639_s14 }
+  0xae   :  { %s1626_s24 = scalar_lea.vmem %s3216_s0, %s2805_s18  ;;  %s1641_s16 = sshrl.u32 %s1640_s25, 3 }
+  0xaf   :  { %v1848_v53 = vpop.permute.xlu1 %1847  ;;  %2902 = vset.pattern.permute.xlu1 %v2865_v8  ;;  %s2327_s30 = scalar_lea.vmem %s1626_s24, %s2323_s22  ;;  %p1643_p1 = scmp.lt.s32.totalorder %s1641_s16, 7 }
+  0xb0   :  { %1856 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1855_vm14, /*vst_source=*/%v1848_v53  ;;  %v2328_v10 = vld [vmem:[%s2327_s30] ss:$0 sm:$0xff]  ;;  %s2345_s9 = sand.u32 7, %s1640_s25 /* smod.u32 w/div 8 */  ;;  %s1662_s28 = sshrl.u32 %s3112_s21, 5  ;;  %vm2027_vm14 = vcmp.eq.s32.totalorder %v3026_v36, 14 }
+  0xb1   :  { %2331 = vperm.xlu1 /*pattern=*/%2902, /*source=*/%v2328_v10 /* Set PCR instruction */  ;;  %s3278_s16 = smov (!%p1643_p1, %s1641_s16), 7  ;;  %s1663_s1 = sand.u32 63, %s1662_s28  ;;  %vm2031_vm15 = vmand %vm2027_vm14, %vm1722_vm1 }
+  0xb2   :  { %s2806_s4 = sshll.u32 %s3278_s16, 3  ;;  %s1664_s6 = sshrl.u32 %s1663_s1, 3 }
+  0xb3   :  { %s1649_s5 = scalar_lea.vmem %s3216_s0, %s2806_s4  ;;  %p1666_p2 = scmp.lt.s32.totalorder %s1664_s6, 7 }
+  0xb4   :  { %s2349_s3 = scalar_lea.vmem %s1649_s5, %s2345_s9  ;;  %s2386_s21 = sld [smem:[#allocation1 + $0x1f]] }
+  0xb5   :  { %2904 = vset.pattern.permute.xlu1 %v2869_v11  ;;  %v2350_v13 = vld [vmem:[%s2349_s3] ss:$0 sm:$0xff]  ;;  %s3280_s6 = smov (!%p1666_p2, %s1664_s6), 7  ;;  %s2367_s12 = sand.u32 7, %s1663_s1 /* smod.u32 w/div 8 */ }
+  0xb6   :  { %2353 = vperm.xlu0 /*pattern=*/%2903, /*source=*/%v2350_v13 /* Set PCR instruction */  ;;  %s2807_s13 = sshll.u32 %s3280_s6, 3 }
+  0xb7   :  { %s1672_s20 = scalar_lea.vmem %s3216_s0, %s2807_s13 }
+  0xb8   :  { %v1870_v58 = vpop.permute.xlu1 %1869  ;;  %s2371_s15 = scalar_lea.vmem %s1672_s20, %s2367_s12 }
+  0xb9   :  { %1878 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1877_vm0, /*vst_source=*/%v1870_v58  ;;  %vm2049_vm0 = vcmp.eq.s32.totalorder %v3026_v36, 15  ;;  %v2372_v15 = vld [vmem:[%s2371_s15] ss:$0 sm:$0xff] }
+  0xba   :  { %2375 = vperm.xlu1 /*pattern=*/%2904, /*source=*/%v2372_v15 /* Set PCR instruction */  ;;  %s2391_s23 = sand.u32 31, %s2386_s21  ;;  %s1685_s7 = sshrl.u32 %s2386_s21, 5  ;;  %vm2053_vm2 = vmand %vm2049_vm0, %vm1722_vm1 }
+  0xbb   :  { %v2871_v16 = vstv %s2391_s23  ;;  %s1686_s22 = sand.u32 63, %s1685_s7 }
+  0xbc   :  { %v1892_v60 = vpop.permute.xlu0 %1891  ;;  %s1687_s11 = sshrl.u32 %s1686_s22, 3  ;;  %2906 = vset.pattern.permute.xlu0 %v2871_v16  ;;  %s2389_s29 = sand.u32 7, %s1686_s22 /* smod.u32 w/div 8 */ }
+  0xbd   :  { %1900 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1899_vm3, /*vst_source=*/%v1892_v60  ;;  %p1689_p3 = scmp.lt.s32.totalorder %s1687_s11, 7  ;;  %vm2071_vm3 = vcmp.eq.s32.totalorder %v3026_v36, 16 }
+  0xbe   :  { %2905 = vset.pattern.permute.xlu1 %v2871_v16  ;;  %vm2075_vm4 = vmand %vm2071_vm3, %vm1722_vm1 }
+  0xbf   :  { %s3282_s11 = smov (!%p1689_p3, %s1687_s11), 7 }
+  0xc0   :  { %v1914_v63 = vpop.permute.xlu1 %1913  ;;  %s2808_s14 = sshll.u32 %s3282_s11, 3 }
+  0xc1   :  { %1922 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1921_vm5, /*vst_source=*/%v1914_v63  ;;  %s1695_s26 = scalar_lea.vmem %s3216_s0, %s2808_s14  ;;  %vm2093_vm5 = vcmp.eq.s32.totalorder %v3026_v36, 17 }
+  0xc2   :  { %s2393_s27 = scalar_lea.vmem %s1695_s26, %s2389_s29  ;;  %vm2097_vm6 = vmand %vm2093_vm5, %vm1722_vm1 }
+  0xc3   :  { %v2394_v19 = vld [vmem:[%s2393_s27] ss:$0 sm:$0xff] }
+  0xc4   :  { %2397 = vperm.xlu1 /*pattern=*/%2905, /*source=*/%v2394_v19 /* Set PCR instruction */ }
+  0xc5   :  { %v1936_v1 = vpop.permute.xlu1 %1935 }
+  0xc6   :  { %1944 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1943_vm7, /*vst_source=*/%v1936_v1  ;;  %vm2115_vm7 = vcmp.eq.s32.totalorder %v3026_v36, 18 }
+  0xc7   :  { %vm2119_vm8 = vmand %vm2115_vm7, %vm1722_vm1 }
+  0xc8   :  { %v1958_v5 = vpop.permute.xlu0 %1957 }
+  0xc9   :  { %1966 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1965_vm9, /*vst_source=*/%v1958_v5  ;;  %vm2137_vm9 = vcmp.eq.s32.totalorder %v3026_v36, 19 }
+  0xca   :  { %vm2141_vm10 = vmand %vm2137_vm9, %vm1722_vm1 }
+  0xcb   :  { %v1980_v7 = vpop.permute.xlu1 %1979 }
+  0xcc   :  { %1988 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm1987_vm11, /*vst_source=*/%v1980_v7  ;;  %vm2159_vm11 = vcmp.eq.s32.totalorder %v3026_v36, 20 }
+  0xcd   :  { %vm2163_vm12 = vmand %vm2159_vm11, %vm1722_vm1 }
+  0xce   :  { %v2002_v12 = vpop.permute.xlu1 %2001 }
+  0xcf   :  { %2010 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2009_vm13, /*vst_source=*/%v2002_v12  ;;  %vm2181_vm13 = vcmp.eq.s32.totalorder %v3026_v36, 21 }
+  0xd0   :  { %vm2185_vm14 = vmand %vm2181_vm13, %vm1722_vm1 }
+  0xd1   :  { %v2024_v14 = vpop.permute.xlu0 %2023 }
+  0xd2   :  { %2032 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2031_vm15, /*vst_source=*/%v2024_v14  ;;  %vm2203_vm15 = vcmp.eq.s32.totalorder %v3026_v36, 22 }
+  0xd3   :  { %vm2207_vm0 = vmand %vm2203_vm15, %vm1722_vm1 }
+  0xd4   :  { %v2046_v17 = vpop.permute.xlu1 %2045 }
+  0xd5   :  { %2054 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2053_vm2, /*vst_source=*/%v2046_v17  ;;  %vm2225_vm2 = vcmp.eq.s32.totalorder %v3026_v36, 23 }
+  0xd6   :  { %vm2229_vm3 = vmand %vm2225_vm2, %vm1722_vm1 }
+  0xd7   :  { %v2068_v18 = vpop.permute.xlu1 %2067 }
+  0xd8   :  { %2076 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2075_vm4, /*vst_source=*/%v2068_v18  ;;  %vm2247_vm4 = vcmp.eq.s32.totalorder %v3026_v36, 24 }
+  0xd9   :  { %vm2251_vm5 = vmand %vm2247_vm4, %vm1722_vm1 }
+  0xda   :  { %v2090_v20 = vpop.permute.xlu0 %2089 }
+  0xdb   :  { %2098 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2097_vm6, /*vst_source=*/%v2090_v20  ;;  %vm2269_vm6 = vcmp.eq.s32.totalorder %v3026_v36, 25 }
+  0xdc   :  { %vm2273_vm7 = vmand %vm2269_vm6, %vm1722_vm1 }
+  0xdd   :  { %v2112_v21 = vpop.permute.xlu1 %2111 }
+  0xde   :  { %2120 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2119_vm8, /*vst_source=*/%v2112_v21  ;;  %vm2291_vm8 = vcmp.eq.s32.totalorder %v3026_v36, 26 }
+  0xdf   :  { %vm2295_vm9 = vmand %vm2291_vm8, %vm1722_vm1 }
+  0xe0   :  { %v2134_v22 = vpop.permute.xlu1 %2133 }
+  0xe1   :  { %2142 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2141_vm10, /*vst_source=*/%v2134_v22  ;;  %vm2313_vm10 = vcmp.eq.s32.totalorder %v3026_v36, 27 }
+  0xe2   :  { %vm2317_vm11 = vmand %vm2313_vm10, %vm1722_vm1 }
+  0xe3   :  { %v2156_v23 = vpop.permute.xlu0 %2155 }
+  0xe4   :  { %2164 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2163_vm12, /*vst_source=*/%v2156_v23  ;;  %vm2335_vm12 = vcmp.eq.s32.totalorder %v3026_v36, 28 }
+  0xe5   :  { %vm2339_vm13 = vmand %vm2335_vm12, %vm1722_vm1 }
+  0xe6   :  { %v2178_v24 = vpop.permute.xlu1 %2177 }
+  0xe7   :  { %2186 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2185_vm14, /*vst_source=*/%v2178_v24  ;;  %vm2357_vm14 = vcmp.eq.s32.totalorder %v3026_v36, 29 }
+  0xe8   :  { %vm2361_vm15 = vmand %vm2357_vm14, %vm1722_vm1 }
+  0xe9   :  { %v2200_v25 = vpop.permute.xlu1 %2199 }
+  0xea   :  { %2208 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2207_vm0, /*vst_source=*/%v2200_v25  ;;  %vm2379_vm0 = vcmp.eq.s32.totalorder %v3026_v36, 30 }
+  0xeb   :  { %vm2383_vm2 = vmand %vm2379_vm0, %vm1722_vm1 }
+  0xec   :  { %v2222_v26 = vpop.permute.xlu0 %2221 }
+  0xed   :  { %2230 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2229_vm3, /*vst_source=*/%v2222_v26  ;;  %vm2401_vm3 = vcmp.eq.s32.totalorder %v3026_v36, 31 }
+  0xee   :  { %vm2405_vm4 = vmand %vm2401_vm3, %vm1722_vm1 }
+  0xef   :  { %v2244_v27 = vpop.permute.xlu1 %2243 }
+  0xf0   :  { %2252 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2251_vm5, /*vst_source=*/%v2244_v27 }
+  0xf1   :  { %v2266_v28 = vpop.permute.xlu1 %2265 }
+  0xf2   :  { %2274 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2273_vm7, /*vst_source=*/%v2266_v28 }
+  0xf3   :  { %v2288_v29 = vpop.permute.xlu0 %2287 }
+  0xf4   :  { %2296 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2295_vm9, /*vst_source=*/%v2288_v29 }
+  0xf5   :  { %v2310_v30 = vpop.permute.xlu1 %2309 }
+  0xf6   :  { %2318 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2317_vm11, /*vst_source=*/%v2310_v30 }
+  0xf7   :  { %v2332_v31 = vpop.permute.xlu1 %2331 }
+  0xf8   :  { %2340 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2339_vm13, /*vst_source=*/%v2332_v31 }
+  0xf9   :  { %v2354_v32 = vpop.permute.xlu0 %2353 }
+  0xfa   :  { %2362 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2361_vm15, /*vst_source=*/%v2354_v32 }
+  0xfb   :  { %v2376_v33 = vpop.permute.xlu1 %2375 }
+  0xfc   :  { %2384 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2383_vm2, /*vst_source=*/%v2376_v33 }
+  0xfd   :  { %v2398_v34 = vpop.permute.xlu1 %2397 }
+  0xfe   :  { %2406 = vst.msk [vmem:[#allocation0] sm:$0xff] /*vm=*/%vm2405_vm4, /*vst_source=*/%v2398_v34 }
+  0xff   :  { %v2411_v35 = vld [vmem:[#allocation0] sm:$0x1] }
+ 0x100   :  { %2414 = vst [vmem:[#allocation3] sm:$0x1] /*vst_source=*/%v2411_v35 }
+ 0x101   :  { %v2433_v38 = vld [vmem:[#allocation3] sm:$0x1] }
+ 0x102   :  { %2434 = vst [vmem:[%s3218_s2] sm:$0x1] /*vst_source=*/%v2433_v38 } /* End region 2 */
+ 0x103   :  { %2452 = vsyncpa [#allocation2], 1 } /* exit bundle: %gather_fusion.1 = fusion(%slice-done, %or_bitcast_fusion) */

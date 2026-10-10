@@ -1,0 +1,16 @@
+// scan_rnn · v6e:1 · 1791619716958330944-broadcast_select_fusion.2-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s38_s0 = inlined_call_operand.vmem [shape: f32[64], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s39_s1 = inlined_call_operand.<no memory space> [shape: pred[], index: 1, kind: input, shape index: {}] /* operand 1 */  ;;  %s40_s2 = inlined_call_operand.vmem [shape: f32[64], index: 2, kind: output, shape index: {}] /* operand 2 */ } /* entry bundle: %broadcast_select_fusion.2 = fusion(%get-tuple-element.83, %compare.3) */
+   0x1   :  { %v3_v0 = vstv %s39_s1  ;;  %v7_v2 = vld [vmem:[%s38_s0] sm:$0x1] }
+   0x2   :  { %v6_v1 = vand.u32 255, %v3_v0 }
+   0x3   :  { %vm10_vm0 = vcmp.ne.s32.totalorder %v6_v1, 0 }
+   0x4   :  { %v11_v3 = vsel /*vm=*/%vm10_vm0, /*on_true_vy=*/0.0, /*on_false_vx=*/%v7_v2 }
+   0x5   :  { %13 = vst [vmem:[%s40_s2] sm:$0x1] /*vst_source=*/%v11_v3 } /* exit bundle: %broadcast_select_fusion.2 = fusion(%get-tuple-element.83, %compare.3) */

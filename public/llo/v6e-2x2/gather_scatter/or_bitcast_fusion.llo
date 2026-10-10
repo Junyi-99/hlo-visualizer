@@ -1,0 +1,22 @@
+// gather_scatter · v6e:2x2 · 1791619912674580667-or_bitcast_fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %vm4_vm0 = vcmask 1040384 /* [0:0,0:127] */  ;;  %s41_s0 = inlined_call_operand.vmem [shape: s32[32,2], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s42_s1 = inlined_call_operand.vmem [shape: s32[32], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %or_bitcast_fusion = fusion(%add_bitcast_fusion) */
+   0x1   :  { %v2_v0 = vld [vmem:[%s41_s0] sm:$0x3] }
+   0x2   :  { %v5_v1 = vsel /*vm=*/%vm4_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v2_v0  ;;  %vm9_vm1 = vcmp.gt.s32.totalorder %v2_v0, 0 }
+   0x3   :  { %v6_v2 = vrot.slane %v5_v1, 1  ;;  %v10_v3 = vsel /*vm=*/%vm9_vm1, /*on_true_vy=*/%v2_v0, /*on_false_vx=*/0 }
+   0x4   :  { %vm11_vm2 = vcmp.lt.s32.totalorder %v10_v3, 31 }
+   0x5   :  { %vm17_vm3 = vcmp.gt.s32.totalorder %v6_v2, 0  ;;  %v12_v5 = vsel /*vm=*/%vm11_vm2, /*on_true_vy=*/%v10_v3, /*on_false_vx=*/31 }
+   0x6   :  { %v18_v4 = vsel /*vm=*/%vm17_vm3, /*on_true_vy=*/%v6_v2, /*on_false_vx=*/0 }
+   0x7   :  { %vm19_vm4 = vcmp.lt.s32.totalorder %v18_v4, 63 }
+   0x8   :  { %v20_v6 = vsel /*vm=*/%vm19_vm4, /*on_true_vy=*/%v18_v4, /*on_false_vx=*/63 }
+   0x9   :  { %v22_v7 = vshll.u32 %v20_v6, 5 }
+   0xa   :  { %v23_v8 = vor.u32 %v22_v7, %v12_v5 }
+   0xb   :  { %24 = vst [vmem:[%s42_s1] sm:$0x1] /*vst_source=*/%v23_v8 } /* exit bundle: %or_bitcast_fusion = fusion(%add_bitcast_fusion) */

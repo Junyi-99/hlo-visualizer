@@ -1,0 +1,35 @@
+// gather_scatter · v6e:2x2 · 1791619912681006886-fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %3 = vsyncpa [#allocation1], 0  ;;  %s83_s0 = inlined_call_operand.vmem [shape: f32[32], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s84_s1 = inlined_call_operand.vmem [shape: s32[32], index: 1, kind: input, shape index: {}] /* operand 1 */  ;;  %s85_s2 = inlined_call_operand.hbm [shape: f32[32,1], index: 2, kind: output, shape index: {}] /* operand 2 */ } /* entry bundle: %fusion = fusion(%gather_fusion.1, %get-tuple-element.8) */
+   0x1   :  { %v4_v0 = vld [vmem:[%s84_s1] sm:$0x1] }
+   0x2   :  { %v5_v1 = vld [vmem:[%s83_s0] sm:$0x1]  ;;  %vm8_vm0 = vcmp.ge.s32.totalorder %v4_v0, 0  ;;  %vm13_vm1 = vcmp.le.s32.totalorder %v4_v0, 63  ;;  %s58_s0 = smov [#allocation0] /* materialized constant */ }
+   0x3   :  { %v33_v2 = vsel /*vm=*/%vm13_vm1, /*on_true_vy=*/%v5_v1, /*on_false_vx=*/nan  ;;  %s25_s12 = sshll.u32 %s58_s0, 4  ;;  %s26_s12 = int_to_ptr.vmem [resolvable:$true] %s25_s12 }
+   0x4   :  { %v34_v3 = vsel /*vm=*/%vm8_vm0, /*on_true_vy=*/%v33_v2, /*on_false_vx=*/nan  ;;  %s36_s13 = scalar_lea.vmem %s26_s12, 16  ;;  %s40_s14 = scalar_lea.vmem %s26_s12, 32 }
+   0x5   :  { %22 = vst [vmem:[#allocation0] sm:$0x1] /*vst_source=*/%v34_v3  ;;  %p37_p0 = scmp.ne.s32.totalorder %s26_s12, %s36_s13  ;;  %p41_p1 = scmp.lt.s32.totalorder %s26_s12, %s26_s12 }
+   0x6   :  { %p42_p2 = scmp.lt.s32.totalorder %s40_s14, %s36_s13 }
+   0x7   :  { %p43_p3 = por %p42_p2, %p41_p1 }
+   0x8   :  { %p44_p4 = pnand %p43_p3, %p37_p0 }
+   0x9   :  { %47 = shalt.err (!%p44_p4) /* BoundsCheck 3 [deref of opnd#0] for %28=dma.vmem_to_hbm
+hlo: fusion
+ */ }
+   0xa   :  { %28 = dma.vmem_to_hbm [thread:$0]  /*vmem=*/%s26_s12, /*size_in_granules=*/16, /*hbm=*/%s85_s2, /*dst_syncflagno=*/[#allocation1] /* 
+base_bounds: (1, 1)
+dynamic_base_bounds: (1, 1)
+window_bounds: (1, 1)
+iteration_bounds: (1, 1)
+strides: (1, 1)
+pad_low: (0, 0)
+pad_high: (0, 0)
+element_size_in_bytes: 512
+second_minor_factor: 1 */ }
+   0xb   :  { %56 = dma.done.wait [#allocation1], 16 /* pipeline-emitter-dma-wait */ }
+   0xc   :  { %57 = vsyncadd [#allocation1], 4294967280 }
+   0xd   :  { %30 = vsyncpa [#allocation1], 1 } /* exit bundle: %fusion = fusion(%gather_fusion.1, %get-tuple-element.8) */

@@ -16,7 +16,8 @@ async function filesUnder(directory, prefix = '') {
   return files.flat();
 }
 
-const assets = (await filesUnder(dist)).filter(file => file !== 'sw.js').sort();
+// LLO programs are large and fetched on demand; the worker caches them on first use instead of at install.
+const assets = (await filesUnder(dist)).filter(file => file !== 'sw.js' && !file.startsWith('llo/')).sort();
 const hash = createHash('sha256');
 for (const file of assets) {
   hash.update(file);
@@ -56,7 +57,19 @@ self.addEventListener('fetch', event => {
 
   // Module scripts send an Origin header while install-time precache requests may not.
   // All entries are same-origin, so ignore Vary when matching these cached files.
-  event.respondWith(caches.match(request, { ignoreVary: true }).then(cached => cached || fetch(request)));
+  event.respondWith(
+    caches.match(request, { ignoreVary: true }).then(
+      cached =>
+        cached ||
+        fetch(request).then(response => {
+          if (response.ok && url.pathname.includes('/llo/')) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          }
+          return response;
+        })
+    )
+  );
 });
 `;
 

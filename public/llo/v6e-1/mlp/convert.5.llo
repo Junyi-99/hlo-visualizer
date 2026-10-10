@@ -1,0 +1,14 @@
+// mlp · v6e:1 · 1791619575914651628-convert.5-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s28_s0 = inlined_call_operand.vmem [shape: bf16[256], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s29_s1 = inlined_call_operand.vmem [shape: f32[256], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %convert.5 = convert(%get-tuple-element) */
+   0x1   :  { %v5_v0 = vld [vmem:[%s28_s0] sm:$0x1] }
+   0x2   :  { %v6_v1 = vunpack.c.l.bf16 %v5_v0 }
+   0x3   :  { %11 = vst [vmem:[%s29_s1] sm:$0x3] /*vst_source=*/%v6_v1 } /* exit bundle: %convert.5 = convert(%get-tuple-element) */

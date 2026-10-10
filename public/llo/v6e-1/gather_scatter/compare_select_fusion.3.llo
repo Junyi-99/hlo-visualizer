@@ -1,0 +1,45 @@
+// gather_scatter · v6e:1 · 1791619730641612631-compare_select_fusion.3-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %4 = vsyncpa [#allocation1], 0  ;;  %s108_s9 = smov [#allocation0] /* materialized constant */  ;;  %s133_s0 = inlined_call_operand.hbm [shape: s32[32], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s134_s1 = inlined_call_operand.vmem [shape: s32[32], index: 1, kind: output, shape index: {0}] /* operand 1 */  ;;  %s135_s2 = inlined_call_operand.vmem [shape: s32[32], index: 2, kind: output, shape index: {1}] /* operand 2 */ } /* entry bundle: %compare_select_fusion.3 = fusion(%idx.1) */
+   0x1   :  { %s7_s10 = sshll.u32 %s108_s9, 4  ;;  %s8_s10 = int_to_ptr.vmem [resolvable:$true] %s7_s10 }
+   0x2   :  { %s94_s11 = scalar_lea.vmem %s8_s10, 16  ;;  %s98_s12 = scalar_lea.vmem %s8_s10, 32 }
+   0x3   :  { %p95_p0 = scmp.ne.s32.totalorder %s8_s10, %s94_s11  ;;  %p99_p1 = scmp.lt.s32.totalorder %s8_s10, %s8_s10 }
+   0x4   :  { %p100_p2 = scmp.lt.s32.totalorder %s98_s12, %s94_s11 }
+   0x5   :  { %p101_p3 = por %p100_p2, %p99_p1 }
+   0x6   :  { %p102_p4 = pnand %p101_p3, %p95_p0 }
+   0x7   :  { %105 = shalt.err (!%p102_p4) /* BoundsCheck 0 [deref of opnd#2] for %10=dma.hbm_to_vmem
+hlo: compare_select_fusion.3
+ */ }
+   0x8   :  { %10 = dma.hbm_to_vmem [thread:$0]  /*hbm=*/%s133_s0, /*size_in_granules=*/16, /*vmem=*/%s8_s10, /*dst_syncflagno=*/[#allocation1] /* 
+base_bounds: (1)
+dynamic_base_bounds: (1)
+window_bounds: (1)
+iteration_bounds: (1)
+strides: (1)
+pad_low: (0)
+pad_high: (0)
+element_size_in_bytes: 512
+second_minor_factor: 1 */ }
+   0x9   :  { %106 = dma.done.wait [#allocation1], 16 /* pipeline-emitter-dma-wait */ }
+   0xa   :  { %107 = vsyncadd [#allocation1], 4294967280  ;;  %v12_v0 = vld [vmem:[#allocation0] sm:$0x1] }
+   0xb   :  { %v20_v1 = vsub.s32 0, %v12_v0  ;;  %v70_v2 = vadd.s32 1000, %v12_v0  ;;  %vm15_vm0 = vcmp.lt.s32.totalorder %v12_v0, 0 }
+   0xc   :  { %v80_v3 = vmin.u32 %v20_v1, %v12_v0  ;;  %v74_v4 = vsel /*vm=*/%vm15_vm0, /*on_true_vy=*/%v70_v2, /*on_false_vx=*/%v12_v0 }
+   0xd   :  { %78 = vst [vmem:[%s135_s2] sm:$0x1] /*vst_source=*/%v74_v4 }
+   0xe   :  { %v26_v5 = vand.u32 63, %v80_v3 }
+   0xf   :  { %v29_v6 = vsub.s32 0, %v26_v5 }
+  0x10   :  { %v33_v7 = vsel /*vm=*/%vm15_vm0, /*on_true_vy=*/%v29_v6, /*on_false_vx=*/%v26_v5 }
+  0x11   :  { %vm37_vm1 = vcmp.lt.s32.totalorder %v33_v7, 0  ;;  %vm42_vm2 = vcmp.ne.s32.totalorder %v33_v7, 0  ;;  %v48_v8 = vadd.s32 64, %v33_v7 }
+  0x12   :  { %v83_v9 = vsel /*vm=*/%vm42_vm2, /*on_true_vy=*/%v48_v8, /*on_false_vx=*/%v33_v7 }
+  0x13   :  { %v84_v10 = vsel /*vm=*/%vm37_vm1, /*on_true_vy=*/%v83_v9, /*on_false_vx=*/%v33_v7 }
+  0x14   :  { %vm57_vm3 = vcmp.lt.s32.totalorder %v84_v10, 0  ;;  %v62_v11 = vadd.s32 64, %v84_v10 }
+  0x15   :  { %v66_v12 = vsel /*vm=*/%vm57_vm3, /*on_true_vy=*/%v62_v11, /*on_false_vx=*/%v84_v10 }
+  0x16   :  { %77 = vst [vmem:[%s134_s1] sm:$0x1] /*vst_source=*/%v66_v12 }
+  0x17   :  { %79 = vsyncpa [#allocation1], 1 } /* exit bundle: %compare_select_fusion.3 = fusion(%idx.1) */

@@ -1,0 +1,14 @@
+// linalg · v6e:2x2 · 1791619942568022285-householder_product.22-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s24_s0 = inlined_call_operand.vmem [shape: f32[64], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s25_s1 = inlined_call_operand.vmem [shape: f32[64], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %householder_product.22 = negate(%get-tuple-element.7) */
+   0x1   :  { %v2_v0 = vld [vmem:[%s24_s0] sm:$0x1] }
+   0x2   :  { %v5_v1 = vxor.u32 2147483648, %v2_v0 }
+   0x3   :  { %7 = vst [vmem:[%s25_s1] sm:$0x1] /*vst_source=*/%v5_v1 } /* exit bundle: %householder_product.22 = negate(%get-tuple-element.7) */

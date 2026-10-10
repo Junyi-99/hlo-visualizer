@@ -1,0 +1,24 @@
+// sort_topk · v6e:1 · 1791619741412270080-copy.1-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %s191_s0 = inlined_call_operand.vmem [shape: f32[8,8,128], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s192_s1 = inlined_call_operand.vmem [shape: f32[8,8,128], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %copy.1 = copy(%pad_bitcast_fusion) */
+   0x1   :  { %v6_v0 = vld [vmem:[%s191_s0] ss:$8 sm:$0xf]  ;;  %v88_v3 = vld [vmem:[%s191_s0 + $0x1] ss:$8 sm:$0xf] }
+   0x2   :  { %v8_v1 = vld [vmem:[%s191_s0] ss:$8 sm:$0xf0]  ;;  %v89_v4 = vld [vmem:[%s191_s0 + $0x1] ss:$8 sm:$0xf0] }
+   0x3   :  { %v9_v2 = vor.u32 %v8_v1, %v6_v0  ;;  %v19_v5 = vor.u32 %v89_v4, %v88_v3  ;;  %v91_v6 = vld [vmem:[%s191_s0 + $0x2] ss:$8 sm:$0xf]  ;;  %v94_v9 = vld [vmem:[%s191_s0 + $0x3] ss:$8 sm:$0xf] }
+   0x4   :  { %v92_v7 = vld [vmem:[%s191_s0 + $0x2] ss:$8 sm:$0xf0]  ;;  %v95_v10 = vld [vmem:[%s191_s0 + $0x3] ss:$8 sm:$0xf0] }
+   0x5   :  { %10 = vst [vmem:[%s192_s1] sm:$0xff] /*vst_source=*/%v9_v2  ;;  %v30_v8 = vor.u32 %v92_v7, %v91_v6  ;;  %90 = vst [vmem:[%s192_s1 + $0x8] sm:$0xff] /*vst_source=*/%v19_v5  ;;  %v41_v11 = vor.u32 %v95_v10, %v94_v9  ;;  %v97_v12 = vld [vmem:[%s191_s0 + $0x4] ss:$8 sm:$0xf] }
+   0x6   :  { %v98_v13 = vld [vmem:[%s191_s0 + $0x4] ss:$8 sm:$0xf0]  ;;  %v100_v15 = vld [vmem:[%s191_s0 + $0x5] ss:$8 sm:$0xf] }
+   0x7   :  { %93 = vst [vmem:[%s192_s1 + $0x10] sm:$0xff] /*vst_source=*/%v30_v8  ;;  %v52_v14 = vor.u32 %v98_v13, %v97_v12  ;;  %v101_v16 = vld [vmem:[%s191_s0 + $0x5] ss:$8 sm:$0xf0]  ;;  %96 = vst [vmem:[%s192_s1 + $0x18] sm:$0xff] /*vst_source=*/%v41_v11 }
+   0x8   :  { %v63_v17 = vor.u32 %v101_v16, %v100_v15  ;;  %v103_v18 = vld [vmem:[%s191_s0 + $0x6] ss:$8 sm:$0xf]  ;;  %v106_v21 = vld [vmem:[%s191_s0 + $0x7] ss:$8 sm:$0xf] }
+   0x9   :  { %v104_v19 = vld [vmem:[%s191_s0 + $0x6] ss:$8 sm:$0xf0]  ;;  %99 = vst [vmem:[%s192_s1 + $0x20] sm:$0xff] /*vst_source=*/%v52_v14 }
+   0xa   :  { %v74_v20 = vor.u32 %v104_v19, %v103_v18  ;;  %v107_v22 = vld [vmem:[%s191_s0 + $0x7] ss:$8 sm:$0xf0]  ;;  %102 = vst [vmem:[%s192_s1 + $0x28] sm:$0xff] /*vst_source=*/%v63_v17 }
+   0xb   :  { %v85_v23 = vor.u32 %v107_v22, %v106_v21 }
+   0xc   :  { %105 = vst [vmem:[%s192_s1 + $0x30] sm:$0xff] /*vst_source=*/%v74_v20 }
+   0xd   :  { %108 = vst [vmem:[%s192_s1 + $0x38] sm:$0xff] /*vst_source=*/%v85_v23 } /* exit bundle: %copy.1 = copy(%pad_bitcast_fusion) */

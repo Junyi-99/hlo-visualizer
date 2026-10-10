@@ -1,0 +1,23 @@
+// collectives · v6e:2x2 · 1791620039595150716-copy.6-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %2 = vsyncpa [#allocation0], 0  ;;  %s47_s0 = inlined_call_operand.vmem [shape: f32[1,1,64], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s48_s1 = inlined_call_operand.hbm [shape: f32[1,1,64], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %copy.6 = copy(%bitcast.1) */
+   0x1   :  { %s3_s0 = sshll.u32 %s47_s0, 4  ;;  %s4_s0 = int_to_ptr.vmem [resolvable:$true] %s3_s0 }
+   0x2   :  { %s9_s8 = scalar_lea.vmem %s4_s0, 16  ;;  %p14_p1 = scmp.lt.s32.totalorder %s4_s0, %s4_s0 }
+   0x3   :  { %p10_p0 = scmp.ne.s32.totalorder %s4_s0, %s9_s8  ;;  %p15_p2 = scmp.lt.s32.totalorder %s9_s8, %s9_s8 }
+   0x4   :  { %p16_p3 = por %p15_p2, %p14_p1 }
+   0x5   :  { %p17_p4 = pnand %p16_p3, %p10_p0 }
+   0x6   :  { %20 = shalt.err (!%p17_p4) /* BoundsCheck 0 [deref of opnd#0] for %6=dma.vmem_to_hbm
+hlo: copy.6
+ */ }
+   0x7   :  { %6 = dma.vmem_to_hbm [thread:$0]  /*vmem=*/%s4_s0, /*size_in_granules=*/16, /*hbm=*/%s48_s1, /*dst_syncflagno=*/[#allocation0] }
+   0x8   :  { %29 = dma.done.wait [#allocation0], 16 /* local-dma-wait */ }
+   0x9   :  { %30 = vsyncadd [#allocation0], 4294967280 }
+   0xa   :  { %8 = vsyncpa [#allocation0], 1 } /* exit bundle: %copy.6 = copy(%bitcast.1) */

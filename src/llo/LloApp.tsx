@@ -2,10 +2,9 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent, type DragEv
 import { Drawer } from 'vaul';
 import sample from './sample.llo?raw';
 import { AppSidebar, SidebarToggle } from '../components/AppSidebar';
-import { examples as hloExamples } from '../lib/examples';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStoredState } from '../hooks/useStoredState';
-import { lloExamples, type LloExample } from './examples';
+import { findLloExample, lloExamples, lloTopologies, type LloExample } from './examples';
 import { definitionOf, parseLlo, units, type LloInstruction, type LloProgram, type Unit } from './parser';
 import './llo.css';
 
@@ -239,9 +238,12 @@ export default function LloApp() {
   const searchRef = useRef<HTMLInputElement>(null);
 
   const region = program.regions.find(item => item.name === regionName) ?? program.regions[0];
-  // Same program in the HLO view when the loaded dump is a bundled example.
-  const hloId = exampleId && `${exampleId.split('/')[1]}.after`;
-  const hloHref = hloId && hloExamples.some(item => item.id === hloId) ? `?example=${hloId}` : '?';
+  const example = exampleId ? (lloExamples.find(item => item.id === exampleId) ?? null) : null;
+  // Other programs compiled from the same JAX example, one per HLO instruction.
+  const siblings = example ? lloExamples.filter(item => item.topology === example.topology && item.example === example.example) : [];
+  const exampleDefault = siblings.find(item => item.default);
+  // The same instruction in the HLO graph when the shipped HLO example contains it.
+  const hloHref = example?.hloExample ? `?example=${example.hloExample}&node=${example.instruction}` : '?';
   const selected = program.instructions.find(item => item.id === selectedId) ?? null;
   const scheduled = !!region?.bundles.length;
   const normalizedQuery = query.trim().toLowerCase();
@@ -285,12 +287,12 @@ export default function LloApp() {
     setSelectedId(instruction.id);
     requestAnimationFrame(() => rowRefs.current.get(instruction.id)?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
   };
-  const load = useCallback((source: string, name: string, example: string | null = null) => {
+  const load = useCallback((source: string, name: string, id: string | null = null) => {
     const parsed = parseLlo(source);
     if (!parsed.instructions.length) throw new Error(parsed.warnings[0]);
     setProgram(parsed);
     setFileName(name);
-    setExampleId(example);
+    setExampleId(id);
     setRegionName(parsed.regions[0].name);
     setSelectedId(null);
     setQuery('');
@@ -299,18 +301,18 @@ export default function LloApp() {
     setImportOpen(false);
     setError('');
     const url = new URL(location.href);
-    if (example) url.searchParams.set('example', example);
+    if (id) url.searchParams.set('example', id);
     else url.searchParams.delete('example');
     history.replaceState(null, '', url);
   }, []);
   const loadExample = useCallback(
-    (example: LloExample) => void example.load().then(source => load(source, `${example.program} · ${example.topology}`, example.id)),
+    (entry: LloExample) =>
+      void entry.load().then(source => load(source, `${entry.example} · %${entry.instruction} · ${entry.topology}`, entry.id)),
     [load]
   );
   useEffect(() => {
-    const id = new URLSearchParams(location.search).get('example');
-    const example = lloExamples.find(item => item.id === id);
-    if (example) loadExample(example);
+    const entry = findLloExample(new URLSearchParams(location.search).get('example'));
+    if (entry) loadExample(entry);
   }, [loadExample]);
   const openFile = async (file: File) => {
     try {
@@ -378,6 +380,32 @@ export default function LloApp() {
             {program.regions.length} {program.regions.length === 1 ? 'region' : 'regions'} · {program.instructions.length} instructions ·{' '}
             {program.regions.reduce((sum, item) => sum + item.bundles.length, 0)} bundles
           </p>
+          {program.hlo && (
+            <div className="llo-hlo">
+              <div className="eyebrow">HLO INSTRUCTION</div>
+              <p>
+                %{program.hlo.name} = {program.hlo.opcode}({program.hlo.operands.join(', ')})
+              </p>
+              {siblings.length > 1 && (
+                <select
+                  className="llo-example-select"
+                  aria-label="Choose another program from this example"
+                  value={exampleId ?? ''}
+                  onChange={event => {
+                    const next = lloExamples.find(item => item.id === event.target.value);
+                    if (next) loadExample(next);
+                  }}
+                >
+                  {siblings.map(item => (
+                    <option key={item.id} value={item.id}>
+                      %{item.instruction} · {item.opcode} · {item.bundles} bundles
+                    </option>
+                  ))}
+                </select>
+              )}
+              {example?.hloExample && <a href={hloHref}>Open in HLO graph →</a>}
+            </div>
+          )}
         </div>
         <div className="llo-side-section llo-region-section">
           <div className="llo-section-title">
@@ -417,22 +445,22 @@ export default function LloApp() {
             <select
               className="llo-example-select"
               aria-label="Load an LLO example"
-              value={exampleId ?? ''}
+              value={exampleDefault?.id ?? ''}
               onChange={event => {
-                const example = lloExamples.find(item => item.id === event.target.value);
-                if (example) loadExample(example);
+                const next = lloExamples.find(item => item.id === event.target.value);
+                if (next) loadExample(next);
               }}
             >
               <option value="" disabled>
                 Examples
               </option>
-              {['v6e-1', 'v6e-2x2'].map(topology => (
+              {lloTopologies.map(topology => (
                 <optgroup key={topology} label={topology}>
                   {lloExamples
-                    .filter(item => item.topology === topology)
+                    .filter(item => item.topology === topology && item.default)
                     .map(item => (
                       <option key={item.id} value={item.id}>
-                        {item.program}
+                        {item.example}
                       </option>
                     ))}
                 </optgroup>

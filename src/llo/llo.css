@@ -48,6 +48,26 @@
   color: var(--text-2);
   font-size: 12px;
 }
+.llo-hlo {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+.llo-hlo p {
+  font: 11px/1.5 var(--font-mono);
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+.llo-hlo select {
+  width: 100%;
+  max-width: none;
+}
+.llo-hlo a {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
 .llo-region-section {
   flex: 1;
   min-height: 0;

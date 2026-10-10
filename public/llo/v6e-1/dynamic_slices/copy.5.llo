@@ -1,0 +1,23 @@
+// dynamic_slices · v6e:1 · 1791619735891029208-copy.5-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %2 = vsyncpa [#allocation0], 0  ;;  %s47_s0 = inlined_call_operand.hbm [shape: f32[256,256], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s48_s1 = inlined_call_operand.vmem [shape: f32[256,256], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %copy.5 = copy(%x.1) */
+   0x1   :  { %s3_s1 = sshll.u32 %s48_s1, 4  ;;  %s4_s1 = int_to_ptr.vmem [resolvable:$true] %s3_s1 }
+   0x2   :  { %s17_s8 = scalar_lea.vmem %s4_s1, 8192  ;;  %p22_p1 = scmp.lt.s32.totalorder %s4_s1, %s4_s1 }
+   0x3   :  { %p18_p0 = scmp.ne.s32.totalorder %s4_s1, %s17_s8  ;;  %p23_p2 = scmp.lt.s32.totalorder %s17_s8, %s17_s8 }
+   0x4   :  { %p24_p3 = por %p23_p2, %p22_p1 }
+   0x5   :  { %p25_p4 = pnand %p24_p3, %p18_p0 }
+   0x6   :  { %28 = shalt.err (!%p25_p4) /* BoundsCheck 0 [deref of opnd#2] for %6=dma.hbm_to_vmem
+hlo: copy.5
+ */ }
+   0x7   :  { %6 = dma.hbm_to_vmem [thread:$0]  /*hbm=*/%s47_s0, /*size_in_granules=*/8192, /*vmem=*/%s4_s1, /*dst_syncflagno=*/[#allocation0] }
+   0x8   :  { %29 = dma.done.wait [#allocation0], 8192 /* local-dma-wait */ }
+   0x9   :  { %30 = vsyncadd [#allocation0], 4294959104 }
+   0xa   :  { %8 = vsyncpa [#allocation0], 1 } /* exit bundle: %copy.5 = copy(%x.1) */

@@ -1,0 +1,22 @@
+// random_ops · v6e:1 · 1791619758209405802-pad_add_fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v35_v0 = vlaneseq  ;;  %s101_s0 = inlined_call_operand.vmem [shape: u32[2,1], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s102_s1 = inlined_call_operand.vmem [shape: u32[2,1], index: 1, kind: input, shape index: {}] /* operand 1 */  ;;  %s103_s2 = inlined_call_operand.vmem [shape: u32[2,2], index: 2, kind: output, shape index: {}] /* operand 2 */ } /* entry bundle: %pad_add_fusion = fusion(%get-tuple-element.14, %get-tuple-element.15) */
+   0x1   :  { %v73_v2 = vld [vmem:[%s102_s1] sm:$0x3] }
+   0x2   :  { %v36_v1 = vand.u32 127, %v35_v0  ;;  %v74_v3 = vld [vmem:[%s101_s0] sm:$0x3]  ;;  %s76_s0 = smov 1 /* materialized constant */ }
+   0x3   :  { %v53_v4 = vadd.s32 128, %v36_v1  ;;  %vm38_vm0 = vcmp.lt.s32.totalorder %v36_v1, 1  ;;  %vm58_vm1 = vcmp.lt.s32.totalorder %v36_v1, 127 }
+   0x4   :  { %v39_v5 = vsel /*vm=*/%vm38_vm0, /*on_true_vy=*/%v73_v2, /*on_false_vx=*/0 }
+   0x5   :  { %vm54_vm2 = vcmp.lt.s32.totalorder %v53_v4, 129 }
+   0x6   :  { %v55_v6 = vsel /*vm=*/%vm54_vm2, /*on_true_vy=*/%v74_v3, /*on_false_vx=*/0 }
+   0x7   :  { %v59_v7 = vsel /*vm=*/%vm58_vm1, /*on_true_vy=*/%v55_v6, /*on_false_vx=*/0 }
+   0x8   :  { %60 = vrot.lane.b32.xlu0 %v59_v7, %s76_s0 }
+   0x9   :  { %v61_v8 = vpop.permute.xlu0 %60 }
+   0xa   :  { %v64_v9 = vadd.s32 %v61_v8, %v39_v5 }
+   0xb   :  { %66 = vst [vmem:[%s103_s2] sm:$0x3] /*vst_source=*/%v64_v9 } /* exit bundle: %pad_add_fusion = fusion(%get-tuple-element.14, %get-tuple-element.15) */

@@ -1,0 +1,15 @@
+// random_ops · v6e:2x2 · 1791619929780124847-slice_bitcast_fusion.2-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %vm5_vm0 = vcmask 1040384 /* [0:0,0:127] */  ;;  %s36_s0 = inlined_call_operand.vmem [shape: u32[2,2], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s37_s1 = inlined_call_operand.vmem [shape: u32[2], index: 1, kind: output, shape index: {0}] /* operand 1 */  ;;  %s38_s2 = inlined_call_operand.vmem [shape: u32[2], index: 2, kind: output, shape index: {1}] /* operand 2 */ } /* entry bundle: %slice_bitcast_fusion.2 = fusion(%pad_add_fusion) */
+   0x1   :  { %v4_v0 = vld [vmem:[%s36_s0] sm:$0x3] }
+   0x2   :  { %v6_v1 = vsel /*vm=*/%vm5_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v4_v0  ;;  %11 = vst [vmem:[%s38_s2] sm:$0x1] /*vst_source=*/%v4_v0 }
+   0x3   :  { %v7_v2 = vrot.slane %v6_v1, 1 }
+   0x4   :  { %10 = vst [vmem:[%s37_s1] sm:$0x1] /*vst_source=*/%v7_v2 } /* exit bundle: %slice_bitcast_fusion.2 = fusion(%pad_add_fusion) */

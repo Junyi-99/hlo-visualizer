@@ -1,0 +1,13 @@
+// linalg · v6e:2x2 · 1791619942219319616-iota_add_fusion-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v1_v0 = vlaneseq  ;;  %s17_s0 = inlined_call_operand.vmem [shape: s32[64], index: 0, kind: output, shape index: {}] /* operand 0 */ } /* entry bundle: %iota_add_fusion = fusion() */
+   0x1   :  { %v6_v1 = vadd.s32 4294967295, %v1_v0 }
+   0x2   :  { %8 = vst [vmem:[%s17_s0] sm:$0x1] /*vst_source=*/%v6_v1 } /* exit bundle: %iota_add_fusion = fusion() */

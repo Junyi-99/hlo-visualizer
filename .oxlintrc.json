@@ -22,5 +22,5 @@
       }
     ]
   },
-  "ignorePatterns": ["dist", "node_modules", "examples"]
+  "ignorePatterns": ["dist", "node_modules", "examples", "public"]
 }

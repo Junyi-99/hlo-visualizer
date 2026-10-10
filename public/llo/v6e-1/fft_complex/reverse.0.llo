@@ -1,0 +1,17 @@
+// fft_complex · v6e:1 · 1791619769494853813-reverse.0-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v2_v0 = vlaneseq  ;;  %s99_s0 = inlined_call_operand.vmem [shape: f32[8,31], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s100_s1 = inlined_call_operand.vmem [shape: f32[8,31], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %reverse.0 = reverse(%slice.1) */
+   0x1   :  { %v33_v2 = vld [vmem:[%s99_s0] sm:$0xff] }
+   0x2   :  { %v3_v1 = vsub.s32 30, %v2_v0 }
+   0x3   :  { %4 = vset.pattern.permute.xlu0 %v3_v1 }
+   0x4   :  { %39 = vperm.xlu0 /*pattern=*/%4, /*source=*/%v33_v2 /* Set PCR instruction */ }
+   0x5   :  { %v40_v3 = vpop.permute.xlu0 %39 }
+   0x6   :  { %71 = vst [vmem:[%s100_s1] sm:$0xff] /*vst_source=*/%v40_v3 } /* exit bundle: %reverse.0 = reverse(%slice.1) */

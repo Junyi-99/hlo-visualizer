@@ -1,0 +1,18 @@
+// fft_complex · v6e:2x2 · 1791619936836951590-jit_fft_.72-01-final_bundles.txt
+= control target key start
+LH: loop header
+LB: loop body
+LE: loop exit
+PB: predicated region body
+PF: predicated region fallthrough
+CT: control target
+= control target key end
+
+     0   :  { %v3_v0 = vlaneseq  ;;  %s28_s0 = inlined_call_operand.vmem [shape: f32[8,64], index: 0, kind: input, shape index: {}] /* operand 0 */  ;;  %s29_s1 = inlined_call_operand.vmem [shape: f32[8,31], index: 1, kind: output, shape index: {}] /* operand 1 */ } /* entry bundle: %jit_fft_.72 = slice(%fusion.3) */
+   0x1   :  { %v2_v1 = vld [vmem:[%s28_s0] sm:$0xff]  ;;  %s11_s0 = smov 127 /* materialized constant */ }
+   0x2   :  { %v4_v2 = vand.u32 127, %v3_v0 }
+   0x3   :  { %vm5_vm0 = vcmp.lt.s32.totalorder %v4_v2, 1 }
+   0x4   :  { %v6_v3 = vsel /*vm=*/%vm5_vm0, /*on_true_vy=*/0, /*on_false_vx=*/%v2_v1 }
+   0x5   :  { %7 = vrot.lane.b32.xlu0 %v6_v3, %s11_s0 }
+   0x6   :  { %v8_v4 = vpop.permute.xlu0 %7 }
+   0x7   :  { %9 = vst [vmem:[%s29_s1] sm:$0xff] /*vst_source=*/%v8_v4 } /* exit bundle: %jit_fft_.72 = slice(%fusion.3) */
