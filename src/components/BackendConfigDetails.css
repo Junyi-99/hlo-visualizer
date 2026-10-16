@@ -1,0 +1,116 @@
+.backend-records {
+  margin: 16px 0;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.backend-records > summary,
+.backend-raw > summary {
+  padding: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.backend-records > summary > span {
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 400;
+  margin-left: 5px;
+}
+
+.backend-records-body {
+  padding: 0 12px 12px;
+}
+
+.backend-records p {
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+
+.backend-fields {
+  margin: 0;
+}
+
+.backend-fields > div {
+  border-top: 1px solid var(--border-soft);
+  padding: 10px 0;
+}
+
+.backend-fields dt button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.backend-fields dd {
+  margin: 6px 0 0;
+}
+
+.backend-fields dd > code {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+
+.backend-fields dd p {
+  margin: 5px 0 0;
+}
+
+.backend-raw {
+  border: 1px solid var(--border-soft);
+  border-radius: 7px;
+  margin: 4px 0 10px;
+  background: var(--surface-2);
+}
+
+.backend-raw > summary {
+  padding: 9px;
+}
+
+.backend-raw .backend-selected {
+  padding: 0 9px;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+
+.backend-raw pre {
+  max-height: 240px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 9px;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.backend-raw mark {
+  background: var(--accent-bg);
+  color: var(--accent);
+  outline: 1px solid var(--accent);
+}
+
+.backend-records .backend-source {
+  font-size: 10px;
+  margin-bottom: 0;
+}
+
+.backend-source a {
+  color: var(--accent);
+}
+
+.backend-records :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}

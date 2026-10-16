@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Drawer } from 'vaul';
-import { instructionGuide, layoutDiagram, partColor } from '../lib/instruction-guide';
+import { instructionGuide, partColor } from '../lib/instruction-guide';
 import { extractHloMetadata, type HloMetadata } from '../lib/metadata';
 import { nodeCategory, nodeSummary, sourceStack } from '../lib/parser';
 import type { CopyGroup } from '../lib/copy-grouping';
@@ -9,21 +9,27 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useStoredState } from '../hooks/useStoredState';
 import { Icon } from './Icon';
 import { partClass, TypeTree } from './TypeTree';
+import { CopyLesson } from './CopyLesson';
+import { BackendConfigDetails } from './BackendConfigDetails';
+import { LayoutLesson } from './LayoutLesson';
+import { FusionLesson } from './FusionLesson';
 
 interface InspectorProps {
   copyGroup?: CopyGroup | null;
   module: HloModule;
   computation: Computation | null;
   node: HloNode | null;
-  upstreamCount: number;
-  downstreamCount: number;
   lloHref: string | null;
   onClose: () => void;
   onNode: (name: string) => void;
   onComputation: (name: string) => void;
+  onNavigate: (computation: string, node: string) => void;
 }
 
-type DetailsProps = Omit<InspectorProps, 'onClose' | 'onNode' | 'onComputation'> & { node: HloNode; computation: Computation };
+type DetailsProps = Omit<InspectorProps, 'onClose' | 'onNode' | 'onComputation' | 'onNavigate'> & {
+  node: HloNode;
+  computation: Computation;
+};
 
 type Activate = (part: string | null, slot?: string | null) => void;
 
@@ -140,29 +146,18 @@ function ResizeHandle({ panelRef }: { panelRef: React.RefObject<HTMLElement | nu
 const sameDetails = (a: DetailsProps, b: DetailsProps | null) =>
   !!b && (Object.keys(a) as (keyof DetailsProps)[]).every(key => a[key] === b[key]);
 
-export function Inspector({
-  copyGroup,
-  module,
-  computation,
-  node,
-  upstreamCount,
-  downstreamCount,
-  lloHref,
-  onClose,
-  onNode,
-  onComputation
-}: InspectorProps) {
+export function Inspector({ copyGroup, module, computation, node, lloHref, onClose, onNode, onComputation, onNavigate }: InspectorProps) {
   const isPhone = useMediaQuery('(max-width: 700px)');
   const panelRef = useRef<HTMLElement>(null);
 
-  const shown = node && computation ? { copyGroup, module, computation, node, upstreamCount, downstreamCount, lloHref } : null;
+  const shown = node && computation ? { copyGroup, module, computation, node, lloHref } : null;
 
   // The drawer keeps the last node rendered while it slides away.
   const [lastShown, setLastShown] = useState(shown);
   if (shown && !sameDetails(shown, lastShown)) setLastShown(shown);
 
   const renderDetails = (props: DetailsProps | null) =>
-    props && <InstructionDetails key={props.node.id} {...props} onNode={onNode} onComputation={onComputation} />;
+    props && <InstructionDetails key={props.node.id} {...props} onNode={onNode} onComputation={onComputation} onNavigate={onNavigate} />;
   const details = renderDetails(shown);
 
   if (isPhone) {
@@ -267,12 +262,11 @@ function InstructionDetails({
   module,
   computation,
   node,
-  upstreamCount,
-  downstreamCount,
   lloHref,
   onNode,
-  onComputation
-}: DetailsProps & Pick<InspectorProps, 'onNode' | 'onComputation'>) {
+  onComputation,
+  onNavigate
+}: DetailsProps & Pick<InspectorProps, 'onNode' | 'onComputation' | 'onNavigate'>) {
   const [activePart, setActivePart] = useState<string | null>(null);
   const [activeSlot, setActiveSlot] = useState<string | null>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
@@ -311,7 +305,7 @@ function InstructionDetails({
   return (
     <div ref={detailsRef}>
       {copyGroup && <CopyGroupSummary copyGroup={copyGroup} onNode={onNode} />}
-      <InstructionHeader node={node} upstreamCount={upstreamCount} downstreamCount={downstreamCount} />
+      <InstructionHeader node={node} />
       <InstructionSection
         node={node}
         guide={guide}
@@ -321,6 +315,10 @@ function InstructionDetails({
         activate={activate}
         onCodeClick={onCodeClick}
       />
+      <CopyLesson module={module} computation={computation} node={node} onNode={onNode} />
+      <FusionLesson module={module} computation={computation} node={node} onNode={onNode} onNavigate={onNavigate} />
+      <LayoutLesson node={node} />
+      <BackendConfigDetails node={node} />
       {metadata && <MetadataSection metadata={metadata} module={module} active={activePart === 'metadata'} activate={activate} />}
       <ReferenceSection title="Direct inputs" names={node.operands} onNode={onNode} />
       <ReferenceSection title="Direct consumers" names={node.users} onNode={onNode} />
@@ -357,31 +355,16 @@ function CopyGroupSummary({ copyGroup, onNode }: { copyGroup: CopyGroup; onNode:
   );
 }
 
-function InstructionHeader({ node, upstreamCount, downstreamCount }: { node: HloNode; upstreamCount: number; downstreamCount: number }) {
+function InstructionHeader({ node }: { node: HloNode }) {
   const displayType = node.type.startsWith('(') ? nodeSummary(node) : node.type;
-  const metrics = [
-    { label: 'Upstream', value: upstreamCount },
-    { label: 'Downstream', value: downstreamCount },
-    { label: 'Source line', value: node.line }
-  ];
 
   return (
-    <>
-      <div className="inspector-title">
-        <span className={`type-badge ${nodeCategory(node)}`}>{node.op}</span>
-        {node.root && <span className="root-pill">ROOT</span>}
-        <h3>%{node.name}</h3>
-        <div className="muted">{displayType}</div>
-      </div>
-      <div className="metric-row">
-        {metrics.map(metric => (
-          <div key={metric.label}>
-            <strong>{metric.value}</strong>
-            <span>{metric.label}</span>
-          </div>
-        ))}
-      </div>
-    </>
+    <div className="inspector-title">
+      <span className={`type-badge ${nodeCategory(node)}`}>{node.op}</span>
+      {node.root && <span className="root-pill">ROOT</span>}
+      <h3>%{node.name}</h3>
+      <div className="muted">{displayType}</div>
+    </div>
   );
 }
 
@@ -405,11 +388,6 @@ function InstructionSection({
   const [showFullInstruction, setShowFullInstruction] = useState(false);
   const html = showFullInstruction ? guide.html : guide.compactHtml || guide.html;
 
-  // copy-start's diagram explains the instruction itself, so it comes before the explanation.
-  const diagramHtml = layoutDiagram(node);
-  const diagram = diagramHtml && <div dangerouslySetInnerHTML={{ __html: diagramHtml }} />;
-  const diagramFirst = node.op === 'copy-start';
-
   return (
     <div className="inspector-section instruction-section">
       <h4>HLO instruction</h4>
@@ -419,8 +397,6 @@ function InstructionSection({
           {showFullInstruction ? 'Hide encoded config' : 'Show full HLO instruction'}
         </button>
       )}
-      {diagramFirst && diagram}
-
       <div className="guide-heading">Explanation</div>
       <div className="guide-list">
         {guide.resultGroup && (
@@ -430,8 +406,6 @@ function InstructionSection({
           <GuideRow key={part.key} part={part} active={activePart === part.key} activate={activate} />
         ))}
       </div>
-      {!diagramFirst && diagram}
-
       <GuideReferences node={node} />
     </div>
   );

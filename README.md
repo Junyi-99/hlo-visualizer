@@ -31,6 +31,13 @@ The site can also be installed as a PWA from your browser's install or Add to Ho
 - A plain-language explanation of every part of an instruction
 - Where each value lives on TPU (HBM, VMEM, SMEM, …)
 - Data and control dependencies between instructions
+- Follow an asynchronous copy from its source through completion to its consumers
+- Explore array coordinates, physical tiling, padding and BF16 packing interactively
+- Inspect fusion inputs, returned values and internal operations, and locate recorded compiler settings in their JSON
+
+Node details include **Follow the copy**, **Inside this fusion**, **Explore array layout**
+and **Compiler records** when applicable. The layout explorer follows the selected result’s recorded shape and layout; compiler estimates
+and graph positions are not runtime measurements.
 
 <table>
   <tr>

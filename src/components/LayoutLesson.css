@@ -1,0 +1,180 @@
+.layout-lesson {
+  margin: 12px 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 12px;
+}
+.layout-lesson > summary {
+  padding: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.layout-lesson-body {
+  padding: 0 12px 12px;
+  min-width: 0;
+}
+.layout-lesson .layout-lesson-body p {
+  margin: 8px 0;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+.layout-lesson .layout-lesson-type {
+  display: block;
+  padding: 8px;
+  background: var(--code-bg);
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+.layout-lesson .layout-lesson-slot {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.layout-lesson select {
+  min-width: 0;
+  max-width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px;
+  border-radius: 5px;
+}
+.layout-lesson-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.layout-lesson-inputs label {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 70px;
+  gap: 4px;
+  color: var(--text-2);
+  min-width: 0;
+}
+.layout-lesson .layout-lesson-inputs input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 6px;
+  font: inherit;
+}
+.layout-lesson-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.layout-lesson-stats span {
+  display: grid;
+  gap: 2px;
+  color: var(--text-2);
+  font-size: 11px;
+}
+.layout-lesson-stats strong {
+  color: var(--text);
+  font: 600 14px var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.layout-lesson .layout-lesson-note {
+  font-size: 10px;
+  color: var(--text-3);
+}
+.layout-lesson-selection {
+  border-radius: 5px;
+  background: var(--accent-bg);
+  padding: 7px;
+  overflow-wrap: anywhere;
+}
+.layout-lesson-view {
+  margin: 14px 0;
+}
+.layout-lesson .layout-lesson-view h4 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.layout-lesson-grid {
+  display: grid;
+  gap: 3px;
+}
+.layout-lesson-memory {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+.layout-lesson .layout-lesson-grid button {
+  display: block;
+  min-width: 0;
+  min-height: 27px;
+  padding: 4px 1px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text-2);
+  font: 10px var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.layout-lesson .layout-lesson-grid button.is-selected {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+.layout-lesson .layout-lesson-grid button.is-pair {
+  outline: 1px solid var(--c-transfer);
+  outline-offset: 0;
+}
+.layout-lesson .layout-lesson-grid button.is-padding {
+  background: repeating-linear-gradient(135deg, var(--fill), var(--fill) 3px, transparent 3px, transparent 6px);
+  color: var(--text-3);
+  cursor: default;
+  opacity: 1;
+}
+.layout-lesson :is(button, input, select, summary, a):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.layout-lesson-tile {
+  display: grid;
+  gap: 5px;
+  padding: 9px;
+  margin: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+.layout-lesson-tile strong {
+  color: var(--text);
+}
+.layout-lesson-coordinate {
+  background: var(--accent-bg);
+  color: var(--accent);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.layout-lesson .layout-lesson-packing {
+  border-left: 2px solid var(--c-transfer);
+  padding-left: 8px;
+}
+.layout-lesson a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+@media (max-width: 700px) {
+  .layout-lesson .layout-lesson-inputs input,
+  .layout-lesson select {
+    font-size: 16px;
+  }
+  .layout-lesson .layout-lesson-grid button {
+    min-height: 34px;
+  }
+}

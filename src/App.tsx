@@ -11,7 +11,7 @@ import { useStoredState } from './hooks/useStoredState';
 import { groupCopyPairs } from './lib/copy-grouping';
 import { examples, exampleSource, findExample } from './lib/examples';
 import { lloExamples, type LloExample } from './llo/examples';
-import { clampZoom, type LayoutMode } from './lib/graph-layout';
+import { type LayoutMode } from './lib/graph-layout';
 import { parseHlo, reachable } from './lib/parser';
 import type { HloModule } from './lib/types';
 
@@ -55,6 +55,8 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const loadRequest = useRef(0);
   const [sourceOpen, setSourceOpen] = useState(false);
 
   const graphRef = useRef<GraphHandle>(null);
@@ -89,6 +91,7 @@ export default function App() {
     const parsed = parseHlo(source);
     if (!parsed.computations.length) throw new Error('No computations found. Paste a textual HLO module with %computation { … } blocks.');
 
+    loadRequest.current++;
     setModule(parsed);
     setCurrent(parsed.computations.length === 1 ? parsed.computations[0].name : null);
     setSelected(null);
@@ -98,21 +101,36 @@ export default function App() {
     setSourceOpen(false);
     setZoom(1);
     setExampleId(example);
+    setLoadError(null);
     syncExampleParam(example);
   }, []);
 
   const loadExample = useCallback(
-    (id: string) => {
+    async (id: string) => {
+      const request = ++loadRequest.current;
       const example = findExample(id);
-      return example?.load().then(source => loadText(source, example.id));
+      if (!example) throw new Error('This example could not be found. Choose another example.');
+      try {
+        const source = await example.load();
+        if (request === loadRequest.current) loadText(source, example.id);
+      } catch (error) {
+        if (request === loadRequest.current) throw error;
+      }
     },
     [loadText]
   );
 
+  const reportLoadError = useCallback(
+    (error: unknown) => setLoadError(error instanceof Error ? error.message : 'The example could not be loaded.'),
+    []
+  );
+
   useEffect(() => {
     const id = new URLSearchParams(location.search).get('example');
-    if (id) void loadExample(id);
-  }, [loadExample]);
+    // The loader updates state asynchronously after the example's dynamic import resolves.
+    // oxlint-disable-next-line react/set-state-in-effect
+    if (id) void loadExample(id).catch(reportLoadError);
+  }, [loadExample, reportLoadError]);
 
   useEffect(() => {
     const name = pendingNode.current;
@@ -168,12 +186,10 @@ export default function App() {
     onShowMemoryLocation: setShowMemoryLocation,
     onBack: goBack,
     onComputation: showComputation,
-    onFit: () => graphRef.current?.fit(),
     onArrange: () => graphRef.current?.arrange(),
-    onZoom: (delta: number) => setZoom(value => clampZoom(value + delta)),
     onSearch: () => setSearchOpen(true),
     onImport: () => setImportOpen(true),
-    onExample: (id: string) => void loadExample(id)
+    onExample: (id: string) => void loadExample(id).catch(reportLoadError)
   };
 
   // LLO programs compiled from this HLO example, one per instruction. A before-optimization
@@ -224,28 +240,29 @@ export default function App() {
             onSelect={setSelected}
             onComputation={showComputation}
           />
-          <div className="bottom-bar">
-            <div role="status">{status}</div>
-            <div>
-              {module.warnings.length ? (
-                <button type="button" className="parse-notes-button" onClick={() => setNotesOpen(true)}>
-                  {module.warnings.length} parse notes ↗
-                </button>
-              ) : null}
+          {!!(loadError || status || module.warnings.length) && (
+            <div className="bottom-bar">
+              <div>{loadError ? <span role="alert">{loadError}</span> : <span role="status">{status}</span>}</div>
+              <div>
+                {module.warnings.length ? (
+                  <button type="button" className="parse-notes-button" onClick={() => setNotesOpen(true)}>
+                    {module.warnings.length} parse notes ↗
+                  </button>
+                ) : null}
+              </div>
             </div>
-          </div>
+          )}
         </main>
         <Inspector
           copyGroup={selectedCopyGroup}
           module={module}
           computation={computation}
           node={node}
-          upstreamCount={upstreamCount}
-          downstreamCount={downstreamCount}
           lloHref={nodeLloHref}
           onClose={() => setSelected(null)}
           onNode={openReference}
           onComputation={showComputation}
+          onNavigate={openComputation}
         />
       </div>
 

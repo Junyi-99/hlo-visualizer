@@ -119,7 +119,6 @@ export function Sidebar({ module, current, collapsed, lloHref, onShowSource, onO
             </span>
           ))}
         </div>
-        <p>Click a node to trace its dependencies. Double-click empty space to clear.</p>
       </div>
     </AppSidebar>
   );

@@ -311,6 +311,8 @@ kbd {
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+  container: workspace / inline-size;
+  isolation: isolate;
 }
 
 /* ───────────── Sidebar (macOS source list) ───────────── */
@@ -631,6 +633,8 @@ kbd {
   flex-direction: column;
   align-items: flex-end;
   flex: none;
+  min-width: 0;
+  max-width: 100%;
 }
 .view-actions {
   display: flex;
@@ -638,25 +642,13 @@ kbd {
   align-items: center;
   gap: 8px;
   flex: none;
+  min-width: 0;
+  max-width: 100%;
 }
 .mobile-navigation {
   display: none;
 }
 
-.auto-group-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  padding: 0 4px;
-  white-space: nowrap;
-  color: var(--text-2);
-  font-size: 12px;
-  cursor: pointer;
-}
-.auto-group-toggle input {
-  accent-color: var(--accent);
-}
 .layout-select {
   max-width: 145px;
   height: 32px;
@@ -718,6 +710,8 @@ kbd {
   top: calc(100% + 6px);
   z-index: 20;
   width: 260px;
+  max-height: min(420px, 50dvh);
+  overflow-y: auto;
   padding: 6px;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -725,7 +719,29 @@ kbd {
   backdrop-filter: blur(24px) saturate(1.6);
   box-shadow: var(--shadow-lg);
   transform-origin: top right;
-  animation: pop-in 0.18s var(--spring);
+}
+.graph-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.graph-reset-button {
+  display: block;
+  width: 100%;
+  padding: 9px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--accent);
+  text-align: left;
+  font-size: 12px;
+}
+.graph-settings-divider {
+  margin: 6px 8px;
+  border-top: 1px solid var(--border-soft);
 }
 .display-popover strong {
   display: block;
@@ -793,7 +809,21 @@ kbd {
   background-size: 20px 20px;
   box-shadow: var(--shadow-sm);
 }
+.graph-shell:last-child {
+  margin-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+}
+.graph-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
 .graph-scroller {
+  flex: 1;
+  min-height: 0;
   width: 100%;
   height: 100%;
   overflow: auto;
@@ -1137,15 +1167,16 @@ marker path {
 /* ───────────── Canvas controls and status bar ───────────── */
 
 .graph-controls {
-  position: absolute;
+  position: relative;
   z-index: 4;
-  top: 10px;
-  left: 10px;
+  flex: none;
+  align-self: flex-start;
+  margin: 10px 10px 0;
   max-width: calc(100% - 20px);
   display: flex;
   align-items: center;
   gap: 6px;
-  overflow-x: auto;
+  flex-wrap: wrap;
   white-space: nowrap;
   padding: 4px 6px;
   border: 1px solid var(--border);
@@ -1176,7 +1207,27 @@ marker path {
   opacity: 0.45;
 }
 .graph-controls > span {
+  flex-basis: 100%;
   padding: 0 4px;
+}
+
+.canvas-navigation {
+  position: absolute;
+  grid-column: 1;
+  grid-row: 1;
+  right: 12px;
+  bottom: 12px;
+  z-index: 4;
+}
+.canvas-fit {
+  align-self: stretch;
+  padding: 0 10px;
+  border: 0;
+  border-left: 1px solid var(--border-soft);
+  border-radius: 0 6px 6px 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
 }
 
 .graph-hint {
@@ -1193,20 +1244,14 @@ marker path {
   color: var(--text-2);
   pointer-events: none;
 }
-.flow-icon {
-  color: var(--accent);
-  margin-right: 4px;
-}
-.hint-divider {
-  padding: 0 6px;
-  color: var(--text-3);
-}
-
 .layout-status {
   position: absolute;
+  grid-column: 1;
+  grid-row: 1;
   z-index: 7;
-  top: 12px;
-  left: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -1216,7 +1261,7 @@ marker path {
 }
 
 .bottom-bar {
-  height: 40px;
+  height: 28px;
   flex: none;
   display: flex;
   justify-content: space-between;
@@ -1260,7 +1305,7 @@ marker path {
   grid-template-columns: minmax(0, 1fr) minmax(360px, 42%);
   grid-template-rows: minmax(0, 1fr);
 }
-.graph-shell.explorer-open .graph-scroller {
+.graph-shell.explorer-open .graph-pane {
   grid-column: 1;
   grid-row: 1;
   min-width: 0;
@@ -1650,33 +1695,6 @@ marker path {
   letter-spacing: 0.04em;
   color: var(--accent);
 }
-.metric-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-bottom: 20px;
-  padding: 12px 0;
-  border-radius: 10px;
-  background: var(--fill);
-}
-.metric-row div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-.metric-row div + div {
-  border-left: 1px solid var(--border-soft);
-}
-.metric-row strong {
-  font-size: 18px;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-}
-.metric-row span {
-  font-size: 11px;
-  color: var(--text-3);
-}
-
 /* Sections */
 .inspector-section {
   padding: 16px 0 18px;
@@ -2751,7 +2769,7 @@ dialog textarea:focus {
     display: none;
   }
   .bottom-bar {
-    height: calc(40px + env(safe-area-inset-bottom, 0px));
+    height: calc(28px + env(safe-area-inset-bottom, 0px));
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .bottom-bar > div:last-child {
@@ -2805,6 +2823,73 @@ dialog textarea:focus {
   .explorer-breadcrumb button,
   .explorer-detail button {
     min-height: 36px;
+  }
+}
+
+/* Resizing the inspector changes workspace width independently of the viewport. */
+@container workspace (max-width: 760px) {
+  .crumb > span,
+  .search-button .search-label,
+  .search-button kbd,
+  .top-actions .primary-button span {
+    display: none;
+  }
+  .search-button,
+  .top-actions .primary-button {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+  .example-select {
+    max-width: 140px;
+  }
+  .heading-controls {
+    position: relative;
+    width: 100%;
+  }
+  .display-menu {
+    position: static;
+  }
+  .display-popover {
+    left: 0;
+    right: auto;
+    transform-origin: top left;
+  }
+}
+
+@container workspace (max-width: 480px) {
+  .crumb {
+    display: none;
+  }
+  .topbar {
+    padding-left: calc(12px + env(safe-area-inset-left, 0px));
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
+  }
+  .top-actions {
+    flex: 1;
+    min-width: 0;
+    gap: 6px;
+  }
+  .top-actions .example-select {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+  }
+  .heading,
+  .app.inspector-open .heading-controls {
+    align-items: stretch;
+  }
+  .heading {
+    flex-direction: column;
+  }
+  .app .view-actions {
+    justify-content: flex-start;
+  }
+}
+
+@container workspace (max-width: 600px) {
+  .graph-hint {
+    display: none;
   }
 }
 

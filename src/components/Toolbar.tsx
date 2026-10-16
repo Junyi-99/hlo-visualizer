@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ZOOM_STEP, type LayoutMode } from '../lib/graph-layout';
+import { type LayoutMode } from '../lib/graph-layout';
 import { examples, hloTopologies } from '../lib/examples';
 import type { Computation, HloModule } from '../lib/types';
 import { Icon, type IconName } from './Icon';
@@ -17,7 +17,6 @@ interface ToolbarProps {
   module: HloModule;
   current: string | null;
   canGoBack: boolean;
-  zoom: number;
   useOpName: boolean;
   showLastNameOnly: boolean;
   showMemoryLocation: boolean;
@@ -26,9 +25,7 @@ interface ToolbarProps {
   onShowMemoryLocation: (value: boolean) => void;
   onBack: () => void;
   onComputation: (name: string | null) => void;
-  onFit: () => void;
   onArrange: () => void;
-  onZoom: (delta: number) => void;
   onSearch: () => void;
   onImport: () => void;
   exampleId: string | null;
@@ -108,7 +105,18 @@ function ExampleSelect({ exampleId, onExample }: Pick<ToolbarProps, 'exampleId' 
 
 type DisplayMenuProps = Pick<
   ToolbarProps,
-  'module' | 'useOpName' | 'showLastNameOnly' | 'showMemoryLocation' | 'onUseOpName' | 'onShowLastNameOnly' | 'onShowMemoryLocation'
+  | 'module'
+  | 'useOpName'
+  | 'showLastNameOnly'
+  | 'showMemoryLocation'
+  | 'onUseOpName'
+  | 'onShowLastNameOnly'
+  | 'onShowMemoryLocation'
+  | 'autoGroup'
+  | 'onAutoGroup'
+  | 'layoutMode'
+  | 'onLayoutMode'
+  | 'onArrange'
 >;
 
 function DisplayMenu({
@@ -118,7 +126,12 @@ function DisplayMenu({
   showMemoryLocation,
   onUseOpName,
   onShowLastNameOnly,
-  onShowMemoryLocation
+  onShowMemoryLocation,
+  autoGroup,
+  onAutoGroup,
+  layoutMode,
+  onLayoutMode,
+  onArrange
 }: DisplayMenuProps) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -129,7 +142,17 @@ function DisplayMenu({
   const triggerClass = `subtle-button display-trigger${open ? ' active' : ''}`;
 
   return (
-    <div className="display-menu" ref={menuRef}>
+    <div
+      className="display-menu"
+      ref={menuRef}
+      onKeyDown={event => {
+        if (event.key === 'Escape' && open) {
+          event.stopPropagation();
+          close();
+          menuRef.current?.querySelector('button')?.focus();
+        }
+      }}
+    >
       <button
         className={triggerClass}
         type="button"
@@ -137,11 +160,41 @@ function DisplayMenu({
         aria-controls="display-options"
         onClick={() => setOpen(value => !value)}
       >
-        Display <Icon name="down" size={14} />
+        Graph settings <Icon name="down" size={14} />
       </button>
 
       {open && (
-        <div className="display-popover" id="display-options" role="group" aria-label="Node display options">
+        <div className="display-popover" id="display-options" role="group" aria-label="Graph settings">
+          <strong>Layout</strong>
+          <label className="graph-setting-row">
+            Direction
+            <select
+              className="layout-select"
+              aria-label="Graph layout"
+              value={layoutMode}
+              onChange={event => onLayoutMode(event.target.value as LayoutMode)}
+            >
+              <option value="auto">Automatic</option>
+              <option value="horizontal">Horizontal →</option>
+              <option value="vertical">Vertical ↓</option>
+            </select>
+          </label>
+          <label className="display-option" title="Combine matching copy-start and copy-done instructions">
+            <input type="checkbox" checked={autoGroup} onChange={event => onAutoGroup(event.target.checked)} />
+            Group copy operations
+          </label>
+          <button
+            className="graph-reset-button"
+            type="button"
+            onClick={() => {
+              onArrange();
+              close();
+              menuRef.current?.querySelector('button')?.focus();
+            }}
+          >
+            Reset node positions
+          </button>
+          <div className="graph-settings-divider" />
           <strong>Node labels</strong>
           <label className="display-option">
             <input type="checkbox" checked={useOpName} onChange={event => onUseOpName(event.target.checked)} />
@@ -172,25 +225,9 @@ function DisplayMenu({
   );
 }
 
-type ViewActionsProps = DisplayMenuProps &
-  Pick<
-    ToolbarProps,
-    'canGoBack' | 'onBack' | 'autoGroup' | 'onAutoGroup' | 'layoutMode' | 'onLayoutMode' | 'onArrange' | 'onFit' | 'zoom' | 'onZoom'
-  >;
+type ViewActionsProps = DisplayMenuProps & Pick<ToolbarProps, 'canGoBack' | 'onBack'>;
 
-function ViewActions({
-  canGoBack,
-  onBack,
-  autoGroup,
-  onAutoGroup,
-  layoutMode,
-  onLayoutMode,
-  onArrange,
-  onFit,
-  zoom,
-  onZoom,
-  ...displayProps
-}: ViewActionsProps) {
+function ViewActions({ canGoBack, onBack, ...displayProps }: ViewActionsProps) {
   return (
     <div className="view-actions">
       {canGoBack && (
@@ -199,42 +236,7 @@ function ViewActions({
           Back
         </button>
       )}
-
       <DisplayMenu {...displayProps} />
-
-      <label className="auto-group-toggle" title="Combine matching copy-start and copy-done instructions">
-        <input type="checkbox" checked={autoGroup} onChange={event => onAutoGroup(event.target.checked)} />
-        Auto Group
-      </label>
-
-      <select
-        className="layout-select"
-        aria-label="Graph layout"
-        title="Graph direction: automatic, left to right, or top to bottom"
-        value={layoutMode}
-        onChange={event => onLayoutMode(event.target.value as LayoutMode)}
-      >
-        <option value="auto">Auto layout</option>
-        <option value="horizontal">Horizontal →</option>
-        <option value="vertical">Vertical ↓</option>
-      </select>
-
-      <button className="subtle-button" type="button" title="Restore automatic node positions and tidy routes" onClick={onArrange}>
-        Arrange
-      </button>
-      <button className="subtle-button" type="button" onClick={onFit}>
-        Fit view
-      </button>
-
-      <div className="zoom-controls">
-        <button className="icon-button" type="button" aria-label="Zoom out" onClick={() => onZoom(-ZOOM_STEP)}>
-          <Icon name="minus" />
-        </button>
-        <span className="zoom-value">{Math.round(zoom * 100)}%</span>
-        <button className="icon-button" type="button" aria-label="Zoom in" onClick={() => onZoom(ZOOM_STEP)}>
-          <Icon name="plus" />
-        </button>
-      </div>
     </div>
   );
 }
@@ -293,7 +295,7 @@ export function Toolbar({
           </a>
           <ThemeButton />
           <ExampleSelect exampleId={exampleId} onExample={onExample} />
-          <button className="search-button" type="button" title="Search nodes (/)" aria-label="Search nodes" onClick={onSearch}>
+          <button className="search-button" type="button" aria-label="Search nodes" title="Search nodes (/)" onClick={onSearch}>
             <Icon name="search" />
             <span className="search-label">Search nodes</span>
             <kbd>/</kbd>

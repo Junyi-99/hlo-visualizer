@@ -26,7 +26,10 @@ import type { Computation, ComputationLink, HloModule, HloNode } from '../lib/ty
 import { copyGroupCaption, type CopyGroup, type CopyGrouping } from '../lib/copy-grouping';
 import { useGraphLayouts } from '../hooks/useGraphLayouts';
 import { edgePath, movedEdgePoints, type RoutedEdge, type RoutedLayout } from '../lib/graph-routing';
+import { Icon } from './Icon';
 import { ComputationExplorer } from './ComputationExplorer';
+import { copyEdgeKey, copyLessonData, copyLessonHighlights } from '../lib/copy-lesson';
+import './CopyLesson.css';
 
 const CANVAS_PADDING = 32;
 const VISIBLE_MARGIN = 18;
@@ -102,6 +105,11 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
 ) {
   const computation = copyGrouping?.computation ?? null;
   const selected = originalSelected ? (copyGrouping?.aliases.get(originalSelected) ?? originalSelected) : null;
+  const copyHighlights = useMemo(() => {
+    const original = current ? module.byName.get(current) : undefined;
+    const node = originalSelected ? original?.byName.get(originalSelected) : undefined;
+    return copyLessonHighlights(original && node ? copyLessonData(module, original, node) : null, copyGrouping?.aliases);
+  }, [module, current, originalSelected, copyGrouping]);
   const nodeKey = (name: string) => `${computation?.name}/${name}`;
 
   const [focusRadius, setFocusRadius] = useState<number | null>(null);
@@ -490,9 +498,9 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
     setPathPicking(value => !value);
   };
 
-  const hint = computation
-    ? { action: 'Data flow · Drag nodes · Background pans', counts: `${visibleNodes.length} nodes · ${shownEdges.length} edges` }
-    : { action: 'Calls · Drag to pan', counts: `${module.computations.length} computations · ${links.length} links` };
+  const counts = computation
+    ? `${visibleNodes.length} nodes · ${shownEdges.length} edges`
+    : `${module.computations.length} computations · ${links.length} links`;
 
   return (
     <section
@@ -500,134 +508,163 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
       aria-label="HLO graph"
       aria-busy={pending}
     >
-      {pending && (
-        <div className="layout-status" role="status">
-          Arranging graph…
-        </div>
-      )}
-      {failed && (
-        <div className="layout-status" role="status">
-          Could not arrange graph.{' '}
-          <button type="button" className="subtle-button" onClick={retry}>
-            Retry
-          </button>
-        </div>
-      )}
+      <div className="graph-pane">
+        {pending && (
+          <div className="layout-status" role="status">
+            Arranging graph…
+          </div>
+        )}
+        {failed && (
+          <div className="layout-status" role="status">
+            Could not arrange graph.{' '}
+            <button type="button" className="subtle-button" onClick={retry}>
+              Retry
+            </button>
+          </div>
+        )}
 
-      <div
-        ref={scrollerRef}
-        className="graph-scroller overscroll-contain"
-        role="region"
-        tabIndex={0}
-        aria-label="Graph canvas: + and - to zoom, 0 to fit"
-        aria-keyshortcuts="+ - 0"
-        onKeyDown={handleZoomKey}
-        onPointerDown={startPan}
-        onPointerMove={movePan}
-        onPointerUp={endPan}
-        onPointerCancel={endPan}
-        onDoubleClick={deselectOnBackground}
-      >
-        <div className="graph-content" style={{ width: stageWidth * zoom, height: stageHeight * zoom }}>
-          <div className="graph-stage" style={{ width: stageWidth, height: stageHeight, transform: `scale(${zoom})` }}>
-            <EdgeLayer width={stageWidth} height={stageHeight}>
-              {computation
-                ? shownEdges.map(edge => {
-                    const up = !!selectedNode && (edge.target === selected || (upstream.has(edge.source) && upstream.has(edge.target)));
-                    const down =
-                      !!selectedNode && (edge.source === selected || (downstream.has(edge.source) && downstream.has(edge.target)));
-                    const className = cx(
-                      'edge',
-                      edge.control && 'control-edge',
-                      pathEdges && 'path-edge',
-                      up && 'upstream',
-                      down && 'downstream',
-                      selectedNode && !pathEdges && !up && !down && 'dimmed'
-                    );
-                    return (
-                      <path
-                        key={edge.id}
-                        className={className}
-                        d={edgePath(movedEdgePoints(edge, offsets), direction)}
-                        markerEnd="url(#arrow)"
-                      />
-                    );
-                  })
-                : layout.edges.map(edge => <OverviewEdge key={edge.id} edge={edge} link={links[edge.index]} direction={direction} />)}
-            </EdgeLayer>
+        {computation && (selected || focusRadius !== null) && (
+          <GraphControls
+            hops={hops}
+            focused={focusRadius !== null}
+            selected={!!selected}
+            pathPicking={pathPicking}
+            hasPathTarget={!!pathTarget}
+            status={controlsStatus({
+              pathPicking,
+              pathTarget,
+              path,
+              selected,
+              focused: focusRadius !== null,
+              visibleCount: visibleNodes.length,
+              totalCount: computation.nodes.length
+            })}
+            onHopsChange={changeHops}
+            onToggleFocus={toggleFocus}
+            onTogglePathPicking={togglePathPicking}
+            onClearPath={() => setPathTarget(null)}
+          />
+        )}
 
-            <div className="graph-nodes">
-              {computation
-                ? visibleNodes.map(node => {
-                    const onPath = !!path?.includes(node.name);
-                    const isSelected = selected === node.name;
-                    const related = isSelected || onPath || upstream.has(node.name) || downstream.has(node.name);
-                    return (
-                      <NodeCard
-                        key={node.name}
-                        module={module}
-                        computation={computation}
-                        node={node}
-                        position={positions.get(node.name)!}
-                        ports={ports.get(node.name)}
-                        copyGroup={copyGrouping?.groups.get(node.name)}
-                        useOpName={useOpName}
-                        showLastNameOnly={showLastNameOnly}
-                        showMemoryLocation={showMemoryLocation}
-                        stateClass={cx(
-                          draggingNode === node.name && 'dragging',
-                          isSelected && 'selected',
-                          onPath && 'path-node',
-                          upstream.has(node.name) && 'upstream',
-                          downstream.has(node.name) && 'downstream',
-                          selectedNode && !related && 'dimmed'
-                        )}
-                        expanded={expandedNodeName === node.name}
-                        onPointerDown={event => startNodeDrag(event, node.name)}
-                        onPointerMove={moveNode}
-                        onPointerEnd={endNodeDrag}
-                        onClick={() => clickNode(node.name)}
-                        onToggleExpand={() => setExpandedNodeName(expandedNodeName === node.name ? null : node.name)}
+        <div
+          ref={scrollerRef}
+          className="graph-scroller overscroll-contain"
+          role="region"
+          aria-keyshortcuts="+ - 0"
+          tabIndex={0}
+          aria-label="Graph canvas: + and - to zoom, 0 to fit"
+          onKeyDown={handleZoomKey}
+          onPointerDown={startPan}
+          onPointerMove={movePan}
+          onPointerUp={endPan}
+          onPointerCancel={endPan}
+          onDoubleClick={deselectOnBackground}
+        >
+          <div className="graph-content" style={{ width: stageWidth * zoom, height: stageHeight * zoom }}>
+            <div className="graph-stage" style={{ width: stageWidth, height: stageHeight, transform: `scale(${zoom})` }}>
+              <EdgeLayer width={stageWidth} height={stageHeight}>
+                {computation
+                  ? shownEdges.map(edge => {
+                      const up = !!selectedNode && (edge.target === selected || (upstream.has(edge.source) && upstream.has(edge.target)));
+                      const down =
+                        !!selectedNode && (edge.source === selected || (downstream.has(edge.source) && downstream.has(edge.target)));
+                      const className = cx(
+                        'edge',
+                        edge.control && 'control-edge',
+                        pathEdges && 'path-edge',
+                        !edge.control && copyHighlights.edges.has(copyEdgeKey(edge.source, edge.target)) && 'copy-chain-edge',
+                        up && 'upstream',
+                        down && 'downstream',
+                        selectedNode && !pathEdges && !up && !down && 'dimmed'
+                      );
+                      return (
+                        <path
+                          key={edge.id}
+                          className={className}
+                          d={edgePath(movedEdgePoints(edge, offsets), direction)}
+                          markerEnd="url(#arrow)"
+                        />
+                      );
+                    })
+                  : layout.edges.map(edge => <OverviewEdge key={edge.id} edge={edge} link={links[edge.index]} direction={direction} />)}
+              </EdgeLayer>
+
+              <div className="graph-nodes">
+                {computation
+                  ? visibleNodes.map(node => {
+                      const onPath = !!path?.includes(node.name);
+                      const isSelected = selected === node.name;
+                      const related = isSelected || onPath || upstream.has(node.name) || downstream.has(node.name);
+                      return (
+                        <NodeCard
+                          key={node.name}
+                          module={module}
+                          computation={computation}
+                          node={node}
+                          position={positions.get(node.name)!}
+                          ports={ports.get(node.name)}
+                          copyGroup={copyGrouping?.groups.get(node.name)}
+                          useOpName={useOpName}
+                          showLastNameOnly={showLastNameOnly}
+                          showMemoryLocation={showMemoryLocation}
+                          stateClass={cx(
+                            draggingNode === node.name && 'dragging',
+                            isSelected && 'selected',
+                            onPath && 'path-node',
+                            copyHighlights.nodes.has(node.name) && 'copy-chain-node',
+                            upstream.has(node.name) && 'upstream',
+                            downstream.has(node.name) && 'downstream',
+                            selectedNode && !related && 'dimmed'
+                          )}
+                          expanded={expandedNodeName === node.name}
+                          onPointerDown={event => startNodeDrag(event, node.name)}
+                          onPointerMove={moveNode}
+                          onPointerEnd={endNodeDrag}
+                          onClick={() => clickNode(node.name)}
+                          onToggleExpand={() => setExpandedNodeName(expandedNodeName === node.name ? null : node.name)}
+                        />
+                      );
+                    })
+                  : module.computations.map(entry => (
+                      <OverviewCard
+                        key={entry.name}
+                        computation={entry}
+                        position={layout.positions.get(entry.name)!}
+                        links={links}
+                        onOpen={() => onComputation(entry.name)}
                       />
-                    );
-                  })
-                : module.computations.map(entry => (
-                    <OverviewCard
-                      key={entry.name}
-                      computation={entry}
-                      position={layout.positions.get(entry.name)!}
-                      links={links}
-                      onOpen={() => onComputation(entry.name)}
-                    />
-                  ))}
+                    ))}
+              </div>
             </div>
           </div>
         </div>
+
+        <div className="graph-hint">{counts}</div>
+        <div className="canvas-navigation zoom-controls" role="group" aria-label="Canvas zoom">
+          <button
+            className="icon-button"
+            type="button"
+            aria-label="Zoom out"
+            title="Zoom out (−)"
+            onClick={() => onZoom(clampZoom(zoom - ZOOM_STEP))}
+          >
+            <Icon name="minus" />
+          </button>
+          <span className="zoom-value">{Math.round(zoom * 100)}%</span>
+          <button
+            className="icon-button"
+            type="button"
+            aria-label="Zoom in"
+            title="Zoom in (+)"
+            onClick={() => onZoom(clampZoom(zoom + ZOOM_STEP))}
+          >
+            <Icon name="plus" />
+          </button>
+          <button className="canvas-fit" type="button" title="Fit graph (0)" onClick={fit}>
+            Fit
+          </button>
+        </div>
       </div>
-
-      {computation && (
-        <GraphControls
-          hops={hops}
-          focused={focusRadius !== null}
-          selected={!!selected}
-          pathPicking={pathPicking}
-          hasPathTarget={!!pathTarget}
-          status={controlsStatus({
-            pathPicking,
-            pathTarget,
-            path,
-            selected,
-            focused: focusRadius !== null,
-            visibleCount: visibleNodes.length,
-            totalCount: computation.nodes.length
-          })}
-          onHopsChange={changeHops}
-          onToggleFocus={toggleFocus}
-          onTogglePathPicking={togglePathPicking}
-          onClearPath={() => setPathTarget(null)}
-        />
-      )}
-
       {expandedNode && (
         <ComputationExplorer
           autoGroup={autoGroup}
@@ -638,11 +675,6 @@ export const GraphCanvas = forwardRef<GraphHandle, GraphCanvasProps>(function Gr
           onOpenFull={onComputation}
         />
       )}
-
-      <div className="graph-hint">
-        <span className="flow-icon">{vertical ? '↓' : '→'}</span> {hint.action} <span className="hint-divider">·</span> Pinch / + / − zoom ·
-        0 fit <span className="hint-divider">·</span> {hint.counts}
-      </div>
     </section>
   );
 });
@@ -865,11 +897,13 @@ function GraphControls({
 }: GraphControlsProps) {
   return (
     <div className="graph-controls">
-      <select aria-label="Neighborhood size" value={hops} onChange={event => onHopsChange(Number(event.target.value))}>
-        <option value="1">1 hop</option>
-        <option value="2">2 hops</option>
-        <option value="3">3 hops</option>
-      </select>
+      {focused && (
+        <select aria-label="Neighborhood size" value={hops} onChange={event => onHopsChange(Number(event.target.value))}>
+          <option value="1">1 hop</option>
+          <option value="2">2 hops</option>
+          <option value="3">3 hops</option>
+        </select>
+      )}
       <button
         type="button"
         disabled={!selected && !focused}
@@ -877,23 +911,24 @@ function GraphControls({
         aria-pressed={focused}
         onClick={onToggleFocus}
       >
-        {focused ? 'Show all' : 'View'}
+        {focused ? 'Show all' : 'Focus node'}
       </button>
-      <button
-        type="button"
-        disabled={!selected}
-        aria-pressed={pathPicking}
-        className={pathPicking ? 'active' : ''}
-        onClick={onTogglePathPicking}
-      >
-        Find path
-      </button>
-      {hasPathTarget && (
+      {hasPathTarget ? (
         <button type="button" onClick={onClearPath}>
           Clear path
         </button>
+      ) : (
+        <button
+          type="button"
+          disabled={!selected}
+          className={pathPicking ? 'active' : ''}
+          aria-pressed={pathPicking}
+          onClick={onTogglePathPicking}
+        >
+          {pathPicking ? 'Cancel path' : 'Find path'}
+        </button>
       )}
-      <span>{status}</span>
+      {status && <span role="status">{status}</span>}
     </div>
   );
 }
